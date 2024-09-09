@@ -11,5 +11,5 @@ normal = { family = "JetBrains Mono", style = "Regular" }
 
 [window]
 padding = { x = 16, y = 16 }
-opacity = 0.90
+opacity = 0.9
 blur = true
