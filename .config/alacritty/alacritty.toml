@@ -1,0 +1,15 @@
+import = [
+  # uncomment the flavour you want below:
+  # "~/.config/alacritty/catppuccin-latte.toml"
+  # "~/.config/alacritty/catppuccin-frappe.toml"
+  # "~/.config/alacritty/catppuccin-macchiato.toml"
+  "~/.config/alacritty/catppuccin-mocha.toml",
+]
+
+[font]
+normal = { family = "JetBrains Mono", style = "Regular" }
+
+[window]
+padding = { x = 16, y = 16 }
+opacity = 0.90
+blur = true

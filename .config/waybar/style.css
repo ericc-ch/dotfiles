@@ -1,0 +1,114 @@
+@import "./mocha.css";
+
+/* The whole bar */
+
+#waybar {
+  background: transparent;
+  color: @text;
+}
+
+/* Workspaces */
+
+#workspaces {
+  padding: 4px 8px;
+  /* Because the module is on the left side, we already have global margin */
+  padding-left: 0;
+
+  background-color: transparent;
+}
+
+#workspaces button {
+  padding: 2px;
+  background-color: transparent;
+
+  border-radius: 4px;
+}
+
+#workspaces button:hover {
+  background-color: @surface0transparent;
+}
+
+#workspaces button.active {
+  border: none;
+  background-color: @surface0;
+}
+
+/* Idle Inhibitor */
+#idle_inhibitor {
+  padding: 0.5rem;
+  background-color: transparent;
+}
+
+#idle_inhibitor.activated {
+  color: @blue;
+}
+
+/* Pulse Audio */
+
+#pulseaudio {
+  padding: 0.5rem;
+  background-color: transparent;
+}
+
+#pulseaudio.muted {
+  color: @surface2;
+}
+
+/* Network */
+
+#network {
+  padding: 0.5rem;
+  background-color: transparent;
+
+  color: @blue;
+}
+
+#network.disconnected {
+  color: @surface2;
+}
+
+/* Power Profiles */
+
+#power-profiles-daemon {
+  padding: 0.5rem;
+}
+
+#power-profiles-daemon.power-saver {
+  color: @green;
+}
+
+#power-profiles-daemon.balanced {
+  color: @yellow;
+}
+
+#power-profiles-daemon.performance {
+  color: @red;
+}
+
+/* Battery */
+
+#battery {
+  padding: 0.5rem;
+  background-color: transparent;
+
+  color: @green;
+}
+
+#battery.medium {
+  color: @yellow;
+}
+
+#battery.low {
+  color: @red;
+}
+
+#battery.charging {
+  color: @blue;
+}
+
+/* Clock */
+
+#clock {
+  padding: 0.5rem;
+  background-color: transparent;
+}

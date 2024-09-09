@@ -1,0 +1,66 @@
+// -*- mode: jsonc -*-
+{
+  // "layer": "top", // Waybar at top layer
+  "position": "top", // Waybar position (top|bottom|left|right)
+  // "height": 30, // Waybar height (to be removed for auto height)
+  // "width": 1280, // Waybar width
+  // "spacing": 4, // Gaps between modules (4px)
+  "margin": "0 12",
+
+  // Choose the order of the modules
+  "modules-left": ["hyprland/workspaces"],
+  // "modules-center": ["clock"],
+  "modules-right": [
+    "idle_inhibitor",
+    "pulseaudio",
+    "network",
+    "power-profiles-daemon",
+    "battery",
+    // "tray",
+    "clock"
+  ],
+
+  "idle_inhibitor": {
+    "format": "{icon}",
+    "format-icons": {
+      "activated": "zzz!",
+      "deactivated": "zzz?"
+    },
+
+    "tooltip": false
+  },
+
+  "pulseaudio": {
+    "format": "OUT: {volume}% IN: {format_source}",
+    "on-click": "pavucontrol",
+    "on-double-click": "kill $(pgrep -x pavucontrol)",
+
+    "tooltip": false
+  },
+
+  "network": {
+    "format-wifi": "{essid}",
+    "format-ethernet": "{ifname}",
+    "format-disconnected": "Disconnected",
+
+    "tooltip": false
+  },
+
+  "power-profiles-daemon": {
+    "format": "{profile}",
+    "tooltip": false
+  },
+
+  "battery": {
+    "states": {
+      "medium": 40,
+      "low": 20
+    },
+    "format": "{capacity}%"
+  },
+
+  "clock": {
+    "format": "{:%H:%M, %b %d}",
+    "tooltip": false
+  }
+}
