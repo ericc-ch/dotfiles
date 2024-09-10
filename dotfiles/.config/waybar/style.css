@@ -46,6 +46,13 @@
   background-color: @surface0;
 }
 
+/* Tray */
+#tray {
+  padding: 0.5rem;
+  background-color: transparent;
+  border: 1px solid @surface0;
+}
+
 /* Idle Inhibitor */
 #idle_inhibitor {
   padding: 0.5rem;
