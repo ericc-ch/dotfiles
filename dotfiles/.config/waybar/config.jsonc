@@ -11,15 +11,19 @@
   "modules-left": ["hyprland/workspaces"],
   "modules-center": ["clock"],
   "modules-right": [
+    "tray",
     "idle_inhibitor",
     "pulseaudio",
     "network",
-
     "battery",
     "power-profiles-daemon"
-    // "tray",
-    // "clock"
   ],
+
+  "tray": {
+    "icon-size": 16,
+    "spacing": 10,
+    "show-passive-items": true
+  },
 
   "idle_inhibitor": {
     "format": "{icon}",
