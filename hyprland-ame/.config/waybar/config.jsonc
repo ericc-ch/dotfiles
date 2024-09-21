@@ -1,0 +1,75 @@
+// -*- mode: jsonc -*-
+{
+  // "layer": "top", // Waybar at top layer
+  "position": "top", // Waybar position (top|bottom|left|right)
+  // "height": 30, // Waybar height (to be removed for auto height)
+  // "width": 1280, // Waybar width
+  // "spacing": 4, // Gaps between modules (4px)
+  "margin": "4 4 0 4",
+
+  // Choose the order of the modules
+  "modules-left": ["hyprland/workspaces"],
+  "modules-center": ["clock"],
+  "modules-right": [
+    "tray",
+    "idle_inhibitor",
+    "pulseaudio",
+    "network",
+    "battery",
+    "power-profiles-daemon"
+  ],
+
+  "tray": {
+    "icon-size": 16,
+    "spacing": 10,
+    "show-passive-items": true
+  },
+
+  "idle_inhibitor": {
+    "format": "{icon}",
+    "format-icons": {
+      "activated": "◉",
+      "deactivated": "○"
+    },
+
+    "tooltip": false
+  },
+
+  "pulseaudio": {
+    "format": "OUT:{volume}% | IN:{format_source}",
+    "on-click": "pavucontrol",
+    "on-double-click": "kill $(pgrep -x pavucontrol)",
+
+    "tooltip": false
+  },
+
+  "network": {
+    "format-wifi": "WIFI: {essid}",
+    "format-ethernet": "ETH: {ifname}",
+    "format-disconnected": "NO CONN"
+  },
+
+  "power-profiles-daemon": {
+    "format": "{icon}",
+    "format-icons": {
+      "power-saver": "↓",
+      "balanced": "→",
+      "performance": "↑"
+    }
+    // "tooltip": false
+  },
+
+  "battery": {
+    "states": {
+      "medium": 40,
+      "low": 20
+    },
+    "format": "{capacity}% {icon}",
+    "format-icons": ["▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"]
+  },
+
+  "clock": {
+    "format": "{:%H:%M, %b %d}",
+    "tooltip": false
+  }
+}

@@ -1,0 +1,141 @@
+@import "./mocha.css";
+
+/* The whole bar */
+
+#waybar {
+  font-family: "JetBrains Mono";
+  background: transparent;
+  color: @text;
+}
+
+/* Modules */
+.modules-left {
+  background-color: rgba(30, 30, 46, 0.5);
+}
+
+.modules-center {
+  background-color: rgba(30, 30, 46, 0.5);
+}
+
+.modules-right {
+  background-color: rgba(30, 30, 46, 0.5);
+}
+
+/* Workspaces */
+
+#workspaces {
+  padding: 4px;
+
+  background-color: transparent;
+  border: 1px solid @surface0;
+}
+
+#workspaces button {
+  padding: 2px;
+  background-color: transparent;
+
+  border-radius: 0px;
+}
+
+#workspaces button:hover {
+  background-color: @surface0;
+}
+
+#workspaces button.active {
+  border: none;
+  background-color: @surface0;
+}
+
+/* Tray */
+#tray {
+  padding: 0.5rem;
+  background-color: transparent;
+  border: 1px solid @surface0;
+}
+
+/* Idle Inhibitor */
+#idle_inhibitor {
+  padding: 0.5rem;
+  background-color: transparent;
+  border: 1px solid @surface0;
+}
+
+#idle_inhibitor.activated {
+  color: @blue;
+}
+
+/* Pulse Audio */
+
+#pulseaudio {
+  padding: 0.5rem;
+  background-color: transparent;
+  border: 1px solid @surface0;
+}
+
+#pulseaudio.muted {
+  color: @surface2;
+}
+
+/* Network */
+
+#network {
+  padding: 0.5rem;
+  background-color: transparent;
+
+  color: @blue;
+  border: 1px solid @surface0;
+}
+
+#network.disconnected {
+  color: @surface2;
+}
+
+/* Power Profiles */
+
+#power-profiles-daemon {
+  padding: 0.5rem;
+  border: 1px solid @surface0;
+}
+
+#power-profiles-daemon.power-saver {
+  color: @green;
+}
+
+#power-profiles-daemon.balanced {
+  color: @yellow;
+}
+
+#power-profiles-daemon.performance {
+  color: @red;
+}
+
+/* Battery */
+
+#battery {
+  padding: 0.5rem;
+  background-color: transparent;
+
+  color: @green;
+  border: 1px solid @surface0;
+}
+
+#battery.medium {
+  color: @yellow;
+}
+
+#battery.low {
+  color: @red;
+}
+
+#battery.charging {
+  color: @blue;
+}
+
+/* Clock */
+
+#clock {
+  padding: 0.5rem;
+  background-color: transparent;
+
+  border: 1px solid @surface0;
+}

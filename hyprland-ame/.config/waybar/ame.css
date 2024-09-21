@@ -1,0 +1,19 @@
+@define-color primary #FCF1C5;
+@define-color primaryLight #FEF8E2;
+@define-color primaryDark #FAE594;
+
+@define-color secondary #F3DDC4;
+@define-color secondaryLight #F9EEE1;
+@define-color secondaryDark #EBC79E;
+
+@define-color accent #5F4A51;
+@define-color accentLight #7B6069;
+@define-color accentDark #3F3136;
+
+@define-color text #F6FCFF;
+@define-color textDark #DBF3FF;
+@define-color textDarker #A8E2FF;
+
+@define-color background #1E1D25;
+@define-color backgroundLight #3A3948;
+@define-color backgroundLighter #504F64;
