@@ -1,0 +1,95 @@
+## Specify the model to use for the main chat
+
+## Copilot API
+model: openai/claude-3.5-sonnet
+# model: openai/gpt-4o
+# model: openai/o1
+# model: openai/o3-mini
+
+## OpenRouter
+# model: openrouter/google/gemini-2.0-flash-exp:free
+
+########################
+## API Keys and settings:
+
+## Specify the OpenAI API key
+openai-api-key: not-needed
+
+## Specify the api base url
+openai-api-base: http://localhost:4141/
+
+## Set an API key for a provider
+# api-key:
+#   - openrouter=
+#   - gemini=
+#   - mistral=
+
+#################
+## Model settings:
+
+## Specify a file with aider model settings for unknown models
+model-settings-file: ~/.config/aider/.aider.model.settings.yml
+
+## Specify a file with context window and costs for unknown models
+model-metadata-file: ~/.config/aider/.aider.model.metadata.json
+
+## Specify the model to use for commit messages and chat history summarization (default depends on --model)
+## Copilot API
+weak-model: openai/gemini-2.0-flash-001
+# weak-model: openai/gpt-4o-mini
+# weak-model: openai/gpt-4o
+
+## Mistral
+# weak-model: mistral/mistral-large-latest
+# weak-model: mistral/open-mistral-nemo
+
+## Gemini
+# weak-model: gemini/gemini-1.5-flash-8b
+
+## Specify the model to use for editor tasks (default depends on --model)
+## Copilot API
+editor-model: openai/claude-3.5-sonnet
+
+## Only work with models that have meta-data available (default: True)
+show-model-warnings: false
+
+###################
+# Repomap settings:
+
+## Suggested number of tokens to use for repo map, use 0 to disable (default: 1024)
+map-tokens: 2048
+
+##################
+# Output settings:
+
+## Use colors suitable for a dark terminal background (default: False)
+dark-mode: true
+
+###############
+# Git settings:
+
+## Enable/disable auto commit of LLM changes (default: True)
+auto-commits: false
+
+## Enable/disable commits when repo is found dirty (default: True)
+dirty-commits: false
+
+## Attribute aider code changes in the git author name (default: True)
+attribute-author: false
+
+## Attribute aider commits in the git committer name (default: True)
+attribute-committer: false
+
+#################
+# Other settings:
+
+## Specify read-only files
+read:
+  - "~/.config/aider/conventions/general.md"
+  - "~/.config/aider/conventions/typescript.md"
+
+## Enable/disable detection and offering to add URLs to chat (default: True)
+detect-urls: false
+
+## Always say yes to every confirmation
+yes-always: true
