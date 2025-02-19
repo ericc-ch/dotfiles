@@ -6,9 +6,6 @@ model: openai/claude-3.5-sonnet
 # model: openai/o1
 # model: openai/o3-mini
 
-## OpenRouter
-# model: openrouter/google/gemini-2.0-flash-exp:free
-
 ########################
 ## API Keys and settings:
 
@@ -17,12 +14,6 @@ openai-api-key: not-needed
 
 ## Specify the api base url
 openai-api-base: http://localhost:4141/
-
-## Set an API key for a provider
-# api-key:
-#   - openrouter=
-#   - gemini=
-#   - mistral=
 
 #################
 ## Model settings:
@@ -44,7 +35,7 @@ weak-model: openai/gemini-2.0-flash-001
 # weak-model: mistral/open-mistral-nemo
 
 ## Gemini
-# weak-model: gemini/gemini-1.5-flash-8b
+# weak-model: gemini/gemini-2.0-flash
 
 ## Specify the model to use for editor tasks (default depends on --model)
 ## Copilot API
