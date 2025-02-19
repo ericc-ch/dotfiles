@@ -1,4 +1,4 @@
-function update --description 'Update all installed packages'
+function update-apt --description 'Update all installed packages'
     # Update apt packages
     sudo apt update
     sudo apt upgrade -y
