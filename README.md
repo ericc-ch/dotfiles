@@ -26,3 +26,14 @@ stow -t ~ aider
 ```
 
 stow by default uses the parent of the stow directory.
+
+## Usage Examples
+
+The `example-stow.sh` file contains reference documentation showing:
+
+- Basic stow usage patterns
+- Common command line options
+- Examples with different flags
+- Important usage notes
+
+See that file for detailed examples of how to use GNU Stow effectively.
