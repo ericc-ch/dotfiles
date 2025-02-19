@@ -9,3 +9,8 @@ set --export PATH $HOME/.local/bin $PATH
 
 # go
 set --export PATH /usr/local/go/bin $PATH
+
+# pyenv
+if has_command pyenv
+    pyenv init - fish | source
+end
