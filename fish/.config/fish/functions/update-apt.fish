@@ -6,4 +6,5 @@ function update-apt --description 'Update all installed packages'
 
     # Update flatpak packages
     flatpak update -y
+    flatpak uninstall --unused
 end
