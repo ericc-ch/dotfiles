@@ -1,0 +1,13 @@
+[credential "https://github.com"]
+	helper = 
+	helper = !/usr/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+	helper = 
+	helper = !/usr/bin/gh auth git-credential
+[user]
+	name = Erick Christian
+	email = erickchristian48@gmail.com
+[core]
+	editor = nvim
+[alias]
+	st = status
