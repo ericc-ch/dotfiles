@@ -272,7 +272,7 @@
     "supports_system_messages": true
   },
   "openai/claude-3.7-sonnet": {
-    "max_input_tokens": 64000,
+    "max_input_tokens": 90000,
     "max_output_tokens": 8192,
     "input_cost_per_token": 0.000003,
     "output_cost_per_token": 0.000015,
@@ -288,7 +288,7 @@
     "supports_system_messages": true
   },
   "openai/claude-3.7-sonnet-thought": {
-    "max_input_tokens": 64000,
+    "max_input_tokens": 90000,
     "max_output_tokens": 8192,
     "input_cost_per_token": 0.000003,
     "output_cost_per_token": 0.000015,
