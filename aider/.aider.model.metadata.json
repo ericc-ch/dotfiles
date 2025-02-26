@@ -3,8 +3,8 @@
     "max_tokens": "LEGACY parameter. set to max_output_tokens if provider specifies it. IF not set to max_input_tokens, if provider specifies it.",
     "max_input_tokens": "max input tokens, if the provider specifies it. if not default to max_tokens",
     "max_output_tokens": "max output tokens, if the provider specifies it. if not default to max_tokens",
-    "input_cost_per_token": 0.0,
-    "output_cost_per_token": 0.0,
+    "input_cost_per_token": 0,
+    "output_cost_per_token": 0,
     "litellm_provider": "one of https://docs.litellm.ai/docs/providers",
     "mode": "one of chat, embedding, completion, image_generation, audio_transcription, audio_speech",
     "supports_function_calling": true,
@@ -17,46 +17,6 @@
     "supports_system_messages": true,
     "deprecation_date": "date when the model becomes deprecated in the format YYYY-MM-DD"
   },
-  "openai/o3-mini": {
-    "max_input_tokens": 64000,
-    "max_output_tokens": 100000,
-    "input_cost_per_token": 0.0000025,
-    "output_cost_per_token": 0.00001,
-    "litellm_provider": "openai",
-    "mode": "chat",
-    "supports_system_messages": true,
-    "supports_function_calling": true
-  },
-  "openai/o1": {
-    "max_input_tokens": 20000,
-    "input_cost_per_token": 0.000015,
-    "output_cost_per_token": 0.00006,
-    "litellm_provider": "openai",
-    "mode": "chat",
-    "supports_system_messages": true,
-    "supports_function_calling": true
-  },
-  "openai/gpt-4o": {
-    "max_input_tokens": 128000,
-    "max_output_tokens": 4096,
-    "input_cost_per_token": 0.0000025,
-    "output_cost_per_token": 0.00001,
-    "litellm_provider": "openai",
-    "mode": "chat",
-    "supports_system_messages": true,
-    "supports_function_calling": true,
-    "supports_vision": true
-  },
-  "openai/gpt-4o-mini": {
-    "max_input_tokens": 12288,
-    "max_output_tokens": 4096,
-    "input_cost_per_token": 0.00000015,
-    "output_cost_per_token": 0.0000006,
-    "litellm_provider": "openai",
-    "mode": "chat",
-    "supports_system_messages": true,
-    "supports_function_calling": true
-  },
   "openai/claude-3.5-sonnet": {
     "max_input_tokens": 90000,
     "max_output_tokens": 8192,
@@ -64,37 +24,61 @@
     "output_cost_per_token": 0.000015,
     "litellm_provider": "openai",
     "mode": "chat",
-    "supports_system_messages": true,
-    "supports_function_calling": true
+    "supports_function_calling": true,
+    "supports_parallel_function_calling": true,
+    "supports_vision": false,
+    "supports_audio_input": false,
+    "supports_audio_output": false,
+    "supports_prompt_caching": false,
+    "supports_response_schema": false,
+    "supports_system_messages": true
   },
   "openai/claude-3.7-sonnet": {
-    "max_input_tokens": 90000,
+    "max_input_tokens": 64000,
     "max_output_tokens": 8192,
     "input_cost_per_token": 0.000003,
     "output_cost_per_token": 0.000015,
     "litellm_provider": "openai",
     "mode": "chat",
-    "supports_system_messages": true,
-    "supports_function_calling": true
+    "supports_function_calling": true,
+    "supports_parallel_function_calling": true,
+    "supports_vision": false,
+    "supports_audio_input": false,
+    "supports_audio_output": false,
+    "supports_prompt_caching": false,
+    "supports_response_schema": false,
+    "supports_system_messages": true
   },
   "openai/claude-3.7-sonnet-thought": {
-    "max_input_tokens": 90000,
+    "max_input_tokens": 64000,
     "max_output_tokens": 8192,
     "input_cost_per_token": 0.000003,
     "output_cost_per_token": 0.000015,
     "litellm_provider": "openai",
     "mode": "chat",
-    "supports_system_messages": true,
-    "supports_function_calling": true
+    "supports_function_calling": false,
+    "supports_parallel_function_calling": false,
+    "supports_vision": false,
+    "supports_audio_input": false,
+    "supports_audio_output": false,
+    "supports_prompt_caching": false,
+    "supports_response_schema": false,
+    "supports_system_messages": true
   },
   "openai/gemini-2.0-flash-001": {
     "max_input_tokens": 128000,
     "max_output_tokens": 8192,
-    "input_cost_per_token": 0.0000001,
-    "output_cost_per_token": 0.0000004,
+    "input_cost_per_token": 1e-7,
+    "output_cost_per_token": 4e-7,
     "litellm_provider": "openai",
     "mode": "chat",
-    "supports_system_messages": true,
-    "supports_function_calling": true
+    "supports_function_calling": false,
+    "supports_parallel_function_calling": false,
+    "supports_vision": false,
+    "supports_audio_input": false,
+    "supports_audio_output": false,
+    "supports_prompt_caching": false,
+    "supports_response_schema": false,
+    "supports_system_messages": true
   }
 }
