@@ -9,3 +9,9 @@
   use_repo_map: true
   examples_as_sys_msg: true
   editor_edit_format: editor-diff
+
+- name: anthropic/claude-3-7-sonnet-thought
+  edit_format: diff
+  use_repo_map: true
+  examples_as_sys_msg: true
+  editor_edit_format: editor-diff
