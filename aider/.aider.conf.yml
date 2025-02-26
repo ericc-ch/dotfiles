@@ -82,6 +82,7 @@ attribute-committer: false
 read:
   - "~/.config/aider/conventions/general.md"
   - "~/.config/aider/conventions/typescript.md"
+  - "~/.config/aider/conventions/go.md"
 
 ## Enable/disable detection and offering to add URLs to chat (default: True)
 detect-urls: false
