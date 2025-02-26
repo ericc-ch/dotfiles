@@ -19,9 +19,6 @@ const currentConfig = JSON.parse(
 
 const models = await fetchModels();
 
-console.log(models);
-console.log(currentConfig);
-
 // Helper function to convert API model data to Aider spec format
 function convertModelToSpec(model: Model): ModelSpec {
   return {
@@ -53,11 +50,8 @@ const updatedSpecs: ModelSpecs = {
 
 // Process each model from the API response
 for (const model of models.data) {
-  // Skip models that are not enabled or are embedding models
-  if (
-    model.policy?.state !== "enabled" ||
-    model.capabilities.type === "embeddings"
-  ) {
+  // Skip models that are embedding models
+  if (model.capabilities.type === "embeddings") {
     continue;
   }
 
