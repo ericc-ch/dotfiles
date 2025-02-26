@@ -2,16 +2,19 @@
   edit_format: diff
   use_repo_map: true
   examples_as_sys_msg: true
+  editor_model_name: openai/claude-3.5-sonnet
   editor_edit_format: editor-diff
 
 - name: openai/claude-3.7-sonnet
   edit_format: diff
   use_repo_map: true
   examples_as_sys_msg: true
+  editor_model_name: openai/claude-3.7-sonnet
   editor_edit_format: editor-diff
 
 - name: openai/claude-3.7-sonnet-thought
   edit_format: diff
   use_repo_map: true
   examples_as_sys_msg: true
+  editor_model_name: openai/claude-3.7-sonnet
   editor_edit_format: editor-diff
