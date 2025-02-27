@@ -94,6 +94,7 @@ attribute-committer: false
 read:
   - "~/.config/aider/conventions/general.md"
   - "~/.config/aider/conventions/typescript.md"
+  # - "~/.config/aider/conventions/python.md"
   # - "~/.config/aider/conventions/go.md"
   # - "~/.config/aider/conventions/ghostty-shader.md"
 

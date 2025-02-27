@@ -1,4 +1,4 @@
-Please follow the following conventions only when writing TypeScript code:
+Please follow the following conventions only when writing TypeScript (and JavaScript where applicable) code:
 
 Prioritize type safety, clarity, and maintainability by defining explicit types and organizing code logically. Adopt a functional-first approach emphasizing immutability, pure functions, and composition as your default style, while remaining pragmatic enough to use object-oriented techniques when they demonstrably lead to more organized and maintainable solutions for specific problems. Leverage the latest TypeScript features and modern JavaScript syntax including optional chaining, nullish coalescing, and template literals to write more expressive code.
 
