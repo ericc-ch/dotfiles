@@ -1,3 +1,8 @@
+# Reference
+# https://aider.chat/docs/config/aider_conf.html#sample-yaml-config-file
+
+architect: true
+
 ## Specify the model to use for the main chat
 
 ## Copilot API
