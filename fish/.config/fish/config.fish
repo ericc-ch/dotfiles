@@ -1,16 +1,28 @@
 set -g fish_greeting
 
 # bun
-set --export BUN_INSTALL "$HOME/.bun"
-set --export PATH $BUN_INSTALL/bin $PATH
+if not contains "$HOME/.bun/bin" $PATH
+    set --export BUN_INSTALL "$HOME/.bun"
+    set --export PATH $BUN_INSTALL/bin $PATH
+end
 
 # put random binaries here
-set --export PATH $HOME/.local/bin $PATH
+if not contains "$HOME/.local/bin" $PATH
+    set --export PATH $HOME/.local/bin $PATH
+end
 
 # go
-set --export PATH /usr/local/go/bin $PATH
+if not contains /usr/local/go/bin $PATH
+    set --export PATH /usr/local/go/bin $PATH
+end
 
 # pyenv
 if has_command pyenv
     pyenv init - fish | source
+end
+
+# flyctl
+if not contains "$HOME/.fly/bin" $PATH
+    set --export FLYCTL_INSTALL "$HOME/.fly"
+    set --export PATH $FLYCTL_INSTALL/bin $PATH
 end

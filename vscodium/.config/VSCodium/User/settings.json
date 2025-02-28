@@ -74,13 +74,13 @@
   },
 
   // Shell
+  "[fish]": {
+    "editor.defaultFormatter": "bmalehorn.vscode-fish"
+  },
   "[ignore]": {
     "editor.defaultFormatter": "foxundermoon.shell-format"
   },
   "[shellscript]": {
-    "editor.defaultFormatter": "foxundermoon.shell-format"
-  },
-  "[fish]": {
     "editor.defaultFormatter": "foxundermoon.shell-format"
   },
   "[dotenv]": {
