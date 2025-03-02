@@ -6,9 +6,10 @@ if not contains "$HOME/.bun/bin" $PATH
     set --export PATH $BUN_INSTALL/bin $PATH
 end
 
-# put random binaries here
-if not contains "$HOME/.local/bin" $PATH
-    set --export PATH $HOME/.local/bin $PATH
+# flyctl
+if not contains "$HOME/.fly/bin" $PATH
+    set --export FLYCTL_INSTALL "$HOME/.fly"
+    set --export PATH $FLYCTL_INSTALL/bin $PATH
 end
 
 # go
@@ -16,13 +17,17 @@ if not contains /usr/local/go/bin $PATH
     set --export PATH /usr/local/go/bin $PATH
 end
 
+# put random binaries here
+if not contains "$HOME/.local/bin" $PATH
+    set --export PATH $HOME/.local/bin $PATH
+end
+
 # pyenv
 if has_command pyenv
     pyenv init - fish | source
 end
 
-# flyctl
-if not contains "$HOME/.fly/bin" $PATH
-    set --export FLYCTL_INSTALL "$HOME/.fly"
-    set --export PATH $FLYCTL_INSTALL/bin $PATH
+# nvm
+if has_command nvm
+    nvm use lts/jod
 end
