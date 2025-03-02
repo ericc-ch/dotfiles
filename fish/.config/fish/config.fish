@@ -27,7 +27,3 @@ if has_command pyenv
     pyenv init - fish | source
 end
 
-# nvm
-if has_command nvm
-    nvm use lts/jod
-end
