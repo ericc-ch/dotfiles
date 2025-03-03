@@ -21,3 +21,19 @@
   examples_as_sys_msg: true
   editor_model_name: openai/claude-3.7-sonnet
   editor_edit_format: editor-diff
+
+- name: gemini/gemini-2.0-flash
+  edit_format: diff
+  weak_model_name: gemini/gemini-2.0-flash
+  use_repo_map: true
+  examples_as_sys_msg: true
+  editor_model_name: gemini/gemini-2.0-flash
+  editor_edit_format: editor-diff
+
+- name: gemini/gemini-2.0-flash-thinking-exp-01-21
+  edit_format: diff
+  weak_model_name: gemini/gemini-2.0-flash
+  use_repo_map: true
+  examples_as_sys_msg: true
+  editor_model_name: gemini/gemini-2.0-flash
+  editor_edit_format: editor-diff
