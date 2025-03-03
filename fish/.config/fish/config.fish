@@ -27,3 +27,8 @@ if has_command pyenv
     pyenv init - fish | source
 end
 
+set AIDER_KEYS_FILE "$HOME/.config/aider/aider-keys.fish"
+
+if test -f $AIDER_KEYS_FILE
+    source $AIDER_KEYS_FILE
+end

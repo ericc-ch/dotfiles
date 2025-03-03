@@ -21,6 +21,10 @@
   "codeium.enableSearch": true,
   "codeium.enableCodeLens": false,
   "codeium.enableExplainProblem": false,
+  "codeium.enableConfig": {
+    "*": true,
+    "fish": true
+  },
 
   // Telemetry
   "gitlens.telemetry.enabled": false,
