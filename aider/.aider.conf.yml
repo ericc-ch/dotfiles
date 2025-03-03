@@ -95,11 +95,11 @@ attribute-committer: false
 
 ## Specify read-only files
 read:
-  - "~/.config/aider/conventions/general.md"
-  - "~/.config/aider/conventions/typescript.md"
-  # - "~/.config/aider/conventions/python.md"
-  # - "~/.config/aider/conventions/go.md"
-  # - "~/.config/aider/conventions/ghostty-shader.md"
+  - "~/conventions/general.md"
+  - "~/conventions/typescript.md"
+  # - "~/conventions/python.md"
+  # - "~/conventions/go.md"
+  # - "~/conventions/ghostty-shader.md"
 
 ## Enable/disable detection and offering to add URLs to chat (default: True)
 detect-urls: false
