@@ -67,7 +67,7 @@ show-model-warnings: false
 # Repomap settings:
 
 ## Suggested number of tokens to use for repo map, use 0 to disable (default: 1024)
-map-tokens: 2048
+# map-tokens: 2048
 
 ##################
 # Output settings:
