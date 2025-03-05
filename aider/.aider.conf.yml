@@ -6,7 +6,8 @@ architect: true
 ## Specify the model to use for the main chat
 
 ## Copilot API
-model: gemini/gemini-2.0-flash-thinking-exp-01-21
+# model: codestral/codestral-latest
+model: gemini/gemini-2.0-flash-thinking-exp
 # model: openai/claude-3.7-sonnet-thought
 # model: openai/claude-3.7-sonnet
 # model: openai/claude-3.5-sonnet
@@ -32,7 +33,8 @@ alias:
   - "copilot-sonnet-t:openai/claude-3.7-sonnet-thought"
   - "copilot-flash:openai/gemini-2.0-flash-001"
   - "flash:gemini/gemini-2.0-flash"
-  - "flash-t:gemini/gemini-2.0-flash-thinking-exp-01-21"
+  - "flash-t:gemini/gemini-2.0-flash-thinking-exp"
+  - "codestral:codestral/codestral-latest"
   - "o3:openai/o3-mini"
 
 ## Specify a file with aider model settings for unknown models

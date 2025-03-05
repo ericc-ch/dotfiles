@@ -49,20 +49,27 @@
   editor_model_name: gemini/gemini-2.0-flash
   editor_edit_format: editor-whole
 
-- name: gemini/gemini-2.0-flash-thinking-exp-01-21
+- name: gemini/gemini-2.0-flash-thinking-exp
   edit_format: whole
   weak_model_name: gemini/gemini-2.0-flash
   use_repo_map: true
   use_system_prompt: false
   examples_as_sys_msg: true
-  # editor_model_name: gemini/gemini-2.0-flash
-  editor_model_name: codestral/codestral-latest
-  editor_edit_format: editor-whole
+  editor_model_name: gemini/gemini-2.0-flash
+  editor_edit_format: editor-diff
 
 - name: codestral/codestral-latest
   edit_format: whole
   weak_model_name: gemini/gemini-2.0-flash
   use_repo_map: true
-  # examples_as_sys_msg: true
-  editor_model_name: codestral/codestral-latest
+  examples_as_sys_msg: true
+  editor_model_name: mistral/mistral-large-latest
+  editor_edit_format: editor-whole
+
+- name: mistral/mistral-large-latest
+  edit_format: whole
+  weak_model_name: gemini/gemini-2.0-flash
+  use_repo_map: true
+  examples_as_sys_msg: true
+  editor_model_name: mistral/mistral-large-latest
   editor_edit_format: editor-whole
