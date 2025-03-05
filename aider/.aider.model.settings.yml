@@ -1,3 +1,22 @@
+- name: (default values)
+  edit_format: whole
+  weak_model_name: null
+  use_repo_map: false
+  send_undo_reply: false
+  lazy: false
+  reminder: user
+  examples_as_sys_msg: false
+  extra_params: null
+  cache_control: false
+  caches_by_default: false
+  use_system_prompt: true
+  use_temperature: true
+  streaming: true
+  editor_model_name: null
+  editor_edit_format: null
+  remove_reasoning: null
+  system_prompt_prefix: null
+
 - name: openai/claude-3.5-sonnet
   edit_format: diff
   weak_model_name: openai/gemini-2.0-flash-001
@@ -36,5 +55,14 @@
   use_repo_map: true
   use_system_prompt: false
   examples_as_sys_msg: true
-  editor_model_name: gemini/gemini-2.0-flash
+  # editor_model_name: gemini/gemini-2.0-flash
+  editor_model_name: codestral/codestral-latest
+  editor_edit_format: editor-whole
+
+- name: codestral/codestral-latest
+  edit_format: whole
+  weak_model_name: gemini/gemini-2.0-flash
+  use_repo_map: true
+  # examples_as_sys_msg: true
+  editor_model_name: codestral/codestral-latest
   editor_edit_format: editor-whole
