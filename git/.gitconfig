@@ -16,3 +16,6 @@
 	cm = commit -m
 	ps = push
 	pl = pull -r
+[credential "https://gitlab.com"]
+	helper = 
+	helper = !/usr/bin/glab auth git-credential
