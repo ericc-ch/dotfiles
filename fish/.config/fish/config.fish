@@ -17,6 +17,11 @@ if not contains /usr/local/go/bin $PATH
     set --export PATH /usr/local/go/bin $PATH
 end
 
+# "go install" binaries
+if not contains $HOME/go/bin $PATH
+    set --export PATH $HOME/go/bin $PATH
+end
+
 # put random binaries here
 if not contains "$HOME/.local/bin" $PATH
     set --export PATH $HOME/.local/bin $PATH
