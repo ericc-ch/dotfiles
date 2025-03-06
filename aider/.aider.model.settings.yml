@@ -1,5 +1,5 @@
 - name: (default values)
-  edit_format: whole
+  edit_format: diff
   weak_model_name: null
   use_repo_map: false
   send_undo_reply: false
@@ -42,15 +42,15 @@
   editor_edit_format: editor-diff
 
 - name: gemini/gemini-2.0-flash
-  edit_format: whole
+  edit_format: diff
   weak_model_name: gemini/gemini-2.0-flash
   use_repo_map: true
   examples_as_sys_msg: true
   editor_model_name: gemini/gemini-2.0-flash
-  editor_edit_format: editor-whole
+  editor_edit_format: editor-diff
 
 - name: gemini/gemini-2.0-flash-thinking-exp
-  edit_format: whole
+  edit_format: diff
   weak_model_name: gemini/gemini-2.0-flash
   use_repo_map: true
   use_system_prompt: false
@@ -59,17 +59,17 @@
   editor_edit_format: editor-diff
 
 - name: codestral/codestral-latest
-  edit_format: whole
+  edit_format: diff
   weak_model_name: gemini/gemini-2.0-flash
   use_repo_map: true
   examples_as_sys_msg: true
   editor_model_name: mistral/mistral-large-latest
-  editor_edit_format: editor-whole
+  editor_edit_format: editor-diff
 
 - name: mistral/mistral-large-latest
-  edit_format: whole
+  edit_format: diff
   weak_model_name: gemini/gemini-2.0-flash
   use_repo_map: true
   examples_as_sys_msg: true
   editor_model_name: mistral/mistral-large-latest
-  editor_edit_format: editor-whole
+  editor_edit_format: editor-diff
