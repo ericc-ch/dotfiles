@@ -107,4 +107,4 @@ read:
 detect-urls: false
 
 ## Always say yes to every confirmation
-yes-always: true
+yes-always: false
