@@ -4,6 +4,11 @@
 [credential "https://gist.github.com"]
 	helper = 
 	helper = !/usr/bin/gh auth git-credential
+[credential "https://gitlab.com"]
+	helper = 
+	helper = !/usr/bin/glab auth git-credential
+[push]
+	followTags = true
 [user]
 	name = Erick Christian
 	email = erickchristian48@gmail.com
@@ -16,8 +21,5 @@
 	cm = commit -m
 	ps = push
 	pl = pull -r
-[credential "https://gitlab.com"]
-	helper = 
-	helper = !/usr/bin/glab auth git-credential
-[push]
-	followTags = true
+	last = log -1
+
