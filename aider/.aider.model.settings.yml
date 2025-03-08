@@ -57,8 +57,8 @@
   use_system_prompt: true
   use_temperature: false
   streaming: false
-  editor_model_name: openai/claude-3-haiku
-  editor_edit_format: editor-diff
+  editor_model_name: gemini/gemini-2.0-flash
+  editor_edit_format: editor-whole
   system_prompt_prefix: "Formatting re-enabled. "
 
 - name: gemini/gemini-2.0-flash-thinking-exp
