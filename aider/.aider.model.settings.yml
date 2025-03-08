@@ -80,5 +80,5 @@
     max_tokens: 8192
   caches_by_default: true
   use_temperature: false
-  editor_model_name: gemini/gemini-2.0-flash
+  editor_model_name: gemini/gemini-2.0-flash-thinking-exp
   editor_edit_format: editor-whole
