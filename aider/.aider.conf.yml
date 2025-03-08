@@ -6,7 +6,8 @@ architect: true
 ## Specify the model to use for the main chat
 
 # model: codestral/codestral-latest
-model: gemini/gemini-2.0-flash-thinking-exp
+model: openrouter/deepseek/deepseek-r1
+# model: gemini/gemini-2.0-flash-thinking-exp
 # model: openai/claude-3.7-sonnet-thought
 # model: openai/claude-3.7-sonnet
 # model: openai/claude-3.5-sonnet
@@ -32,10 +33,11 @@ alias:
   - "copilot-sonnet:openai/claude-3.7-sonnet"
   - "copilot-sonnet-t:openai/claude-3.7-sonnet-thought"
   - "copilot-flash:openai/gemini-2.0-flash-001"
+  - "openrouter-r1:openrouter/deepseek/deepseek-r1"
   - "duck-haiku:openai/claude-3-haiku"
+  - "codestral:codestral/codestral-latest"
   - "flash:gemini/gemini-2.0-flash"
   - "flash-t:gemini/gemini-2.0-flash-thinking-exp"
-  - "codestral:codestral/codestral-latest"
   - "o3:openai/o3-mini"
 
 ## Specify a file with aider model settings for unknown models
@@ -50,13 +52,13 @@ model-metadata-file: ~/.config/aider/.aider.model.metadata.json
 # weak-model: openai/gpt-4o
 # weak-model: mistral/mistral-large-latest
 # weak-model: mistral/open-mistral-nemo
-weak-model: gemini/gemini-2.0-flash
+# weak-model: gemini/gemini-2.0-flash
 
 ## Specify the model to use for editor tasks (default depends on --model)
 # editor-model: openai/claude-3.7-sonnet-thought
 # editor-model: openai/claude-3.7-sonnet
 # editor-model: openai/claude-3.5-sonnet
-editor-model: gemini/gemini-2.0-flash
+# editor-model: gemini/gemini-2.0-flash
 
 ## Only work with models that have meta-data available (default: True)
 show-model-warnings: true

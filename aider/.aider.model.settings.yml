@@ -60,3 +60,25 @@
   editor_model_name: openai/claude-3-haiku
   editor_edit_format: editor-diff
   system_prompt_prefix: "Formatting re-enabled. "
+
+- name: gemini/gemini-2.0-flash-thinking-exp
+  edit_format: whole
+  weak_model_name: gemini/gemini-2.0-flash
+  use_repo_map: true
+  examples_as_sys_msg: true
+  use_temperature: true
+  streaming: true
+  editor_model_name: gemini/gemini-2.0-flash
+  editor_edit_format: editor-whole
+
+- name: openrouter/deepseek/deepseek-r1
+  edit_format: diff
+  weak_model_name: gemini/gemini-2.0-flash
+  use_repo_map: true
+  examples_as_sys_msg: true
+  extra_params:
+    max_tokens: 8192
+  caches_by_default: true
+  use_temperature: false
+  editor_model_name: gemini/gemini-2.0-flash
+  editor_edit_format: editor-whole
