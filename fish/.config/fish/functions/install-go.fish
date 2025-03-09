@@ -5,8 +5,8 @@ function install-go
         return 1
     end
 
-    set -l version $argv[1]
-    set -l filename "go$version.linux-amd64.tar.gz"
+    set -l go_version $argv[1]
+    set -l filename "go$go_version.linux-amd64.tar.gz"
     set -l download_url "https://go.dev/dl/$filename"
     set -l tmp_dir /tmp/install-go
     set -l tar_path "$tmp_dir/$filename"
@@ -14,7 +14,7 @@ function install-go
     # Create temp directory if it doesn't exist
     mkdir -p $tmp_dir
 
-    echo "Installing Go $version..."
+    echo "Installing Go $go_version..."
 
     # Download Go archive
     curl -L -o $tar_path $download_url
@@ -30,5 +30,5 @@ function install-go
     eval $sudo_cmd rm -rf /usr/local/go
     eval $sudo_cmd tar -C /usr/local -xzf $tar_path
 
-    echo "Successfully installed Go $version"
+    echo "Successfully installed Go $go_version"
 end
