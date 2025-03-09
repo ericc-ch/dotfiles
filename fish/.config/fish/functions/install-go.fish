@@ -1,4 +1,4 @@
-function install_go
+function install-go
     # Check if version argument was provided
     if test (count $argv) -ne 1
         echo "Error: Please provide a Go version (e.g., 1.24.1)"
