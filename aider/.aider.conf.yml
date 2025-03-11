@@ -1,16 +1,14 @@
 # Reference
 # https://aider.chat/docs/config/aider_conf.html#sample-yaml-config-file
 
-architect: true
-
 ## Specify the model to use for the main chat
 
 # model: codestral/codestral-latest
-model: openrouter/deepseek/deepseek-r1
+# model: openrouter/deepseek/deepseek-r1
 # model: gemini/gemini-2.0-flash-thinking-exp
 # model: openai/claude-3.7-sonnet-thought
 # model: openai/claude-3.7-sonnet
-# model: openai/claude-3.5-sonnet
+model: openai/claude-3.5-sonnet
 # model: openai/gpt-4o
 # model: openai/o1
 # model: openai/o3-mini
@@ -22,8 +20,8 @@ model: openrouter/deepseek/deepseek-r1
 openai-api-key: not-needed
 
 ## Specify the api base url
-# openai-api-base: http://localhost:4141/
-openai-api-base: http://localhost:4460/
+openai-api-base: http://localhost:4141/
+# openai-api-base: http://localhost:4460/
 
 #################
 ## Model settings:
