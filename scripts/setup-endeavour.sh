@@ -20,7 +20,16 @@ else
   echo "Dotfiles repository cloned successfully."
 fi
 
-# 2. Install fish shell
+# 2. Create ~/.local/share/bin directory if it doesn't exist
+echo "Creating ~/.local/share/bin directory if it doesn't exist..."
+mkdir -p ~/.local/share/bin
+if [ $? -ne 0 ]; then
+  echo "Error: Failed to create ~/.local/share/bin directory. Exiting."
+  exit 1
+fi
+echo "~/.local/share/bin directory created or already exists."
+
+# 3. Install fish shell
 echo "Installing fish shell using pacman..."
 sudo pacman -S --noconfirm fish
 if [ $? -ne 0 ]; then
