@@ -66,6 +66,9 @@
   "[markdown]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
+  "[vue]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
 
   // Go
   "[go]": {
@@ -94,8 +97,5 @@
   // Other
   "[dockerfile]": {
     "editor.defaultFormatter": "ms-azuretools.vscode-docker"
-  },
-  "[vue]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
   }
 }
