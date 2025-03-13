@@ -38,7 +38,25 @@ if [ $? -ne 0 ]; then
 fi
 echo "Fish shell installed successfully."
 
-# 3. Stow fish configuration
+# 4. Install ly display manager
+echo "Installing ly display manager using pacman..."
+sudo pacman -S --noconfirm ly
+if [ $? -ne 0 ]; then
+  echo "Error: Failed to install ly display manager. Exiting."
+  exit 1
+fi
+echo "ly display manager installed successfully."
+
+# 5. Enable and start ly service
+echo "Enabling and starting ly service..."
+sudo systemctl enable ly.service
+if [ $? -ne 0 ]; then
+  echo "Error: Failed to enable ly service. Exiting."
+  exit 1
+fi
+echo "ly service enabled and started successfully."
+
+# 6. Stow fish configuration
 echo "Stowing fish configuration from dotfiles..."
 if ! command -v stow &>/dev/null; then
   echo "Error: stow is not installed. Please install stow first (e.g., sudo pacman -S stow). Exiting."
@@ -57,7 +75,7 @@ fi
 cd - >/dev/null # Go back to previous directory
 echo "Fish configuration stowed successfully."
 
-# 4. Set fish as default shell
+# 7. Set fish as default shell
 echo "Setting fish as default shell..."
 if ! which fish >/dev/null; then
   echo "Error: fish executable not found in PATH. Installation might have failed. Exiting."
