@@ -1,4 +1,5 @@
 {
   "editor.formatOnSave": true,
-  "deno.enablePaths": ["./scripts"]
+  "deno.enablePaths": ["./scripts"],
+  "cSpell.words": ["pacman"]
 }
