@@ -20,7 +20,16 @@ else
   echo "Dotfiles repository cloned successfully."
 fi
 
-# 2. Create ~/.local/share/bin directory if it doesn't exist
+# 2. Install stow
+echo "Installing stow using pacman..."
+sudo pacman -S --noconfirm stow
+if [ $? -ne 0 ]; then
+  echo "Error: Failed to install stow. Exiting."
+  exit 1
+fi
+echo "stow installed successfully."
+
+# 3. Create ~/.local/share/bin directory if it doesn't exist
 echo "Creating ~/.local/share/bin directory if it doesn't exist..."
 mkdir -p ~/.local/share/bin
 if [ $? -ne 0 ]; then
@@ -38,7 +47,24 @@ if [ $? -ne 0 ]; then
 fi
 echo "Fish shell installed successfully."
 
-# 4. Install ly display manager
+# 4. Install fisher package manager for fish
+echo "Installing fisher package manager for fish..."
+curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher
+if [ $? -ne 0 ]; then
+  echo "Error: Failed to install fisher. Exiting."
+  exit 1
+fi
+echo "fisher installed successfully."
+
+# Install fisher plugins
+echo "Installing fisher plugins..."
+fisher install jorgebucaran/hydro
+fisher install jethrokuan/z
+fisher install jorgebucaran/nvm.fish
+fisher install jorgebucaran/autopair.fish
+echo "fisher plugins installed successfully."
+
+# 5. Install ly display manager
 echo "Installing ly display manager using pacman..."
 sudo pacman -S --noconfirm ly
 if [ $? -ne 0 ]; then
