@@ -1,3 +1,4 @@
+#!/usr/bin/env deno
 import * as path from "jsr:@std/path";
 
 const COPILOT_API_BASE = "http://localhost:4141";
