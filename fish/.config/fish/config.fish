@@ -38,3 +38,8 @@ set AIDER_KEYS_FILE "$HOME/.config/aider/aider-keys.fish"
 if test -f $AIDER_KEYS_FILE
     source $AIDER_KEYS_FILE
 end
+
+# deno
+if test -f /home/erick/.deno/env.fish
+    source /home/erick/.deno/env.fish
+end
