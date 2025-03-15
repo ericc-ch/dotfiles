@@ -6,7 +6,7 @@ const time = Variable("").poll(1000, "date")
 
 const hyprland = Hyprland.get_default()
 
-export default function Bar(gdkmonitor: Gdk.Monitor) {
+export function Bar(gdkmonitor: Gdk.Monitor) {
   const { TOP, LEFT, RIGHT } = Astal.WindowAnchor
 
   const focusedWorkspace = bind(hyprland, "focusedWorkspace")
