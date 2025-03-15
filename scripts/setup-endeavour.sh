@@ -7,7 +7,6 @@ set -e # Exit immediately if a command exits with a non-zero status.
 DOTFILES_REPO="https://github.com/ericc-ch/dotfiles.git"
 DOTFILES_DIR="$HOME/dotfiles"
 
-# 1. Clone dotfiles repository
 echo "Cloning dotfiles repository from $DOTFILES_REPO to $DOTFILES_DIR..."
 if [ -d "$DOTFILES_DIR" ]; then
   echo "Warning: $DOTFILES_DIR already exists. Skipping cloning."
@@ -20,16 +19,14 @@ else
   echo "Dotfiles repository cloned successfully."
 fi
 
-# 2. Install stow
-echo "Installing stow using pacman..."
-sudo pacman -S --noconfirm stow
+echo "Installing additional packages including stow, fish, and ly using pacman..."
+sudo pacman -S --noconfirm stow lazygit superfile brightnessctl fish ly
 if [ $? -ne 0 ]; then
-  echo "Error: Failed to install stow. Exiting."
+  echo "Error: Failed to install additional packages. Exiting."
   exit 1
 fi
-echo "stow installed successfully."
+echo "Additional packages including stow, fish, and ly installed successfully."
 
-# 3. Create ~/.local/share/bin directory if it doesn't exist
 echo "Creating ~/.local/share/bin directory if it doesn't exist..."
 mkdir -p ~/.local/share/bin
 if [ $? -ne 0 ]; then
@@ -38,16 +35,6 @@ if [ $? -ne 0 ]; then
 fi
 echo "~/.local/share/bin directory created or already exists."
 
-# 3. Install fish shell
-echo "Installing fish shell using pacman..."
-sudo pacman -S --noconfirm fish
-if [ $? -ne 0 ]; then
-  echo "Error: Failed to install fish shell. Exiting."
-  exit 1
-fi
-echo "Fish shell installed successfully."
-
-# 4. Install fisher package manager for fish
 echo "Installing fisher package manager for fish..."
 curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher
 if [ $? -ne 0 ]; then
@@ -56,7 +43,6 @@ if [ $? -ne 0 ]; then
 fi
 echo "fisher installed successfully."
 
-# Install fisher plugins
 echo "Installing fisher plugins..."
 fisher install jorgebucaran/hydro
 fisher install jethrokuan/z
@@ -64,16 +50,6 @@ fisher install jorgebucaran/nvm.fish
 fisher install jorgebucaran/autopair.fish
 echo "fisher plugins installed successfully."
 
-# 5. Install ly display manager
-echo "Installing ly display manager using pacman..."
-sudo pacman -S --noconfirm ly
-if [ $? -ne 0 ]; then
-  echo "Error: Failed to install ly display manager. Exiting."
-  exit 1
-fi
-echo "ly display manager installed successfully."
-
-# 5. Enable and start ly service
 echo "Enabling and starting ly service..."
 sudo systemctl enable ly.service
 if [ $? -ne 0 ]; then
@@ -82,7 +58,6 @@ if [ $? -ne 0 ]; then
 fi
 echo "ly service enabled and started successfully."
 
-# 6. Stow fish configuration
 echo "Stowing fish configuration from dotfiles..."
 if ! command -v stow &>/dev/null; then
   echo "Error: stow is not installed. Please install stow first (e.g., sudo pacman -S stow). Exiting."
@@ -101,7 +76,6 @@ fi
 cd - >/dev/null # Go back to previous directory
 echo "Fish configuration stowed successfully."
 
-# 7. Set fish as default shell
 echo "Setting fish as default shell..."
 if ! which fish >/dev/null; then
   echo "Error: fish executable not found in PATH. Installation might have failed. Exiting."
