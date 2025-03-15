@@ -57,7 +57,7 @@ cd $HOME >/dev/null # Go back to home directory
 echo "Fish configuration stowed successfully."
 
 echo "Installing additional packages..."
-sudo pacman -S --noconfirm stow lazygit superfile brightnessctl fish ly
+sudo pacman -S --noconfirm stow lazygit superfile brightnessctl fish ly uwsm
 if [ $? -ne 0 ]; then
   echo "Error: Failed to install additional packages using pacman. Exiting."
   exit 1

@@ -1,4 +1,4 @@
-import { Variable } from "astal"
+import { bind, Variable } from "astal"
 import { App, Astal, Gtk, Gdk } from "astal/gtk4"
 import Hyprland from "gi://AstalHyprland"
 
@@ -8,13 +8,11 @@ const hyprland = Hyprland.get_default()
 
 export default function Bar(gdkmonitor: Gdk.Monitor) {
   const { TOP, LEFT, RIGHT } = Astal.WindowAnchor
-  const clients = hyprland.get_clients()
 
-  for (const client of clients) {
-    console.log(client.workspace.get_id())
-  }
-
-  console.log(hyprland.get_focused_workspace().id)
+  const focusedWorkspace = bind(hyprland, "focusedWorkspace")
+  const id = Variable.derive([focusedWorkspace], (workspace) =>
+    workspace.get_id(),
+  )
 
   return (
     <window
@@ -27,7 +25,7 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
     >
       <centerbox cssName="centerbox">
         <button hexpand halign={Gtk.Align.CENTER} onClicked="echo hello">
-          Welcome to AGS!
+          Welcome to AGS! {id()}
         </button>
         <box />
         <menubutton hexpand halign={Gtk.Align.CENTER}>
