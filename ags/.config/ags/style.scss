@@ -3,7 +3,7 @@ $fg-color: #{"@theme_fg_color"};
 $bg-color: #{"@theme_bg_color"};
 
 window.Bar {
-    background: transparent;
+    background: black;
     color: $fg-color;
     font-weight: bold;
 
