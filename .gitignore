@@ -1,7 +1,5 @@
 .aider.tags*
 .aider.chat*
 .aider.input*
-
-# aider keys
 aider-keys.fish
-.aider*
+
