@@ -7,6 +7,17 @@ set -e # Exit immediately if a command exits with a non-zero status.
 DOTFILES_REPO="https://github.com/ericc-ch/dotfiles.git"
 DOTFILES_DIR="$HOME/dotfiles"
 
+# Use home dir as working directory
+cd $HOME
+
+echo "Creating ~/.local/share/bin directory if it doesn't exist..."
+mkdir -p ~/.local/share/bin
+if [ $? -ne 0 ]; then
+  echo "Error: Failed to create ~/.local/share/bin directory. Exiting."
+  exit 1
+fi
+echo "~/.local/share/bin directory created or already exists."
+
 echo "Cloning dotfiles repository from $DOTFILES_REPO to $DOTFILES_DIR..."
 if [ -d "$DOTFILES_DIR" ]; then
   echo "Warning: $DOTFILES_DIR already exists. Skipping cloning."
@@ -19,21 +30,45 @@ else
   echo "Dotfiles repository cloned successfully."
 fi
 
-echo "Installing additional packages including stow, fish, and ly using pacman..."
+echo "Installing stow..."
+sudo pacman -S --noconfirm stow
+if [ $? -ne 0 ]; then
+  echo "Error: Failed to install additional packages using pacman. Exiting."
+  exit 1
+fi
+echo "stow installed successfully."
+
+echo "Stowing fish configuration from dotfiles..."
+if ! command -v stow &>/dev/null; then
+  echo "Error: stow is not installed. Please install stow first (e.g., sudo pacman -S stow). Exiting."
+  exit 1
+fi
+
+cd "$DOTFILES_DIR" || {
+  echo "Error: Could not change directory to $DOTFILES_DIR. Exiting."
+  exit 1
+}
+stow --no-folding fish
+if [ $? -ne 0 ]; then
+  echo "Error: Failed to stow fish configuration. Check if 'fish' directory exists in your dotfiles and stow is configured correctly. Exiting."
+  exit 1
+fi
+cd $HOME >/dev/null # Go back to home directory
+echo "Fish configuration stowed successfully."
+
+echo "Installing additional packages..."
 sudo pacman -S --noconfirm stow lazygit superfile brightnessctl fish ly
 if [ $? -ne 0 ]; then
-  echo "Error: Failed to install additional packages. Exiting."
+  echo "Error: Failed to install additional packages using pacman. Exiting."
   exit 1
 fi
-echo "Additional packages including stow, fish, and ly installed successfully."
 
-echo "Creating ~/.local/share/bin directory if it doesn't exist..."
-mkdir -p ~/.local/share/bin
+yay -S aylurs-gtk-shell-git libastal-meta
 if [ $? -ne 0 ]; then
-  echo "Error: Failed to create ~/.local/share/bin directory. Exiting."
+  echo "Error: Failed to install additional packages using yay. Exiting."
   exit 1
 fi
-echo "~/.local/share/bin directory created or already exists."
+echo "Additional packages installed successfully."
 
 echo "Installing fisher package manager for fish..."
 curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher
@@ -57,24 +92,6 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 echo "ly service enabled and started successfully."
-
-echo "Stowing fish configuration from dotfiles..."
-if ! command -v stow &>/dev/null; then
-  echo "Error: stow is not installed. Please install stow first (e.g., sudo pacman -S stow). Exiting."
-  exit 1
-fi
-
-cd "$DOTFILES_DIR" || {
-  echo "Error: Could not change directory to $DOTFILES_DIR. Exiting."
-  exit 1
-}
-stow --no-folding fish
-if [ $? -ne 0 ]; then
-  echo "Error: Failed to stow fish configuration. Check if 'fish' directory exists in your dotfiles and stow is configured correctly. Exiting."
-  exit 1
-fi
-cd - >/dev/null # Go back to previous directory
-echo "Fish configuration stowed successfully."
 
 echo "Setting fish as default shell..."
 if ! which fish >/dev/null; then
