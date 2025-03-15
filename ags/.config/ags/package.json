@@ -1,0 +1,20 @@
+{
+  "name": "astal-shell",
+  "version": "0.0.0",
+  "author": "Erick Christian",
+  "scripts": {
+    "dev": "ags run --gtk4 ./app.ts",
+    "lint": "eslint .",
+    "start": "ags run --gtk4"
+  },
+  "dependencies": {
+    "astal": "/usr/share/astal/gjs"
+  },
+  "devDependencies": {
+    "@echristian/eslint-config": "^0.0.37",
+    "eslint": "^9.22.0",
+    "jiti": "^2.4.2",
+    "prettier-plugin-packagejson": "^2.5.10",
+    "typescript": "5.7"
+  }
+}
