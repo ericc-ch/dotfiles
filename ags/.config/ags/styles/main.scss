@@ -1,20 +1,34 @@
-// https://gitlab.gnome.org/GNOME/gtk/-/blob/gtk-3-24/gtk/theme/Adwaita/_colors-public.scss
-$fg-color: #{"@theme_fg_color"};
-$bg-color: #{"@theme_bg_color"};
+@use "./theme.scss" as *;
 
 window.Bar {
-    background: transparent;
-    color: $fg-color;
-    font-weight: bold;
+  background-image: url("file:///home/erick/.config/ags/assets/sidebar.svg");
+  background-size: cover;
+  color: $fg1;
+  font-weight: bold;
 
-    >centerbox {
-        background: $bg-color;
-        border-radius: 10px;
-        margin: 8px;
+  button {
+    background-color: $bg1;
+    color: $fg1;
+    border: 1px solid $bg3;
+    border-radius: 6px;
+    margin: 4px;
+    padding: 4px 8px;
+    transition: all 200ms ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+
+    &:hover {
+      background-color: $bg2;
+      border-color: $bg4;
     }
 
-    button {
-        border-radius: 8px;
-        margin: 2px;
+    &:active {
+      background-color: $bg3;
+      color: $fg0;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
     }
+
+    &:focus {
+      border-color: $blue;
+    }
+  }
 }
