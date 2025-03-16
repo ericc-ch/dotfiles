@@ -57,13 +57,26 @@ cd $HOME >/dev/null # Go back to home directory
 echo "Fish configuration stowed successfully."
 
 echo "Installing additional packages..."
-sudo pacman -S --noconfirm stow lazygit superfile brightnessctl fish ly uwsm
+sudo pacman -S --noconfirm \
+  lazygit \
+  superfile \
+  brightnessctl \
+  fish \
+  ly \
+  uwsm \
+  ttf-jetbrains-mono-nerd \
+  ttf-ubuntu-nerd
 if [ $? -ne 0 ]; then
   echo "Error: Failed to install additional packages using pacman. Exiting."
   exit 1
 fi
 
-yay -S aylurs-gtk-shell-git libastal-meta
+yay -S aylurs-gtk-shell-git \
+  libastal-meta \
+  hyprland-meta-git \
+  niri-git \
+  vscodium-bin
+
 if [ $? -ne 0 ]; then
   echo "Error: Failed to install additional packages using yay. Exiting."
   exit 1
