@@ -4,25 +4,53 @@
 @use "sass:math";
 
 .bar {
-  background-image: url(assets.$sidebar-bg-svg);
-  background-size: 100% 100%;
+  background-size:
+    auto 40%,
+    100% 100%;
   background-repeat: no-repeat;
 
-  padding: 1rem 0.5rem;
+  padding: 0.5rem 0.5rem;
+
+  &.weekday {
+    background-image:
+      url(assets.$weekday-bg-text-svg), url(assets.$sidebar-bg-svg);
+  }
+
+  &.weekend {
+    background-image:
+      url(assets.$weekend-bg-text-svg), url(assets.$sidebar-bg-svg);
+  }
 }
 
 .bar .date-time {
-  & .bg-text {
+  background-repeat: no-repeat;
+  background-size: auto 100%;
+
+  & .date {
     @include theme.font-heading;
     font-size: 3rem;
-    color: theme.$orange;
+    font-weight: 900;
+    letter-spacing: -0.1em;
 
-    transform: translateX(-2rem) translateY(-6rem) rotate(90deg);
-    transform-origin: left bottom;
+    color: theme.$fg1;
+
+    &.separator {
+      font-weight: 400;
+      margin: 0 -0.075em;
+    }
+  }
+
+  & .time {
+    @include theme.font-heading;
+    font-size: 1.5rem;
+    font-weight: 700;
+
+    color: theme.$blue_light;
   }
 
   & .day {
     min-height: 4rem;
+    min-width: 5rem;
 
     @include theme.font-heading;
     font-size: 1.5rem;
@@ -32,6 +60,8 @@
     background-size: 80% 80%;
     background-repeat: no-repeat;
     background-position: center 75%;
+
+    transform: translate(-0.5rem, -0.25rem);
 
     &.weekday {
       background-image: url(assets.$weekday-bg-svg);
@@ -66,7 +96,7 @@
     transform: scale(1.2) rotate($rotation - 2deg);
   }
 
-  label {
+  & label {
     @include theme.font-heading;
 
     font-size: 1.5rem;

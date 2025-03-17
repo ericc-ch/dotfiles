@@ -1,22 +1,45 @@
 import { Variable } from "astal"
 import { Gtk } from "astal/gtk4"
 
-import { getDay, isWeekend } from "../../lib/date"
+import { formatTime, getDay, isWeekend } from "../../lib/date"
 
 export function DateTime() {
-  const time = Variable(new Date()).poll(1000, () => new Date())
+  const currentDate = Variable(new Date()).poll(1000, () => new Date())
 
-  const dayClasses = Variable.derive([time], (time) => [
+  const month = Variable.derive([currentDate], (date) =>
+    (date.getMonth() + 1).toString(),
+  )
+  const date = Variable.derive([currentDate], (date) =>
+    date.getDate().toString(),
+  )
+
+  const time = Variable.derive([currentDate], (date) => formatTime(date))
+
+  const rootClasses = Variable.derive([currentDate], (date) => [
+    "date-time",
+    isWeekend(date) ? "weekend" : "weekday",
+  ])
+
+  const dayClasses = Variable.derive([currentDate], (date) => [
     "day",
-    isWeekend(time) ? "weekend" : "weekday",
+    isWeekend(date) ? "weekend" : "weekday",
   ])
 
   return (
-    <box cssClasses={["date-time"]} orientation={Gtk.Orientation.VERTICAL}>
+    <box cssClasses={rootClasses()} orientation={Gtk.Orientation.VERTICAL}>
+      <box>
+        <label cssClasses={["date"]} label={month()} />
+        <label cssClasses={["date", "separator"]} label="/" />
+        <label cssClasses={["date"]} label={date()} />
+      </box>
+
+      <label cssClasses={["time"]} halign={Gtk.Align.START} label={time()} />
+
       <label
-        label={time((time) => `${time.getMonth() + 1}/${time.getDate()}`)}
+        cssClasses={dayClasses()}
+        halign={Gtk.Align.START}
+        label={currentDate((time) => getDay(time))}
       />
-      <label cssClasses={dayClasses()} label={time((time) => getDay(time))} />
     </box>
   )
 }
