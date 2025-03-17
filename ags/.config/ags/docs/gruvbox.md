@@ -46,33 +46,16 @@ Gruvbox is divided into several color groups:
 
     - Always pair a foreground color with a background color that provides sufficient contrast. For example, `fg1` on `bg0` is a good combination, while `fg1` on `bg2` would be difficult to read.
 
-3.  **Syntax Highlighting:**
-
-    - Use the accent colors to differentiate elements in code. For example:
-      - `red`: For errors, keywords, or operators.
-      - `green`: For strings or comments.
-      - `yellow`: For functions or methods.
-      - `blue`: For variables or constants.
-      - `purple`: For types or classes.
-      - `aqua`: For special constants or preprocessor directives.
-      - `gray`: For less important elements or punctuation.
-      - `orange`: For numbers.
-
-4.  **UI Elements:**
+3.  **UI Elements:**
 
     - Use the background variations (`bg1`, `bg2`, etc.) to create visual hierarchy in your UI. For example, you might use `bg1` for panels, `bg2` for status bars, and `bg0` for the main editing area.
     - Accent colors can be used for buttons, selections, or other interactive elements.
 
-5.  **Consistency:**
-
-    - Once you've chosen a contrast level (hard, medium, or soft), stick with it throughout your interface for a cohesive look.
-    - Maintain a consistent mapping of accent colors to semantic elements (e.g., always use red for errors).
-
-6.  **Accessibility:**
+4.  **Accessibility:**
 
     - While Gruvbox is designed for readability, it's essential to test your color combinations with users who have visual impairments. Ensure sufficient contrast for all users.
 
-7.  **Dark and Light Modes:**
+5.  **Dark and Light Modes:**
     - Gruvbox is primarily known for its dark mode, but a light mode variant exists. If implementing both, ensure the color relationships are maintained (e.g., dark mode's `bg0` becomes light mode's `fg0`).
 
 Would you like me to explain how to implement Gruvbox in a specific text editor or application?

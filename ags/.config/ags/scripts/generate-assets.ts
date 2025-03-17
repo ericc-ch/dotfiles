@@ -30,8 +30,7 @@ function createScssVariableName(filePath: string): string {
   const relativePath = path.relative(assetsDir, filePath);
 
   return (
-    "$asset-" +
-    relativePath.replaceAll("/", "-").replaceAll(".", "-").toLowerCase()
+    "$" + relativePath.replaceAll("/", "-").replaceAll(".", "-").toLowerCase()
   );
 }
 

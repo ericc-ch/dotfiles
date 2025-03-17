@@ -5,5 +5,7 @@
   "editor.fontFamily": "JetBrainsMono Nerd Font",
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"
-  }
+  },
+
+  "cSpell.words": ["Astal"]
 }
