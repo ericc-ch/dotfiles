@@ -11,27 +11,38 @@
   padding: 1rem 0.5rem;
 }
 
-.bar label.day {
-  min-height: 4rem;
+.bar .date-time {
+  & .bg-text {
+    @include theme.font-heading;
+    font-size: 3rem;
+    color: theme.$orange;
 
-  @include theme.font-heading;
-  font-size: 1.5rem;
-  color: theme.$fg1;
-
-  background-image: url(assets.$weekday-bg-svg);
-  background-size: 80% 80%;
-  background-repeat: no-repeat;
-  background-position: center 75%;
-
-  &.weekday {
-    background-image: url(assets.$weekday-bg-svg);
+    transform: translateX(-2rem) translateY(-6rem) rotate(90deg);
+    transform-origin: left bottom;
   }
-  &.weekend {
-    background-image: url(assets.$weekend-bg-svg);
+
+  & .day {
+    min-height: 4rem;
+
+    @include theme.font-heading;
+    font-size: 1.5rem;
+    color: theme.$fg1;
+
+    background-image: url(assets.$weekday-bg-svg);
+    background-size: 80% 80%;
+    background-repeat: no-repeat;
+    background-position: center 75%;
+
+    &.weekday {
+      background-image: url(assets.$weekday-bg-svg);
+    }
+    &.weekend {
+      background-image: url(assets.$weekend-bg-svg);
+    }
   }
 }
 
-.bar button.power {
+.bar .power {
   all: unset;
 
   $min_rotation: 5;
