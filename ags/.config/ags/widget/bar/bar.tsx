@@ -25,10 +25,11 @@ export function Bar(monitor: Gdk.Monitor) {
       exclusivity={Astal.Exclusivity.EXCLUSIVE}
       gdkmonitor={monitor}
     >
-      <box orientation={Gtk.Orientation.VERTICAL} spacing={8}>
+      <centerbox orientation={Gtk.Orientation.VERTICAL}>
         <DateTime />
         <BatteryIndicator />
-      </box>
+        <BatteryIndicator />
+      </centerbox>
     </window>
   )
 }
