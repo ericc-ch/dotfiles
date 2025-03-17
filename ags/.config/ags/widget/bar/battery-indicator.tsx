@@ -10,7 +10,7 @@ export function BatteryIndicator() {
   const formatted = Variable.derive(
     [percentage, isCharging, isPresent],
     (percentage, isCharging, isPresent) => {
-      if (!isPresent) return ICON_NOT_PRESENT
+      if (!isPresent) return `${ICON_NOT_PRESENT} -- %`
 
       const icon = getIcon(percentage, isCharging)
       const percentageFormatted = formatPercentage(percentage)
