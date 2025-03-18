@@ -21,7 +21,7 @@ export function BatteryIndicator() {
 
   return (
     <button cssClasses={["power"]} widthRequest={80}>
-      <label label={formatted()} />
+      <label cssClasses={["percentage"]} label={formatted()} />
     </button>
   )
 }
