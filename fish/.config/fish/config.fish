@@ -1,6 +1,6 @@
 set -g fish_greeting
 
-set --export MAKEFLAGS -j 2
+set --export MAKEFLAGS -j 4
 
 # bun
 if not contains "$HOME/.bun/bin" $PATH
