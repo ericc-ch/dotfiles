@@ -1,0 +1,12 @@
+@use "./assets.scss";
+
+@mixin hover-indicator-horizontal {
+  background-image: url(assets.$select-bg-svg);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 0%;
+
+  &:hover {
+    background-size: 100% 100%;
+  }
+}

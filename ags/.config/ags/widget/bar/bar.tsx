@@ -2,8 +2,8 @@ import { Variable } from "astal"
 import { App, Astal, Gdk, Gtk } from "astal/gtk4"
 
 import { isWeekend } from "../../lib/date"
-import { BatteryIndicator } from "./battery-indicator"
 import { DateTime } from "./date-time"
+import { Power } from "./power"
 
 const { TOP, LEFT, BOTTOM } = Astal.WindowAnchor
 const anchor = TOP | LEFT | BOTTOM
@@ -27,8 +27,8 @@ export function Bar(monitor: Gdk.Monitor) {
     >
       <centerbox orientation={Gtk.Orientation.VERTICAL}>
         <DateTime />
-        <BatteryIndicator />
-        <BatteryIndicator />
+        <Power />
+        <Power />
       </centerbox>
     </window>
   )

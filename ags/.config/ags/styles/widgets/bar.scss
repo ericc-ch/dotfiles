@@ -1,7 +1,9 @@
-@use "../assets.scss";
-@use "../theme.scss";
-@use "../easings.scss";
 @use "sass:math";
+
+@use "../assets.scss";
+@use "../easings.scss";
+@use "../mixins.scss";
+@use "../theme.scss";
 
 .bar {
   background-size:
@@ -73,27 +75,55 @@
   }
 }
 
-.bar .power {
+.bar .power-profile {
   all: unset;
-
-  $min_rotation: 5;
-  $random_rotation: math.random(10);
-  $rotation: math.max($min_rotation, $random_rotation) * -1deg;
-  transform: rotate($rotation);
 
   color: theme.$fg1;
 
-  background-image: url(assets.$select-bg-svg);
-  background-repeat: no-repeat;
+  background-image: url(assets.$circle-bg-svg);
+  background-size: 0% 0%;
   background-position: center;
-  background-size: 100% 0%;
+  background-repeat: no-repeat;
+
+  transition-property: all;
+  transition-duration: 80ms;
+  transition-timing-function: easings.$circIn;
+
+  &.active {
+    background-size: 100% 100%;
+
+    color: theme.$fg0;
+
+    & .icon {
+      text-shadow: theme.$bg0 0.1em 0.1em;
+    }
+  }
+
+  & .icon {
+    @include theme.font-heading;
+
+    font-size: 1.5rem;
+    font-style: italic;
+    font-weight: 900;
+    letter-spacing: -0.075em;
+  }
+}
+
+.bar .battery-indicator {
+  all: unset;
+
+  @include mixins.hover-indicator-horizontal;
+
+  $rotation: -5deg;
+  transform: rotate($rotation);
+
+  color: theme.$fg1;
 
   transition-property: all;
   transition-duration: 80ms;
   transition-timing-function: easings.$circIn;
 
   &:hover {
-    background-size: 100% 100%;
     transform: scale(1.2) rotate($rotation - 2deg);
   }
 
@@ -110,4 +140,3 @@
     color: theme.$fg0;
   }
 }
-
