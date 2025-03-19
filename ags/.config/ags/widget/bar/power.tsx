@@ -3,11 +3,13 @@ import { Gtk } from "astal/gtk4"
 import Battery from "gi://AstalBattery"
 import AstalPowerProfiles from "gi://AstalPowerProfiles"
 
+import { remToPx } from "../../lib/style"
+
 export function Power() {
   return (
     <box orientation={Gtk.Orientation.VERTICAL} spacing={4}>
-      <PowerProfiles />
       <BatteryIndicator />
+      <PowerProfiles />
     </box>
   )
 }
@@ -18,7 +20,8 @@ function PowerProfiles() {
   // But I'm not doing it so I'm gonna put it here instead
   const powerProfiles = AstalPowerProfiles.get_default()
 
-  const profiles = powerProfiles.get_profiles()
+  // Reverse so "performance" is at the top
+  const profiles = powerProfiles.get_profiles().reverse()
   const active = Variable(powerProfiles.get_active_profile())
 
   const setActiveProfile = (profile: string) => {
@@ -36,10 +39,16 @@ function PowerProfiles() {
   })
 
   return (
-    <box homogeneous>
+    <box
+      halign={Gtk.Align.START}
+      orientation={Gtk.Orientation.VERTICAL}
+      spacing={4}
+    >
       {profiles.map((profile) => (
         <button
           cssClasses={getProfileClasses((func) => func(profile.profile))}
+          // 1.5 rem (font size) + 0.25 rem (padding)
+          widthRequest={remToPx(1.5) + remToPx(0.25)}
           onClicked={() => {
             setActiveProfile(profile.profile)
           }}

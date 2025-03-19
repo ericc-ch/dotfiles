@@ -78,6 +78,8 @@
 .bar .power-profile {
   all: unset;
 
+  padding: 0.25rem;
+
   color: theme.$fg1;
 
   background-image: url(assets.$circle-bg-svg);
