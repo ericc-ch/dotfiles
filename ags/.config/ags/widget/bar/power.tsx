@@ -3,8 +3,6 @@ import { Gtk } from "astal/gtk4"
 import Battery from "gi://AstalBattery"
 import AstalPowerProfiles from "gi://AstalPowerProfiles"
 
-import { remToPx } from "../../lib/style"
-
 export function Power() {
   return (
     <box orientation={Gtk.Orientation.VERTICAL} spacing={4}>
@@ -47,8 +45,8 @@ function PowerProfiles() {
       {profiles.map((profile) => (
         <button
           cssClasses={getProfileClasses((func) => func(profile.profile))}
-          // 1.5 rem (font size) + 0.25 rem (padding)
-          widthRequest={remToPx(1.5) + remToPx(0.25)}
+          heightRequest={32}
+          widthRequest={32}
           onClicked={() => {
             setActiveProfile(profile.profile)
           }}
@@ -70,22 +68,28 @@ function BatteryIndicator() {
   const isCharging = bind(bat, "charging")
   const isPresent = bind(bat, "isPresent")
 
-  const formatted = Variable.derive(
+  const formatted = Variable.derive([percentage], (percentage) => {
+    return formatPercentage(percentage)
+  })
+
+  const icon = Variable.derive(
     [percentage, isCharging, isPresent],
     (percentage, isCharging, isPresent) => {
-      if (!isPresent) return `${ICON_NOT_PRESENT} -- %`
-
-      const icon = getIcon(percentage, isCharging)
-      const percentageFormatted = formatPercentage(percentage)
-
-      return `${icon}${percentageFormatted}`
+      if (!isPresent) return ICON_NOT_PRESENT
+      return getIcon(percentage, isCharging) ?? ICON_NOT_PRESENT
     },
   )
 
   return (
-    <button cssClasses={["battery-indicator"]} widthRequest={80}>
-      <label cssClasses={["percentage"]} label={formatted()} />
-    </button>
+    <overlay cssClasses={["battery-indicator"]}>
+      <label cssClasses={["icon"]} halign={Gtk.Align.START} label={icon()} />
+      <label
+        cssClasses={["percentage"]}
+        halign={Gtk.Align.START}
+        label={formatted()}
+        type="overlay measure"
+      />
+    </overlay>
   )
 }
 

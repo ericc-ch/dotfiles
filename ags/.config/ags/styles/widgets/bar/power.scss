@@ -1,0 +1,87 @@
+@use "sass:math";
+
+@use "../../assets.scss";
+@use "../../easings.scss";
+@use "../../mixins.scss";
+@use "../../theme.scss";
+
+.bar .power-profile {
+  all: unset;
+
+  padding: 0.25rem;
+  color: theme.$fg1;
+  transform: scale(1);
+
+  background-image: url(assets.$circle-bg-svg);
+  background-size: 0% 0%;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  transition-property: all;
+  transition-duration: 80ms;
+  transition-timing-function: easings.$circIn;
+
+  & .icon {
+    @include theme.font-heading;
+
+    font-size: 1.5rem;
+    font-style: italic;
+    font-weight: 900;
+    letter-spacing: -0.075em;
+  }
+
+  &:hover {
+    color: theme.$fg0;
+    transform: scale(1.1);
+
+    & .icon {
+      text-shadow: theme.$bg0 0.1em 0.1em;
+    }
+  }
+
+  &.active {
+    color: theme.$fg0;
+    background-size: 100% 100%;
+
+    & .icon {
+      text-shadow: theme.$bg0 0.1em 0.1em;
+    }
+
+    &:hover {
+      transform: scale(1);
+    }
+  }
+}
+
+.bar .battery-indicator {
+  all: unset;
+
+  color: theme.$fg1;
+
+  transition-property: all;
+  transition-duration: 80ms;
+  transition-timing-function: easings.$circIn;
+
+  & .icon {
+    margin: 0 -0.25em;
+    color: theme.$bg4;
+
+    @include theme.font-heading;
+    font-size: 5rem;
+    font-weight: 900;
+  }
+
+  & .percentage {
+    @include theme.font-heading;
+
+    transform: rotate(-45deg) translate(-0.1em, 0.1em);
+    font-style: italic;
+    font-size: 1.25rem;
+    font-weight: 900;
+    letter-spacing: -0.075em;
+  }
+
+  &:hover .percentage {
+    color: theme.$fg0;
+  }
+}
