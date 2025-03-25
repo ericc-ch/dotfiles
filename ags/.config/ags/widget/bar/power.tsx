@@ -102,9 +102,10 @@ const roundToNearest10 = (percentage: number) => {
 
 const getIcon = (percentage: number, isCharging: boolean) => {
   const rounded = roundToNearest10(percentage)
-  return isCharging ? iconsCharging.get(rounded) : iconsNotCharging.get(rounded)
+  return isCharging ? ICON_CHARGING : iconsNotCharging.get(rounded)
 }
 
+const ICON_CHARGING = "󰂄"
 const ICON_NOT_PRESENT = "󱉝"
 
 const iconsNotCharging = new Map([
@@ -119,20 +120,6 @@ const iconsNotCharging = new Map([
   [80, "󰂁"],
   [90, "󰂂"],
   [100, "󰁹"],
-])
-
-const iconsCharging = new Map([
-  [0, "󰢟"],
-  [10, "󰢜"],
-  [20, "󰂆"],
-  [30, "󰂇"],
-  [40, "󰂈"],
-  [50, "󰂈"],
-  [60, "󰂉"],
-  [70, "󰢞"],
-  [80, "󰂊"],
-  [90, "󰂋"],
-  [100, "󰂅"],
 ])
 
 const iconProfiles = new Map([

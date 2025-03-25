@@ -73,12 +73,14 @@
 
   & .percentage {
     @include theme.font-heading;
-
-    transform: rotate(-45deg) translate(-0.1em, 0.1em);
     font-style: italic;
     font-size: 1.25rem;
     font-weight: 900;
     letter-spacing: -0.075em;
+
+    text-shadow: theme.$blue 0.1em 0.1em;
+    
+    transform: rotate(-45deg) translate(-0.1em, 0.1em);
   }
 
   &:hover .percentage {
