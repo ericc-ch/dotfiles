@@ -26,11 +26,10 @@ openai-api-base: http://localhost:4141/
 
 ## Add a model alias (can be used multiple times)
 alias:
-  - "sonnet-3.5:openai/claude-3.5-sonnet"
   - "sonnet:openai/claude-3.7-sonnet"
   - "sonnet-t:openai/claude-3.7-sonnet-thought"
-  - "flash:gemini/gemini-2.0-flash"
-  - "flash-t:gemini/gemini-2.0-flash-thinking-exp"
+  - "flash:gemini/gemini-2.0-flash-thinking-exp"
+  - "pro:gemini/gemini-2.5-pro-exp-03-25"
   - "o3:openai/o3-mini"
   - "o1:openai/o1"
 
