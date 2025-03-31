@@ -81,8 +81,6 @@ attribute-committer: false
 read:
   - "~/conventions/general.md"
   - "~/conventions/typescript.md"
-  # - "~/conventions/python.md"
-  # - "~/conventions/go.md"
   # - "~/conventions/ghostty-shader.md"
 
 ## Enable/disable detection and offering to add URLs to chat (default: True)
