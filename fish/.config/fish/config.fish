@@ -42,6 +42,10 @@ if test -f $AIDER_KEYS_FILE
 end
 
 # deno
-if test -f /home/erick/.deno/env.fish
-    source /home/erick/.deno/env.fish
+if test -f "$HOME/.deno/env.fish"
+    source "$HOME/.deno/env.fish"
+end
+
+if test -f "$HOME/.cargo/env.fish"
+    source "$HOME/.cargo/env.fish"
 end
