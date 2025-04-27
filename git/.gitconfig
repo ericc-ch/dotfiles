@@ -23,3 +23,5 @@
 	pl = pull -r
 	last = log -1
 
+[fetch]
+	prune = true

@@ -103,5 +103,7 @@
   },
   "[astro]": {
     "editor.defaultFormatter": "astro-build.astro-vscode"
-  }
+  },
+  "geminicodeassist.enableTelemetry": false,
+  "geminicodeassist.updateChannel": "Insiders"
 }
