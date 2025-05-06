@@ -29,6 +29,7 @@
   edit_format: diff
   weak_model_name: gemini/gemini-2.0-flash
   use_repo_map: true
+  overeager: true
   examples_as_sys_msg: true
   editor_model_name: openai/claude-3.5-sonnet
   editor_edit_format: editor-diff
@@ -37,6 +38,7 @@
   edit_format: diff
   weak_model_name: gemini/gemini-2.0-flash
   use_repo_map: true
+  overeager: true
   examples_as_sys_msg: true
   editor_model_name: openai/claude-3.5-sonnet
   editor_edit_format: editor-diff
