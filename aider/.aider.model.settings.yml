@@ -1,9 +1,10 @@
 - name: (default values)
-  edit_format: diff
+  edit_format: whole
   weak_model_name: null
   use_repo_map: false
   send_undo_reply: false
   lazy: false
+  overeager: false
   reminder: user
   examples_as_sys_msg: false
   extra_params: null
@@ -14,8 +15,20 @@
   streaming: true
   editor_model_name: null
   editor_edit_format: null
+  reasoning_tag: null
   remove_reasoning: null
   system_prompt_prefix: null
+  accepts_settings: null
+
+- name: openai/gemini-2.5-pro
+  edit_format: diff-fenced
+  weak_model_name: gemini/gemini-2.0-flash
+  use_repo_map: true
+  overeager: true
+  send_undo_reply: false
+  streaming: false
+  editor_model_name: openai/gemini-2.5-flash
+  editor_edit_format: editor-diff
 
 - name: openai/claude-3.5-sonnet
   edit_format: diff
