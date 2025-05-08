@@ -12,6 +12,7 @@
   "editor.suggest.preview": true,
 
   // TypeScript preferences
+  "typescript.preferences.preferTypeOnlyAutoImports": true,
   "typescript.preferences.includePackageJsonAutoImports": "on",
 
   // Accessibility features
@@ -104,6 +105,5 @@
   "[astro]": {
     "editor.defaultFormatter": "astro-build.astro-vscode"
   },
-  "geminicodeassist.enableTelemetry": false,
-  "geminicodeassist.updateChannel": "Insiders"
+  "css.enabledLanguages": ["html", "typescript"]
 }
