@@ -26,6 +26,7 @@
   use_repo_map: true
   overeager: true
   send_undo_reply: false
+  streaming: false
   editor_model_name: openai/gemini-2.5-flash
   editor_edit_format: editor-diff
 
