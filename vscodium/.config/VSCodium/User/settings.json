@@ -105,5 +105,8 @@
   "[astro]": {
     "editor.defaultFormatter": "astro-build.astro-vscode"
   },
-  "css.enabledLanguages": ["html", "typescript"]
+  "css.enabledLanguages": [
+    "html",
+    "typescript"
+  ]
 }
