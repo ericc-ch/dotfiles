@@ -81,8 +81,8 @@ attribute-committer: false
 
 ## Specify read-only files
 read:
-  - "~/conventions/general.md"
-  - "~/conventions/typescript.md"
+  # - "~/conventions/general.md"
+  # - "~/conventions/typescript.md"
   # - "~/conventions/ghostty-shader.md"
 
 ## Enable/disable detection and offering to add URLs to chat (default: True)
