@@ -2,7 +2,7 @@
 name = Erick Christian
 email = erickchristian48@gmail.com
 [core]
-editor = nvim
+editor = codium
 
 [credential "https://github.com"]
 helper =
