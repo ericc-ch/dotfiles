@@ -1,27 +1,31 @@
-[credential "https://github.com"]
-	helper = 
-	helper = !/usr/bin/gh auth git-credential
-[credential "https://gist.github.com"]
-	helper = 
-	helper = !/usr/bin/gh auth git-credential
-[credential "https://gitlab.com"]
-	helper = 
-	helper = !/usr/bin/glab auth git-credential
-[push]
-	followTags = true
 [user]
-	name = Erick Christian
-	email = erickchristian48@gmail.com
+name = Erick Christian
+email = erickchristian48@gmail.com
 [core]
-	editor = nvim
-[alias]
-	st = status
-	aa = add -A
-	rs = reset
-	cm = commit -m
-	ps = push
-	pl = pull -r
-	last = log -1
+editor = nvim
+
+[credential "https://github.com"]
+helper =
+helper = !/usr/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+helper =
+helper = !/usr/bin/gh auth git-credential
+[credential "https://gitlab.com"]
+helper =
+helper = !/usr/bin/glab auth git-credential
 
 [fetch]
-	prune = true
+prune = true
+[push]
+followTags = true
+[pull]
+rebase = true
+
+[alias]
+st = status
+aa = add -A
+rs = reset
+cm = commit -m
+ps = push
+pl = pull
+lg = log -1
