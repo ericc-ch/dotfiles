@@ -1,8 +1,7 @@
 {
+  // Editor appearance and behavior
   "workbench.colorTheme": "Gruvbox Dark Hard",
   "workbench.iconTheme": "catppuccin-mocha",
-
-  // Editor appearance and behavior
   "editor.fontFamily": "'JetBrains Mono', 'monospace', monospace",
   "editor.fontLigatures": true,
   "editor.tabSize": 2,
@@ -23,17 +22,21 @@
   "codeium.enableCodeLens": false,
   "codeium.enableExplainProblem": false,
   "codeium.enableConfig": {
-    "*": true,
-    "fish": true
+    "*": true
   },
 
   // Telemetry
+  "telemetry.telemetryLevel": "off",
+  "telemetry.feedback.enabled": false,
   "gitlens.telemetry.enabled": false,
   "redhat.telemetry.enabled": false,
 
   // Diff editors
   "diffEditor.experimental.showMoves": true,
   "diffEditor.renderSideBySide": true,
+
+  // Extensions
+  "css.enabledLanguages": ["html", "typescript"],
 
   // Formatter
   // Prettier
@@ -97,16 +100,12 @@
 
   // Other
   "[dockerfile]": {
-    "editor.defaultFormatter": "ms-azuretools.vscode-docker"
+    "editor.defaultFormatter": "ms-azuretools.vscode-containers"
   },
   "[scss]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "[astro]": {
     "editor.defaultFormatter": "astro-build.astro-vscode"
-  },
-  "css.enabledLanguages": [
-    "html",
-    "typescript"
-  ]
+  }
 }
