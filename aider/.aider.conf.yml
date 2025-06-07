@@ -5,7 +5,7 @@
 
 # model: gemini/gemini-2.5-pro-preview-05-06
 # model: gemini/gemini-2.5-flash-preview-04-17
-model: openai/gemini-2.5-pro
+model: openai/gemini-2.5-pro-preview-06-05
 # model: openai/gemini-2.5-flash
 # model: openai/claude-3.7-sonnet-thought
 # model: openai/claude-3.7-sonnet
@@ -32,7 +32,7 @@ alias:
   - "sonnet:openai/claude-3.7-sonnet"
   - "sonnet-thinking:openai/claude-3.7-sonnet-thought"
   - "gemini-flash:gemini/gemini-2.5-flash-preview-04-17"
-  - "gemini:gemini-2.5-pro-preview-05-06"
+  - "gemini:gemini-2.5-pro-preview-06-05"
 
 ## Specify the model to use for commit messages and chat history summarization (default depends on --model)
 weak-model: gemini/gemini-2.5-flash-preview-04-17
@@ -80,7 +80,7 @@ attribute-committer: false
 # Other settings:
 
 ## Specify read-only files
-read:
+# read:
   # - "~/conventions/general.md"
   # - "~/conventions/typescript.md"
   # - "~/conventions/ghostty-shader.md"
