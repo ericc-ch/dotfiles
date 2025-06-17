@@ -32,8 +32,8 @@ alias:
   - "gemini-flash:gemini/gemini-2.5-flash"
 
 ## Specify the model to use for commit messages and chat history summarization (default depends on --model)
-weak-model: gemini/gemini-2.5-flash
-# weak-model: gemini/gemini-2.0-flash
+# weak-model: gemini/gemini-2.5-flash
+weak-model: gemini/gemini-2.0-flash
 
 ## Only work with models that have meta-data available (default: True)
 show-model-warnings: true
