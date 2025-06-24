@@ -30,28 +30,12 @@
   editor_model_name: openai/gemini-2.5-flash
   editor_edit_format: editor-diff
 
-- name: openai/claude-3.5-sonnet
-  edit_format: diff
-  weak_model_name: gemini/gemini-2.0-flash
-  use_repo_map: true
-  examples_as_sys_msg: true
-  editor_model_name: openai/claude-3.5-sonnet
-  editor_edit_format: editor-diff
-
-- name: openai/claude-3.7-sonnet
-  edit_format: diff
+- name: openai/gemini-2.5-pro-preview-05-06
+  edit_format: diff-fenced
   weak_model_name: gemini/gemini-2.0-flash
   use_repo_map: true
   overeager: true
-  examples_as_sys_msg: true
-  editor_model_name: openai/claude-3.5-sonnet
-  editor_edit_format: editor-diff
-
-- name: openai/claude-3.7-sonnet-thought
-  edit_format: diff
-  weak_model_name: gemini/gemini-2.0-flash
-  use_repo_map: true
-  overeager: true
-  examples_as_sys_msg: true
-  editor_model_name: openai/claude-3.5-sonnet
+  send_undo_reply: false
+  streaming: false
+  editor_model_name: openai/gemini-2.5-flash
   editor_edit_format: editor-diff
