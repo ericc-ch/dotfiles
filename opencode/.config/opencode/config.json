@@ -1,6 +1,6 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "model": "github-copilot/gpt-4.1",
+  "model": "github-copilot/claude-sonnet-4",
   "provider": {
     "ai-studio": {
       "npm": "@ai-sdk/openai-compatible",
