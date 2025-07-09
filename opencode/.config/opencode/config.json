@@ -1,21 +1,4 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "model": "github-copilot/claude-sonnet-4",
-  "provider": {
-    "ai-studio": {
-      "npm": "@ai-sdk/openai-compatible",
-      "name": "AI Studio",
-      "options": {
-        "baseURL": "http://localhost:4157"
-      },
-      "models": {
-        "gemini-2.5-flash": {
-          "name": "Gemini 2.5 Flash"
-        },
-        "gemini-2.5-pro": {
-          "name": "Gemini 2.5 Pro"
-        }
-      }
-    }
-  }
+  "model": "github-copilot/gpt-4.1",
 }
