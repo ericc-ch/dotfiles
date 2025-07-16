@@ -8,5 +8,10 @@
     {
         "key": "shift+alt+l",
         "command": "eslint.executeAutofix"
+    },
+    {
+      "key": "ctrl+i",
+      "command": "-codeium.openCodeiumCommand",
+      "when": "codeium.commandEnabled && editorTextFocus && !inlineSuggestionsVisible"
     }
 ]

@@ -107,5 +107,8 @@
   },
   "[astro]": {
     "editor.defaultFormatter": "astro-build.astro-vscode"
-  }
+  },
+  "geminicodeassist.enableTelemetry": false,
+  "diffEditor.codeLens": true,
+  "geminicodeassist.inlineSuggestions.enableAuto": false
 }
