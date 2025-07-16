@@ -1,17 +1,16 @@
-// Place your key bindings in this file to override the defaults
 [
-    {
-        "key": "ctrl+shift+i",
-        "command": "-codeium.openCodeiumCommand",
-        "when": "codeium.commandEnabled && editorTextFocus && !inlineSuggestionsVisible"
-    },
-    {
-        "key": "shift+alt+l",
-        "command": "eslint.executeAutofix"
-    },
-    {
-      "key": "ctrl+i",
-      "command": "-codeium.openCodeiumCommand",
-      "when": "codeium.commandEnabled && editorTextFocus && !inlineSuggestionsVisible"
-    }
+  {
+    "key": "ctrl+i",
+    "command": "-codeium.openCodeiumCommand",
+    "when": "codeium.commandEnabled && editorTextFocus && !inlineSuggestionsVisible"
+  },
+  {
+    "key": "ctrl+shift+i",
+    "command": "-codeium.openCodeiumCommand",
+    "when": "codeium.commandEnabled && editorTextFocus && !inlineSuggestionsVisible"
+  },
+  {
+    "key": "shift+alt+l",
+    "command": "eslint.executeAutofix"
+  }
 ]

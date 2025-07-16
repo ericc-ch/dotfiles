@@ -9,6 +9,7 @@
   "editor.renderWhitespace": "all",
   "editor.minimap.renderCharacters": false,
   "editor.suggest.preview": true,
+  "diffEditor.codeLens": true,
 
   // TypeScript preferences
   "typescript.preferences.preferTypeOnlyAutoImports": true,
@@ -17,7 +18,8 @@
   // Accessibility features
   "accessibility.underlineLinks": true,
 
-  // Codeium settings
+  // AI stuffs
+  "geminicodeassist.inlineSuggestions.enableAuto": false,
   "codeium.enableSearch": true,
   "codeium.enableCodeLens": false,
   "codeium.enableExplainProblem": false,
@@ -28,6 +30,7 @@
   // Telemetry
   "telemetry.telemetryLevel": "off",
   "telemetry.feedback.enabled": false,
+  "geminicodeassist.enableTelemetry": false,
   "gitlens.telemetry.enabled": false,
   "redhat.telemetry.enabled": false,
 
@@ -107,8 +110,5 @@
   },
   "[astro]": {
     "editor.defaultFormatter": "astro-build.astro-vscode"
-  },
-  "geminicodeassist.enableTelemetry": false,
-  "diffEditor.codeLens": true,
-  "geminicodeassist.inlineSuggestions.enableAuto": false
+  }
 }
