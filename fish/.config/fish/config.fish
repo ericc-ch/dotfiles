@@ -34,13 +34,6 @@ if has_command pyenv
     pyenv init - fish | source
 end
 
-# aider
-set AIDER_KEYS_FILE "$HOME/.config/aider/aider-keys.fish"
-
-if test -f $AIDER_KEYS_FILE
-    source $AIDER_KEYS_FILE
-end
-
 # deno
 if test -f "$HOME/.deno/env.fish"
     source "$HOME/.deno/env.fish"
