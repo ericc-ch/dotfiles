@@ -1,6 +1,11 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "model": "github-copilot/gpt-4.1",
+  "autoupdate": false,
+
+  "share": "manual",
+  "autoshare": false,
+
   "mcp": {
     "sequential-thinking": {
       "type": "local",
@@ -9,7 +14,7 @@
         "x",
         "@modelcontextprotocol/server-sequential-thinking"
       ],
-      "enabled": true
+      "enabled": false
     }
   }
 }
