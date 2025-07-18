@@ -12,8 +12,13 @@
       "command": [
         "bun",
         "x",
-        "@modelcontextprotocol/server-sequential-thinking"
+        "@modelcontextprotocol/server-sequential-thinking@latest"
       ],
+      "enabled": false
+    },
+    "playwright": {
+      "type": "local",
+      "command": ["bun", "x", "@playwright/mcp@latest"],
       "enabled": false
     }
   }
