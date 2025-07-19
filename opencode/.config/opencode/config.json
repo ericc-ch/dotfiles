@@ -18,12 +18,17 @@
     },
     "playwright": {
       "type": "local",
-      "command": ["bun", "x", "@playwright/mcp@latest"],
+      "command": ["bun", "@playwright/mcp@latest"],
       "enabled": false
     },
-    "effect-docs": {
+    "duckduckgo": {
       "type": "local",
-      "command": ["bun", "x", "effect-mcp@latest"],
+      "command": ["uvx", "duckduckgo-mcp-server"],
+      "enabled": false
+    },
+    "effect": {
+      "type": "local",
+      "command": ["bunx", "effect-mcp@latest"],
       "enabled": false
     }
   }
