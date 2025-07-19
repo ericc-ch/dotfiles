@@ -20,6 +20,11 @@
       "type": "local",
       "command": ["bun", "x", "@playwright/mcp@latest"],
       "enabled": false
+    },
+    "effect-docs": {
+      "type": "local",
+      "command": ["bun", "x", "effect-mcp@latest"],
+      "enabled": false
     }
   }
 }
