@@ -10,15 +10,14 @@
     "sequential-thinking": {
       "type": "local",
       "command": [
-        "bun",
-        "x",
+        "bunx",
         "@modelcontextprotocol/server-sequential-thinking@latest"
       ],
       "enabled": false
     },
     "playwright": {
       "type": "local",
-      "command": ["bun", "@playwright/mcp@latest"],
+      "command": ["bunx", "@playwright/mcp@latest"],
       "enabled": false
     },
     "duckduckgo": {
