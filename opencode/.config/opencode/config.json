@@ -18,7 +18,15 @@
     },
     "playwright": {
       "type": "local",
-      "command": ["bunx", "@playwright/mcp@latest"],
+      "command": [
+        "docker",
+        "container",
+        "run",
+        "-i",
+        "--rm",
+        "--init",
+        "mcr.microsoft.com/playwright/mcp"
+      ],
       "enabled": false
     },
     "duckduckgo": {
