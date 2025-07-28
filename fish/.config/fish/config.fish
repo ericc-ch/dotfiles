@@ -29,11 +29,6 @@ if not contains "$HOME/.local/bin" $PATH
     set --export PATH $HOME/.local/bin $PATH
 end
 
-# pyenv
-if has_command pyenv
-    pyenv init - fish | source
-end
-
 # deno
 if test -f "$HOME/.deno/env.fish"
     source "$HOME/.deno/env.fish"
