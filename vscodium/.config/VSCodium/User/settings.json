@@ -1,7 +1,5 @@
 {
-  // Editor appearance and behavior
-  "workbench.colorTheme": "Gruvbox Dark Hard",
-  "workbench.iconTheme": "catppuccin-mocha",
+  "workbench.iconTheme": "vscode-icons",
   "editor.fontFamily": "'JetBrains Mono', 'monospace', monospace",
   "editor.fontLigatures": true,
   "editor.tabSize": 2,
