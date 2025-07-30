@@ -2,8 +2,6 @@
   "$schema": "https://opencode.ai/config.json",
   "model": "github-copilot/gpt-4.1",
 
-  "autoupdate": false,
-
   "share": "manual",
   "autoshare": false,
 
