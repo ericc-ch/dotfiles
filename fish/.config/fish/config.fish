@@ -2,6 +2,9 @@ set -g fish_greeting
 
 set --export MAKEFLAGS -j 4
 
+# ssh agent
+set -x SSH_AUTH_SOCK "$XDG_RUNTIME_DIR/ssh-agent.socket"
+
 # bun
 if not contains "$HOME/.bun/bin" $PATH
     set --export BUN_INSTALL "$HOME/.bun"
