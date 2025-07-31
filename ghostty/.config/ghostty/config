@@ -3,5 +3,5 @@ window-padding-y = 8
 
 theme = Apple System Colors
 
-background-opacity = 0.9
+background-opacity = 0.8
 background-blur = 5
