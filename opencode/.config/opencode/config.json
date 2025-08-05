@@ -20,6 +20,8 @@
         "-i",
         "--rm",
         "--init",
+        "--network",
+        "host",
         "mcr.microsoft.com/playwright/mcp"
       ],
       "enabled": false
