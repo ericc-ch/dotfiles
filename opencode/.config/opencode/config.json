@@ -5,6 +5,15 @@
   "share": "manual",
   "autoshare": false,
 
+  "mode": {
+    "build": {
+      "model": "github-copilot/claude-sonnet-4"
+    },
+    "plan": {
+      "model": "github-copilot/gpt-4.1"
+    }
+  },
+
   "mcp": {
     "context7": {
       "type": "remote",
