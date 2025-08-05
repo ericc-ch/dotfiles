@@ -80,11 +80,6 @@
     "editor.defaultFormatter": "golang.go"
   },
 
-  // Rust
-  "[rust]": {
-    "editor.defaultFormatter": "rust-lang.rust-analyzer"
-  },
-
   // Shell
   "[fish]": {
     "editor.defaultFormatter": "bmalehorn.vscode-fish"
