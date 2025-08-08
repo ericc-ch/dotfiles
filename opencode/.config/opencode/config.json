@@ -6,6 +6,12 @@
   "autoshare": false,
 
   "agent": {
+    "general": {
+      "model": "github-copilot/gpt-4.1"
+    },
+    "investigator": {
+      "model": "github-copilot/gpt-4.1"
+    },
     "plan": {
       "model": "github-copilot/gpt-4.1"
     },
