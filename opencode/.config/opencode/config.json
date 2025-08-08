@@ -6,11 +6,15 @@
   "autoshare": false,
 
   "agent": {
-    "build": {
-      "model": "github-copilot/claude-sonnet-4"
-    },
     "plan": {
       "model": "github-copilot/gpt-4.1"
+    },
+    "deep-plan": {
+      "model": "github-copilot/gpt-5",
+      "mode": "primary"
+    },
+    "build": {
+      "model": "github-copilot/claude-sonnet-4"
     }
   },
 
