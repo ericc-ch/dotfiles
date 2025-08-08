@@ -5,7 +5,7 @@
   "share": "manual",
   "autoshare": false,
 
-  "mode": {
+  "agent": {
     "build": {
       "model": "github-copilot/claude-sonnet-4"
     },
