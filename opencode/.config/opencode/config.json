@@ -7,15 +7,26 @@
 
   "agent": {
     "general": {
-      "model": "github-copilot/gpt-4.1"
-    },
-    "investigator": {
-      "model": "github-copilot/gpt-4.1"
+      "model": "github-copilot/gpt-4.1",
+      "tools": {
+        "task": true,
+        "todowrite": true,
+        "todoread": true
+      }
     },
     "plan": {
       "model": "github-copilot/gpt-4.1"
     },
     "deep-plan": {
+      "model": "github-copilot/gpt-5",
+      "tools": {
+        "bash": false,
+        "write": false,
+        "edit": false
+      },
+      "mode": "primary"
+    },
+    "beast-5": {
       "model": "github-copilot/gpt-5",
       "mode": "primary"
     },
