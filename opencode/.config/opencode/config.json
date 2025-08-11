@@ -1,9 +1,11 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "model": "github-copilot/gpt-4.1",
+  "small_model": "github-copilot/gpt-4.1",
 
   "share": "manual",
   "autoshare": false,
+  "autoupdate": false,
 
   "agent": {
     "general": {
@@ -13,7 +15,7 @@
       "model": "github-copilot/gpt-4.1"
     },
     "deep-plan": {
-      "model": "github-copilot/gpt-5",
+      "model": "github-copilot/claude-sonnet-4",
       "mode": "primary"
     },
     "build": {
