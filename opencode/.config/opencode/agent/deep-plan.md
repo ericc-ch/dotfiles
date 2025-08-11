@@ -23,7 +23,7 @@ description: >-
     Since the user is requesting a strategic approach to a coding task, use the precode-strategy-architect agent to produce a pre-coding plan.
     </commentary>
   </example>
-mode: all
+mode: subagent
 tools:
   bash: false
   write: false
