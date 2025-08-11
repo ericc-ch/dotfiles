@@ -1,20 +1,11 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "model": "github-copilot/gpt-4.1",
+  "model": "github-copilot/claude-sonnet-4",
   "small_model": "github-copilot/gpt-4.1",
 
   "share": "manual",
   "autoshare": false,
   "autoupdate": false,
-
-  "agent": {
-    "plan": {
-      "model": "github-copilot/gpt-4.1"
-    },
-    "build": {
-      "model": "github-copilot/claude-sonnet-4"
-    }
-  },
 
   "mcp": {
     "context7": {
