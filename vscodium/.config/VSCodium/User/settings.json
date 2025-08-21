@@ -38,6 +38,9 @@
 
   // Extensions
   "css.enabledLanguages": ["html", "typescript"],
+  "extensions.experimental.affinity": {
+    "asvetliakov.vscode-neovim": 1
+  },
 
   // Formatter
   // Prettier
