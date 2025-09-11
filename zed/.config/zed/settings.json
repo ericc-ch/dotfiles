@@ -17,6 +17,14 @@
     "dark": "One Dark"
   },
 
+  "lsp": {
+    "biome": {
+      "settings": {
+        "require_config_file": true
+      }
+    }
+  },
+
   "agent": {
     "default_model": {
       "provider": "copilot_chat",
