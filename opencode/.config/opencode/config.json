@@ -23,17 +23,7 @@
     },
     "playwright": {
       "type": "local",
-      "command": [
-        "docker",
-        "container",
-        "run",
-        "-i",
-        "--rm",
-        "--init",
-        "--network",
-        "host",
-        "mcr.microsoft.com/playwright/mcp"
-      ],
+      "command": ["bunx", "@playwright/mcp@latest", "--extension"],
       "enabled": false
     }
   }
