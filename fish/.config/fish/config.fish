@@ -40,3 +40,9 @@ end
 if test -f "$HOME/.cargo/env.fish"
     source "$HOME/.cargo/env.fish"
 end
+
+# pnpm
+if not contains "$HOME/.local/share/pnpm" $PATH
+    set --export PNPM_HOME "$HOME/.local/share/pnpm"
+    set --export PATH $PNPM_HOME $PATH
+end
