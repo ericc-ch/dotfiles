@@ -1,15 +1,15 @@
 [user]
 name = Erick Christian
 email = erickchristian48@gmail.com
-signingkey = ~/.ssh/id_ed25519.pub
+; signingkey = ~/.ssh/id_ed25519.pub
 
-[gpg]
-	format = ssh
-[commit]
-	gpgsign = true
+; [gpg]
+; 	format = ssh
+; [commit]
+; 	gpgsign = true
 
 [core]
-editor = nvim
+editor = zeditor
 
 [credential "https://github.com"]
 helper =
@@ -27,12 +27,3 @@ prune = true
 followTags = true
 [pull]
 rebase = true
-
-[alias]
-st = status
-aa = add -A
-rs = reset
-cm = commit -m
-ps = push
-pl = pull
-lg = log -1
