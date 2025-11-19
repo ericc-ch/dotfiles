@@ -1,3 +1,5 @@
+spawn-at-startup "/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1"
+
 binds {
     Mod+T { spawn "ghostty"; }
     // Keys consist of modifiers separated by + signs, followed by an XKB key name
