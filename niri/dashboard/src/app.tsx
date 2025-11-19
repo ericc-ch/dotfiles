@@ -4,7 +4,7 @@ const defaultLocale = Intl.DateTimeFormat().resolvedOptions().locale
 
 const dateFormatter = new Intl.DateTimeFormat(defaultLocale, {
   year: "numeric",
-  month: "2-digit",
+  month: "short",
   day: "2-digit",
 })
 
