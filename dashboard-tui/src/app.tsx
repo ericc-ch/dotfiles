@@ -1,4 +1,14 @@
-import { createSignal, onCleanup, onMount } from "solid-js"
+import { RGBA } from "@opentui/core"
+import {
+  createResource,
+  createSignal,
+  For,
+  onCleanup,
+  onMount,
+  Show,
+} from "solid-js"
+import { getDefaultSink, listSinks, setDefaultSink } from "./lib/pactl"
+import { useKeyboard } from "@opentui/solid"
 
 const defaultLocale = Intl.DateTimeFormat().resolvedOptions().locale
 
@@ -31,11 +41,75 @@ export const App = () => {
   const formattedDate = () => dateFormatter.format(current())
   const formattedTime = () => timeFormatter.format(current())
 
+  const [hoveredDevice, setHoveredDevice] = createSignal(0)
+
+  const [defaultSink, { refetch: refetchDefaultSink }] = createResource(() =>
+    getDefaultSink(),
+  )
+  const [sinks, { refetch: refetchSinks }] = createResource(() => listSinks())
+
+  useKeyboard((event) => {
+    if (event.name === "up") {
+      setHoveredDevice((prev) => {
+        const sinksCount = sinks()?.length ?? 0
+        return prev > 0 ? prev - 1 : sinksCount - 1
+      })
+    } else if (event.name === "down") {
+      setHoveredDevice((prev) => {
+        const sinksCount = sinks()?.length ?? 0
+        return prev < sinksCount - 1 ? prev + 1 : 0
+      })
+    } else if (event.name === "space") {
+      const currentSinks = sinks()
+      if (currentSinks && currentSinks.length > 0) {
+        const selectedDevice = currentSinks[hoveredDevice()]
+        if (selectedDevice) {
+          setDefaultSink(selectedDevice.name)
+            .then(() => {
+              refetchDefaultSink()
+              refetchSinks()
+            })
+            .catch((error) => {
+              console.error("Failed to set default sink:", error)
+            })
+        }
+      }
+    }
+  })
+
   return (
     <box alignItems="center" justifyContent="center" flexGrow={1}>
-      <box justifyContent="center" alignItems="flex-end">
+      <box alignItems="flex-end">
         <ascii_font font="block" text={formattedTime()} />
         <ascii_font text={formattedDate()} />
+      </box>
+
+      <box position="absolute" top={0} right={0}>
+        <Show when={Boolean(sinks())}>
+          <For each={sinks()}>
+            {(device, index) => (
+              <box
+                flexDirection="row"
+                gap={2}
+                backgroundColor={
+                  hoveredDevice() === index() ?
+                    RGBA.fromInts(100, 100, 100)
+                  : RGBA.fromInts(0, 0, 0)
+                }
+              >
+                <text
+                  fg={
+                    device.name === defaultSink() ?
+                      RGBA.fromInts(255, 0, 0)
+                    : RGBA.fromInts(255, 255, 255)
+                  }
+                >
+                  {device.description}
+                </text>
+              </box>
+            )}
+          </For>
+        </Show>
       </box>
     </box>
   )
