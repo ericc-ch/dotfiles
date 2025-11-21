@@ -6,12 +6,21 @@ set -e # Exit immediately if a command exits with a non-zero status.
 
 DOTFILES_DIR="$HOME/dotfiles"
 
-echo "Installing stow..."
-sudo pacman -S --noconfirm stow || {
-  echo "Error: Failed to install stow. Exiting."
+echo "Installing required packages..."
+sudo pacman -S --noconfirm \
+  stow \
+  niri \
+  ly \
+  ghostty \
+  xwayland-satellite \
+  qt5-wayland \
+  qt5ct \
+  qt6ct \
+  kvantum || {
+  echo "Error: Failed to install packages. Exiting."
   exit 1
 }
-echo "stow installed successfully."
+echo "Packages installed successfully."
 
 echo "Stowing fish configuration from dotfiles..."
 cd "$DOTFILES_DIR" || {
@@ -25,19 +34,6 @@ stow --no-folding fish || {
 cd $HOME >/dev/null # Go back to home directory
 echo "Fish configuration stowed successfully."
 
-echo "Installing fisher package manager for fish..."
-curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher || {
-  echo "Error: Failed to install fisher. Exiting."
-  exit 1
-}
-echo "fisher installed successfully."
-
-echo "Installing fisher plugins..."
-fisher install jorgebucaran/hydro
-fisher install jethrokuan/z
-fisher install jorgebucaran/nvm.fish
-fisher install jorgebucaran/autopair.fish
-echo "fisher plugins installed successfully."
 
 echo "Setting fish as default shell..."
 if ! which fish >/dev/null; then
@@ -49,3 +45,12 @@ chsh -s "$(which fish)" || {
   exit 1
 }
 echo "Fish shell set as default shell successfully."
+
+# Install fisher
+# curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher
+
+# Plugins
+# fisher install jorgebucaran/hydro
+# fisher install jethrokuan/z
+# fisher install jorgebucaran/nvm.fish
+# fisher install jorgebucaran/autopair.fish

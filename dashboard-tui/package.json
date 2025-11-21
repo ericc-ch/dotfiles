@@ -3,7 +3,8 @@
   "type": "module",
   "scripts": {
     "start": "bun run src/main.tsx",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "typecheck": "tsc"
   },
   "devDependencies": {
     "@types/bun": "^1.3.2",

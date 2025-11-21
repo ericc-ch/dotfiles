@@ -7,7 +7,7 @@ import {
   onMount,
   Show,
 } from "solid-js"
-import { getDefaultSink, listSinks, setDefaultSink } from "./lib/pactl"
+import { getDefaultSink, listSinks, setDefaultSink } from "./lib/audio"
 import { useKeyboard } from "@opentui/solid"
 
 const defaultLocale = Intl.DateTimeFormat().resolvedOptions().locale
@@ -19,10 +19,8 @@ const dateFormatter = new Intl.DateTimeFormat(defaultLocale, {
 })
 
 const timeFormatter = new Intl.DateTimeFormat(defaultLocale, {
-  hour12: false,
   hour: "2-digit",
   minute: "2-digit",
-  second: "2-digit",
 })
 
 export const App = () => {
@@ -84,7 +82,9 @@ export const App = () => {
         <ascii_font text={formattedDate()} />
       </box>
 
-      <box position="absolute" top={0} right={0}>
+      <box border position="absolute" top={0} width="100%" flexDirection="row">
+        <box border={["right"]}></box>
+
         <Show when={Boolean(sinks())}>
           <For each={sinks()}>
             {(device, index) => (

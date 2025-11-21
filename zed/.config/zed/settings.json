@@ -5,7 +5,7 @@
   "buffer_font_family": "JetBrains Mono",
   "theme": {
     "mode": "system",
-    "light": "One Dark",
+    "light": "Gruvbox Dark Hard",
     "dark": "One Dark"
   },
 

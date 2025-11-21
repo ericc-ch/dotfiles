@@ -6,7 +6,7 @@ import {
   setDefaultSink,
   getDefaultSource,
   setDefaultSource,
-} from "./pactl"
+} from "./audio"
 
 describe("pactl utilities", () => {
   test("listSinks returns array of sink devices", async () => {
