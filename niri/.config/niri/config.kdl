@@ -1,4 +1,5 @@
 spawn-at-startup "/usr/lib/polkit-kde-authentication-agent-1"
+spawn-at-startup "/usr/lib/pam_kwallet_init"
 
 environment {
     QT_QPA_PLATFORMTHEME "qt5ct"

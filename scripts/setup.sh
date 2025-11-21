@@ -7,16 +7,21 @@ set -e # Exit immediately if a command exits with a non-zero status.
 DOTFILES_DIR="$HOME/dotfiles"
 
 echo "Installing required packages..."
+# Packages sorted from most fundamental to least fundamental
 sudo pacman -S --noconfirm \
   stow \
-  niri \
   ly \
-  ghostty \
+  niri \
   xwayland-satellite \
+  ghostty \
   qt5-wayland \
   qt5ct \
   qt6ct \
-  kvantum || {
+  kvantum \
+  kwallet \
+  kwallet-pam \
+  kwalletmanager \
+  xdg-desktop-portal-kde || {
   echo "Error: Failed to install packages. Exiting."
   exit 1
 }
