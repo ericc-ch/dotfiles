@@ -1,8 +1,11 @@
 set -g fish_greeting
-set --export MAKEFLAGS -j 4
 
+# makefile
+set -gx MAKEFLAGS -j 4
 # ssh agent
-set -x SSH_AUTH_SOCK "$XDG_RUNTIME_DIR/ssh-agent.socket"
+set -gx SSH_AUTH_SOCK "$XDG_RUNTIME_DIR/ssh-agent.socket"
+# pnpm
+set -gx PNPM_HOME "$HOME/.local/share/pnpm"
 
 # Add tool directories to PATH
 fish_add_path --append --path \
