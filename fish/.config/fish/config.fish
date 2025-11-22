@@ -4,6 +4,8 @@ set -g fish_greeting
 set -gx MAKEFLAGS -j 4
 # ssh agent
 set -gx SSH_AUTH_SOCK "$XDG_RUNTIME_DIR/ssh-agent.socket"
+# flatpak
+set -gx XDG_DATA_DIRS $XDG_DATA_DIRS /var/lib/flatpak/exports/share $HOME/.local/share/flatpak/exports/share
 # pnpm
 set -gx PNPM_HOME "$HOME/.local/share/pnpm"
 

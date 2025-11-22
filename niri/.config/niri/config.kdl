@@ -5,6 +5,10 @@ environment {
     QT_QPA_PLATFORMTHEME "qt5ct"
 }
 
+input {
+    warp-mouse-to-focus
+}
+
 layout {
     gaps 8
 
@@ -28,6 +32,7 @@ window-rule {
 
 binds {
     Mod+T { spawn "ghostty"; }
+    Mod+E { spawn "dolphin"; }
 
     XF86AudioRaiseVolume allow-when-locked=true { spawn "pamixer" "-i" "5"; }
     XF86AudioLowerVolume allow-when-locked=true { spawn "pamixer" "-d" "5"; }
@@ -35,8 +40,8 @@ binds {
 
     Mod+D { toggle-overview; }
 
-    Mod+F4 { close-window; }
-    Alt+F4 { close-window; }
+    Mod+F4 repeat=false { close-window; }
+    Alt+F4 repeat=false { close-window; }
 
     Mod+Left  { focus-column-left; }
     Mod+Down  { focus-window-down; }

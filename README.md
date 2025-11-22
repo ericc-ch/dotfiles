@@ -37,3 +37,9 @@ The `example-stow.sh` file contains reference documentation showing:
 - Important usage notes
 
 See that file for detailed examples of how to use GNU Stow effectively.
+
+## Audio Fixes
+
+- Use dell-headset-multi
+- Unmute in alsamixer
+- Completely shut down. Do not reboot.
