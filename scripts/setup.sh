@@ -93,17 +93,7 @@ stow --no-folding fish || {
 cd $HOME >/dev/null # Go back to home directory
 echo "Fish configuration stowed successfully."
 
-
-echo "Setting fish as default shell..."
-if ! which fish >/dev/null; then
-  echo "Error: fish executable not found in PATH. Installation might have failed. Exiting."
-  exit 1
-fi
-chsh -s "$(which fish)" || {
-  echo "Error: Failed to set fish as default shell. You might need to manually run 'chsh -s $(which fish)'. Exiting."
-  exit 1
-}
-echo "Fish shell set as default shell successfully."
+# chsh -s (which fish)
 
 # Install fisher
 # curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher
