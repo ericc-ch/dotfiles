@@ -71,27 +71,29 @@ sudo pacman -S --noconfirm \
   exit 1
 }
 
-paru -S \
+# Packages sorted from most fundamental to least fundamental
+paru -S --noconfirm \
+  libastal-meta \
+  wbg \
   qt5ct-kde \
-  qt6ct-kde \
-  wbg || {
+  qt6ct-kde || {
   echo "Error: Failed to install packages. Exiting."
   exit 1
 }
 
 echo "Packages installed successfully."
 
-echo "Stowing fish configuration from dotfiles..."
-cd "$DOTFILES_DIR" || {
-  echo "Error: Could not change directory to $DOTFILES_DIR. Exiting."
-  exit 1
-}
-stow --no-folding fish || {
-  echo "Error: Failed to stow fish configuration. Check if 'fish' directory exists in your dotfiles. Exiting."
-  exit 1
-}
-cd $HOME >/dev/null # Go back to home directory
-echo "Fish configuration stowed successfully."
+# echo "Stowing fish configuration from dotfiles..."
+# cd "$DOTFILES_DIR" || {
+#   echo "Error: Could not change directory to $DOTFILES_DIR. Exiting."
+#   exit 1
+# }
+# stow --no-folding fish || {
+#   echo "Error: Failed to stow fish configuration. Check if 'fish' directory exists in your dotfiles. Exiting."
+#   exit 1
+# }
+# cd $HOME >/dev/null # Go back to home directory
+# echo "Fish configuration stowed successfully."
 
 # chsh -s (which fish)
 
