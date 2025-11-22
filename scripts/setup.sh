@@ -56,6 +56,7 @@ sudo pacman -S --noconfirm \
   niri \
   xwayland-satellite \
   ghostty \
+  kitty \
   qt5-wayland \
   kvantum \
   kvantum-qt5 \
@@ -72,7 +73,8 @@ sudo pacman -S --noconfirm \
 
 paru -S \
   qt5ct-kde \
-  qt6ct-kde || {
+  qt6ct-kde \
+  wbg || {
   echo "Error: Failed to install packages. Exiting."
   exit 1
 }
