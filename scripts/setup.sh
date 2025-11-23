@@ -59,11 +59,10 @@ sudo pacman -S --noconfirm \
   kitty \
   qt5-wayland \
   kvantum \
+  papirus-icon-theme \
   kvantum-qt5 \
-  kwallet \
-  kwallet-pam \
-  kwalletmanager \
-  xdg-desktop-portal-kde \
+  xdg-desktop-portal-gnome \
+  gnome-keyring \
   breeze \
   breeze5 \
   breeze-gtk || {

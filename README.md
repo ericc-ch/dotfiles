@@ -43,3 +43,12 @@ See that file for detailed examples of how to use GNU Stow effectively.
 - Use dell-headset-multi
 - Unmute in alsamixer
 - Completely shut down. Do not reboot.
+
+## Setting up kwallet with ly
+
+You dont need to do anything mate
+just install kwallet-pam
+
+## Why is firefox "show in folder" opening nautilus instead of dolphin?
+
+Because nautilus name matches exactly in that org.freedesktop shit the FileManager1 stuff
