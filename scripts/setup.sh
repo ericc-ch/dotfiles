@@ -52,20 +52,21 @@ echo "Installing required packages..."
 # Packages sorted from most fundamental to least fundamental
 sudo pacman -S --noconfirm \
   stow \
+  qt5-wayland \
+  gnome-keyring \
+  polkit-gnome \
+  xdg-desktop-portal-gnome \
   ly \
   niri \
   xwayland-satellite \
-  ghostty \
-  kitty \
-  qt5-wayland \
   kvantum \
-  papirus-icon-theme \
   kvantum-qt5 \
-  xdg-desktop-portal-gnome \
-  gnome-keyring \
   breeze \
   breeze5 \
-  breeze-gtk || {
+  breeze-gtk \
+  papirus-icon-theme \
+  ghostty \
+  kitty || {
   echo "Error: Failed to install packages. Exiting."
   exit 1
 }

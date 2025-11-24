@@ -1,10 +1,10 @@
-import { describe, test, expect } from "bun:test"
+import { describe, expect, test } from "bun:test"
 import {
+  getDefaultSink,
+  getDefaultSource,
   listSinks,
   listSources,
-  getDefaultSink,
   setDefaultSink,
-  getDefaultSource,
   setDefaultSource,
 } from "./audio"
 

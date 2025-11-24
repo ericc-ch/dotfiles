@@ -1,7 +1,4 @@
-spawn-at-startup "/usr/lib/polkit-kde-authentication-agent-1"
-spawn-at-startup "/usr/lib/pam_kwallet_init"
-
-spawn-at-startup "wbg ~/dotfiles/assets/debian.png"
+spawn-sh-at-startup "wbg ~/dotfiles/assets/debian.png"
 
 environment {
     QT_QPA_PLATFORMTHEME "qt5ct"
@@ -35,7 +32,7 @@ window-rule {
 }
 
 binds {
-    Mod+T { spawn "ghostty"; }
+    Mod+T { spawn "kitty"; }
     Mod+E { spawn "nautilus"; }
 
     XF86AudioRaiseVolume allow-when-locked=true { spawn "pamixer" "-i" "5"; }

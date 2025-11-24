@@ -1,10 +1,18 @@
 import { render } from "@opentui/solid"
 import { App } from "./app"
 import { ConsolePosition } from "@opentui/core"
+import { Providers } from "./providers/main"
 
-render(() => <App />, {
-  exitOnCtrlC: true,
-  consoleOptions: {
-    position: ConsolePosition.RIGHT,
+render(
+  () => (
+    <Providers>
+      <App />
+    </Providers>
+  ),
+  {
+    exitOnCtrlC: true,
+    consoleOptions: {
+      position: ConsolePosition.RIGHT,
+    },
   },
-})
+)

@@ -1,6 +1,5 @@
-import { createContext, useContext } from "solid-js"
-import { createSignal } from "solid-js"
 import type { ParentComponent } from "solid-js"
+import { createContext, createSignal, useContext } from "solid-js"
 
 export type Route = "home" | "audio" | "settings"
 

@@ -1,8 +1,4 @@
 /**
- * PulseAudio control utility using pactl
- */
-
-/**
  * Device state as defined by PulseAudio
  * @see https://github.com/pulseaudio/pulseaudio/blob/master/src/pulse/def.h
  */
