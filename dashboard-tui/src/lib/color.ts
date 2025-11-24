@@ -88,9 +88,9 @@ export function createDefaultPalette(): ColorPalette {
     ),
     info: createColorShades(DEFAULT_COLORS.blue, DEFAULT_COLORS.brightBlue),
     bg: {
-      darker: RGBA.fromHex(DEFAULT_COLORS.bg),
-      normal: lightenColor(RGBA.fromHex(DEFAULT_COLORS.bg), 0.05),
-      lighter: lightenColor(RGBA.fromHex(DEFAULT_COLORS.bg), 0.15),
+      darker: darkenColor(RGBA.fromHex(DEFAULT_COLORS.bg), 0.2),
+      normal: RGBA.fromHex(DEFAULT_COLORS.bg),
+      lighter: lightenColor(RGBA.fromHex(DEFAULT_COLORS.bg), 0.1),
     },
     fg: {
       darker: darkenColor(RGBA.fromHex(DEFAULT_COLORS.fg), 0.2),
@@ -259,9 +259,9 @@ export async function createColorPalette(
     warning: createColorShades(ansiYellow, ansiBrightYellow),
     info: createColorShades(ansiBlue, ansiBrightBlue),
     bg: {
-      darker: bgBase,
-      normal: lightenColor(bgBase, 0.05),
-      lighter: lightenColor(bgBase, 0.15),
+      darker: darkenColor(bgBase, 0.2),
+      normal: bgBase,
+      lighter: lightenColor(bgBase, 0.1),
     },
     fg: {
       darker: darkenColor(fgBase, 0.2),

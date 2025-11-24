@@ -244,9 +244,9 @@ describe("createColorPalette", () => {
     const palette = await createColorPalette(mockRenderer as any)
 
     // Check background and foreground
-    expect(palette.bg.darker.r).toBeCloseTo(0.12, 1) // Base bg
-    expect(palette.bg.normal.r).toBeGreaterThan(palette.bg.darker.r) // Lighter
-    expect(palette.bg.lighter.r).toBeGreaterThan(palette.bg.normal.r) // Even lighter
+    expect(palette.bg.normal.r).toBeCloseTo(0.12, 1) // Base bg
+    expect(palette.bg.darker.r).toBeLessThan(palette.bg.normal.r) // Darker
+    expect(palette.bg.lighter.r).toBeGreaterThan(palette.bg.normal.r) // Lighter
 
     expect(palette.fg.normal.r).toBeCloseTo(0.83, 1) // Base fg
     expect(palette.fg.darker.r).toBeLessThan(palette.fg.normal.r) // Darker
@@ -327,8 +327,8 @@ describe("createColorPalette", () => {
     expect(palette.bg.darker.g).toBe(0)
     expect(palette.bg.darker.b).toBe(0)
 
-    // bg.normal should be lighter than darker
-    expect(palette.bg.normal.r).toBeGreaterThan(palette.bg.darker.r)
+    // bg.normal should be base (black)
+    expect(palette.bg.normal.r).toBe(0)
 
     // Should use fallback colors - white fg
     expect(palette.fg.normal.r).toBe(1.0)
@@ -350,7 +350,7 @@ describe("createColorPalette", () => {
 
     const palette = await createColorPalette(mockRenderer as any)
 
-    // Background shades: darker (base) < normal (lighter) < lighter (most light)
+    // Background shades: darker < normal (base) < lighter
     expect(palette.bg.darker).toBeDefined()
     expect(palette.bg.normal).toBeDefined()
     expect(palette.bg.lighter).toBeDefined()
