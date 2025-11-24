@@ -1,4 +1,10 @@
-import { getOwner, onCleanup } from "solid-js"
+import {
+  createEffect,
+  createSignal,
+  getOwner,
+  onCleanup,
+  type Accessor,
+} from "solid-js"
 
 export interface Scheduled<Args extends unknown[]> {
   (...args: Args): void
@@ -38,4 +44,39 @@ export function debounce<Args extends unknown[]>(
   }
 
   return Object.assign(debounced, { clear })
+}
+
+/**
+ * Creates a debounced signal that tracks changes to a source signal with a delay.
+ *
+ * @param source The source signal accessor to debounce
+ * @param wait The duration to debounce in milliseconds
+ * @returns An accessor for the debounced value
+ *
+ * @example
+ * ```ts
+ * const [search, setSearch] = createSignal("")
+ * const debouncedSearch = debouncedSignal(search, 200)
+ *
+ * createResource(debouncedSearch, fetchResults)
+ * ```
+ */
+export function debouncedSignal<T>(
+  source: Accessor<T>,
+  wait: number,
+): Accessor<T> {
+  const [debounced, setDebounced] = createSignal<T>(source(), {
+    equals: false,
+  })
+
+  const debouncedUpdate = debounce(
+    (value: T) => setDebounced(() => value),
+    wait,
+  )
+
+  createEffect(() => {
+    debouncedUpdate(source())
+  })
+
+  return debounced
 }

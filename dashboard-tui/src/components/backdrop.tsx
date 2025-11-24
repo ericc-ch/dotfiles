@@ -1,7 +1,10 @@
 import { RGBA } from "@opentui/core"
-import type { ParentProps } from "solid-js"
+import type { ParentComponent } from "solid-js/types/server/rendering.js"
+import { DEFAULT_COLORS, withAlpha } from "../lib/color"
 
-export const Backdrop = (props: ParentProps) => {
+export const Backdrop: ParentComponent = (props) => {
+  const transparentBg = () => withAlpha(RGBA.fromHex(DEFAULT_COLORS.black), 0.1)
+
   return (
     <box
       position="absolute"
@@ -10,7 +13,7 @@ export const Backdrop = (props: ParentProps) => {
       height="100%"
       justifyContent="center"
       alignItems="center"
-      backgroundColor={RGBA.fromValues(0, 0, 0, 0.1)}
+      backgroundColor={transparentBg()}
     >
       {props.children}
     </box>

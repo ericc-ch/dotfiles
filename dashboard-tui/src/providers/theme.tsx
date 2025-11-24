@@ -9,7 +9,7 @@ import {
   createColorPalette,
   createDefaultPalette,
   type ColorPalette,
-} from "../lib/palette"
+} from "../lib/color"
 
 /**
  * Theme context providing access to the color palette

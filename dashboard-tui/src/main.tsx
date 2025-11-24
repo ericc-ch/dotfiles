@@ -10,8 +10,9 @@ render(
     </Providers>
   ),
   {
-    exitOnCtrlC: true,
+    exitOnCtrlC: false,
     consoleOptions: {
+      sizePercent: 100,
       position: ConsolePosition.RIGHT,
     },
   },

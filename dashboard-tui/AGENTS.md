@@ -2,6 +2,7 @@
 
 - **Run app**: `bun run src/main.tsx` or `bun start`
 - **Format code**: `bun run format` (uses Prettier)
+- **Type check**: `bun run typecheck` (run after implementation changes)
 - **Run all tests**: `bun test`
 - **Run single test file**: `bun test src/lib/pactl.test.ts`
 - **Run specific test**: `bun test -t "test name pattern"`
@@ -22,6 +23,7 @@
 - **Framework**: Use `bun:test` - import `describe`, `test`, `expect` from `"bun:test"`
 - **Structure**: Group related tests with `describe()`, use descriptive test names
 - **Assertions**: Available matchers include `.toBe()`, `.toBeTruthy()`, `.toBeDefined()`, `.toBeGreaterThan()`, `.toThrow()`
+- **Coverage**: Only write tests for non-TSX files (lib/ functions, utilities, etc.)
 
 ## Git Commits
 

@@ -10,34 +10,17 @@ export interface Application {
 }
 
 /**
- * Lists all available applications
+ * Lists or searches for applications
+ * @param searchTerm - Optional search term to filter applications (results are sorted by relevance when provided)
  * @returns Promise that resolves to an array of applications
  */
-export async function listApps(): Promise<Application[]> {
-  const proc = Bun.spawn(["astal-apps", "--json"], {
-    stderr: "pipe",
-  })
+export async function listApps(searchTerm?: string): Promise<Application[]> {
+  const args =
+    searchTerm ?
+      ["astal-apps", "--search", searchTerm, "--json"]
+    : ["astal-apps", "--json"]
 
-  const output = await proc.stdout.text()
-  const exitCode = await proc.exited
-
-  if (exitCode !== 0) {
-    const errorOutput = await proc.stderr.text()
-    throw new Error(
-      `astal-apps command failed with exit code ${exitCode}: ${errorOutput}`,
-    )
-  }
-
-  return JSON.parse(output) as Application[]
-}
-
-/**
- * Searches for applications by a search term (results are sorted by relevance)
- * @param searchTerm - The term to search for
- * @returns Promise that resolves to an array of matching applications
- */
-export async function searchApps(searchTerm: string): Promise<Application[]> {
-  const proc = Bun.spawn(["astal-apps", "--search", searchTerm, "--json"], {
+  const proc = Bun.spawn(args, {
     stderr: "pipe",
   })
 

@@ -1,5 +1,5 @@
 import { describe, test, expect } from "bun:test"
-import { listApps, searchApps, launchApp } from "./apps"
+import { listApps, launchApp } from "./apps"
 
 describe("listApps", () => {
   test("returns array of applications", async () => {
@@ -25,16 +25,22 @@ describe("listApps", () => {
   })
 })
 
-describe("searchApps", () => {
+describe("listApps with search", () => {
   test("returns filtered apps by search term", async () => {
-    const apps = await searchApps("terminal")
+    const apps = await listApps("terminal")
 
     expect(apps).toBeDefined()
     expect(Array.isArray(apps)).toBe(true)
   })
 
   test("returns empty array for non-matching search", async () => {
-    const apps = await searchApps("xyznonexistentapp12345")
+    const apps = await listApps("xyznonexistentapp12345")
+
+    expect(Array.isArray(apps)).toBe(true)
+  })
+
+  test("returns empty array for non-matching search", async () => {
+    const apps = await listApps("xyznonexistentapp12345")
 
     expect(Array.isArray(apps)).toBe(true)
   })

@@ -185,6 +185,24 @@ export function createColorShades(
 }
 
 /**
+ * Creates a new RGBA color with a modified alpha value
+ *
+ * @param color - The RGBA color to modify
+ * @param alpha - The new alpha value (0.0-1.0, where 0.0 = fully transparent, 1.0 = fully opaque)
+ * @returns New RGBA color with the specified alpha value
+ *
+ * @example
+ * ```typescript
+ * const theme = useTheme()
+ * const semitransparent = withAlpha(theme().fg.normal, 0.5) // 50% opacity
+ * <box backgroundColor={semitransparent} />
+ * ```
+ */
+export function withAlpha(color: RGBA, alpha: number): RGBA {
+  return RGBA.fromValues(color.r, color.g, color.b, alpha)
+}
+
+/**
  * Creates a semantic color palette from terminal colors
  *
  * @param renderer - The OpenTUI renderer instance

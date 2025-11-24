@@ -5,7 +5,71 @@ import {
   createColorShades,
   darkenColor,
   lightenColor,
-} from "./palette"
+  withAlpha,
+} from "./color"
+
+describe("withAlpha", () => {
+  test("modifies alpha to 0.5", () => {
+    const color = RGBA.fromInts(255, 128, 64, 255)
+    const result = withAlpha(color, 0.5)
+
+    expect(result.r).toBeCloseTo(1.0, 5)
+    expect(result.g).toBeCloseTo(0.5, 2)
+    expect(result.b).toBeCloseTo(0.25, 2)
+    expect(result.a).toBe(0.5)
+  })
+
+  test("sets alpha to full opacity (1.0)", () => {
+    const color = RGBA.fromInts(100, 150, 200, 128)
+    const result = withAlpha(color, 1.0)
+
+    expect(result.a).toBe(1.0)
+    expect(result.r).toBeCloseTo(color.r, 5)
+    expect(result.g).toBeCloseTo(color.g, 5)
+    expect(result.b).toBeCloseTo(color.b, 5)
+  })
+
+  test("sets alpha to full transparency (0.0)", () => {
+    const color = RGBA.fromInts(255, 255, 255, 255)
+    const result = withAlpha(color, 0.0)
+
+    expect(result.a).toBe(0.0)
+    expect(result.r).toBe(1.0)
+    expect(result.g).toBe(1.0)
+    expect(result.b).toBe(1.0)
+  })
+
+  test("preserves RGB values", () => {
+    const color = RGBA.fromInts(123, 45, 67, 200)
+    const result = withAlpha(color, 0.75)
+
+    expect(result.r).toBeCloseTo(color.r, 5)
+    expect(result.g).toBeCloseTo(color.g, 5)
+    expect(result.b).toBeCloseTo(color.b, 5)
+  })
+
+  test("does not modify original color", () => {
+    const color = RGBA.fromInts(255, 128, 64, 255)
+    const originalAlpha = color.a
+
+    withAlpha(color, 0.3)
+
+    expect(color.a).toBe(originalAlpha)
+  })
+
+  test("works with various alpha values", () => {
+    const color = RGBA.fromInts(200, 100, 50, 255)
+
+    const quarter = withAlpha(color, 0.25)
+    expect(quarter.a).toBe(0.25)
+
+    const threeQuarters = withAlpha(color, 0.75)
+    expect(threeQuarters.a).toBe(0.75)
+
+    const tenth = withAlpha(color, 0.1)
+    expect(tenth.a).toBeCloseTo(0.1, 5)
+  })
+})
 
 describe("darkenColor", () => {
   test("darkens red color by 30%", () => {
