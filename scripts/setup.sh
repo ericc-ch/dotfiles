@@ -75,6 +75,8 @@ sudo pacman -S --noconfirm \
 paru -S --noconfirm \
   libastal-meta \
   wbg \
+  zen-browser-bin \
+  helium-browser-bin \
   qt5ct-kde \
   qt6ct-kde || {
   echo "Error: Failed to install packages. Exiting."
