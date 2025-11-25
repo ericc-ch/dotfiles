@@ -143,9 +143,7 @@ export const AppLauncher: ParentComponent<{
     if (!appToLaunch) return
 
     try {
-      const entryName = appToLaunch.entry.replace(/\.desktop$/, "")
-      await launchApp(entryName)
-
+      await launchApp(appToLaunch.entry)
       closeLauncher()
     } catch (error) {
       console.error("Failed to launch app:", error)

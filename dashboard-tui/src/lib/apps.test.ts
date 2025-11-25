@@ -1,5 +1,5 @@
 import { describe, test, expect } from "bun:test"
-import { listApps, launchApp } from "./apps"
+import { listApps, launchApp, extractAppBasename } from "./apps"
 
 describe("listApps", () => {
   test("returns array of applications", async () => {
@@ -51,5 +51,30 @@ describe("launchApp", () => {
     expect(async () => {
       await launchApp("nonexistent.desktop")
     }).toThrow()
+  })
+})
+
+describe("extractAppBasename", () => {
+  test("extracts basename from simple entry", () => {
+    expect(extractAppBasename("zen.desktop")).toBe("zen")
+    expect(extractAppBasename("kitty.desktop")).toBe("kitty")
+    expect(extractAppBasename("bruno.desktop")).toBe("bruno")
+  })
+
+  test("extracts basename from reverse-DNS entry", () => {
+    expect(extractAppBasename("com.mitchellh.ghostty.desktop")).toBe("ghostty")
+    expect(extractAppBasename("org.gnome.Nautilus.desktop")).toBe("Nautilus")
+    expect(extractAppBasename("com.obsproject.Studio.desktop")).toBe("Studio")
+    expect(extractAppBasename("dev.zed.Zed.desktop")).toBe("Zed")
+  })
+
+  test("handles entry without .desktop suffix", () => {
+    expect(extractAppBasename("zen")).toBe("zen")
+    expect(extractAppBasename("com.mitchellh.ghostty")).toBe("ghostty")
+  })
+
+  test("handles edge cases", () => {
+    expect(extractAppBasename("")).toBe("")
+    expect(extractAppBasename("singlename")).toBe("singlename")
   })
 })
