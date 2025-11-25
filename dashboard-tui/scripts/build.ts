@@ -8,19 +8,22 @@ import fs from "node:fs/promises"
 const rootDir = path.join(import.meta.dir, "..")
 const distDir = path.join(rootDir, "./dist/")
 
-const dashboardEntry = path.join(rootDir, "./src/dashboard.tsx")
-const dashboardOut = path.join(distDir, "./dashboard")
+const entries = [
+  { name: "dashboard", entry: "./src/dashboard.tsx" },
+  { name: "bar", entry: "./src/bar.tsx" },
+]
 
-if (await fs.exists(distDir)) {
-  fs.mkdir(distDir, { recursive: true })
+await fs.mkdir(distDir, { recursive: true })
+
+for (const { name, entry } of entries) {
+  await Bun.build({
+    entrypoints: [path.join(rootDir, entry)],
+    plugins: [solidPlugin],
+    compile: {
+      autoloadBunfig: false,
+      autoloadDotenv: false,
+      outfile: path.join(distDir, name),
+    },
+  })
+  console.log(`Built ${name}`)
 }
-
-await Bun.build({
-  entrypoints: [dashboardEntry],
-  plugins: [solidPlugin],
-  compile: {
-    autoloadBunfig: false,
-    autoloadDotenv: false,
-    outfile: dashboardOut,
-  },
-})

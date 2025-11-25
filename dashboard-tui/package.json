@@ -3,8 +3,11 @@
   "type": "module",
   "scripts": {
     "build": "bun run ./scripts/build.ts",
+    "predeploy": "bun run build",
+    "deploy": "bun run ./scripts/deploy.ts",
     "format": "prettier --write .",
     "start:dashboard": "bun run ./src/dashboard.tsx",
+    "start:bar": "bun run ./src/bar.tsx",
     "typecheck": "tsc"
   },
   "dependencies": {

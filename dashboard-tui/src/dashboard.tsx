@@ -68,6 +68,7 @@ render(
   ),
   {
     exitOnCtrlC: false,
+    useKittyKeyboard: true,
     consoleOptions: {
       sizePercent: 100,
       position: ConsolePosition.RIGHT,
