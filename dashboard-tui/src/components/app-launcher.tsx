@@ -1,6 +1,5 @@
 import { useKeyboard, useTerminalDimensions } from "@opentui/solid"
 import {
-  createEffect,
   createMemo,
   createResource,
   createSignal,
@@ -13,9 +12,9 @@ import {
 import { launchApp, listApps, type Application } from "../lib/apps"
 import { type ColorPalette } from "../lib/color"
 import { debouncedSignal } from "../lib/debounce"
+import { truncate } from "../lib/truncate"
 import { useTheme } from "../providers/theme"
 import { Backdrop } from "./backdrop"
-import { truncate } from "../lib/truncate"
 
 const AppListItem: Component<{
   app: Application
