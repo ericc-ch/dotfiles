@@ -65,7 +65,8 @@ sudo pacman -S --noconfirm \
   breeze5 \
   breeze-gtk \
   papirus-icon-theme \
-  ghostty \
+  seahorse \
+  gwenview \
   kitty || {
   echo "Error: Failed to install packages. Exiting."
   exit 1
