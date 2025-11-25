@@ -23,10 +23,6 @@ export const App = () => {
       event.preventDefault()
       setShowAppLauncher(true)
     }
-
-    if (event.name === "escape") {
-      setShowAppLauncher(false)
-    }
   })
 
   return (
@@ -40,10 +36,20 @@ export const App = () => {
       <Clock />
 
       {/* This is an overlay + modal, absolute */}
-      <AppLauncher show={showAppLauncher()} />
+      <AppLauncher
+        show={showAppLauncher()}
+        onClose={() => setShowAppLauncher(false)}
+      />
 
-      <box position="absolute" bottom={0}>
-        <text>Press [space] to open the app launcher</text>
+      <box
+        paddingLeft={1}
+        paddingRight={1}
+        backgroundColor={theme().bg.lighter}
+        position="absolute"
+        bottom={0}
+        width="100%"
+      >
+        <text>[q] Quit [space] App Launcher</text>
       </box>
     </box>
   )

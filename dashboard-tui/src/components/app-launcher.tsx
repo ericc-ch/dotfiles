@@ -7,16 +7,51 @@ import {
   For,
   mergeProps,
   Show,
+  type Component,
   type ParentComponent,
 } from "solid-js"
-import { listApps } from "../lib/apps"
+import { launchApp, listApps, type Application } from "../lib/apps"
+import { type ColorPalette } from "../lib/color"
 import { debouncedSignal } from "../lib/debounce"
 import { useTheme } from "../providers/theme"
 import { Backdrop } from "./backdrop"
 import { truncate } from "../lib/truncate"
 
+const AppListItem: Component<{
+  app: Application
+  isHovered: boolean
+  theme: ColorPalette
+  itemHeight: number
+}> = (props) => {
+  return (
+    <box
+      flexDirection="row"
+      justifyContent="space-between"
+      height={props.itemHeight}
+      paddingLeft={3}
+      paddingRight={3}
+      backgroundColor={
+        props.isHovered ? props.theme.fg.darker : props.theme.bg.normal
+      }
+    >
+      <text
+        fg={props.isHovered ? props.theme.bg.darker : props.theme.fg.normal}
+      >
+        <strong>{truncate(props.app.name, 25)}</strong>
+      </text>
+
+      <text
+        fg={props.isHovered ? props.theme.bg.normal : props.theme.fg.darker}
+      >
+        {props.app.categories.slice(0, 2).join(", ")}
+      </text>
+    </box>
+  )
+}
+
 export const AppLauncher: ParentComponent<{
   show: boolean
+  onClose: () => void
 }> = (props) => {
   const finalProps = mergeProps({ show: false }, props)
 
@@ -65,16 +100,20 @@ export const AppLauncher: ParentComponent<{
   })
   const trimmedApps = () => apps().slice(0, layout().maxItems)
 
-  createEffect(() => {
-    if (finalProps.show) {
-      setSearch("")
-    }
-  })
+  const closeLauncher = () => {
+    setSearch("")
+    setHoveredApp(0)
+    props.onClose()
+  }
 
   useKeyboard((event) => {
     if (event.ctrl && event.name === "c" && search() !== "") {
       event.preventDefault()
       setSearch("")
+    }
+
+    if (event.name === "escape") {
+      closeLauncher()
     }
 
     if (event.name === "up") {
@@ -99,6 +138,20 @@ export const AppLauncher: ParentComponent<{
       })
     }
   })
+
+  const handleLaunchApp = async () => {
+    const appToLaunch = trimmedApps().at(hoveredApp())
+    if (!appToLaunch) return
+
+    try {
+      const entryName = appToLaunch.entry.replace(/\.desktop$/, "")
+      await launchApp(entryName)
+
+      closeLauncher()
+    } catch (error) {
+      console.error("Failed to launch app:", error)
+    }
+  }
 
   return (
     <Show when={finalProps.show}>
@@ -134,6 +187,7 @@ export const AppLauncher: ParentComponent<{
             <input
               value={search()}
               onInput={setSearch}
+              onSubmit={handleLaunchApp}
               focused={finalProps.show}
               placeholder="Search apps..."
               textColor={theme().fg.normal}
@@ -148,34 +202,14 @@ export const AppLauncher: ParentComponent<{
 
           <box>
             <For each={trimmedApps()}>
-              {(app, index) => {
-                const isHovered = () => index() === hoveredApp()
-
-                return (
-                  <box
-                    flexDirection="row"
-                    justifyContent="space-between"
-                    height={layout().elements.itemHeight}
-                    paddingLeft={3}
-                    paddingRight={3}
-                    backgroundColor={
-                      isHovered() ? theme().fg.darker : theme().bg.normal
-                    }
-                  >
-                    <text
-                      fg={isHovered() ? theme().bg.darker : theme().fg.normal}
-                    >
-                      <strong>{truncate(app.name, 25)}</strong>
-                    </text>
-
-                    <text
-                      fg={isHovered() ? theme().bg.normal : theme().fg.darker}
-                    >
-                      {app.categories.slice(0, 2).join(", ")}
-                    </text>
-                  </box>
-                )
-              }}
+              {(app, index) => (
+                <AppListItem
+                  app={app}
+                  isHovered={index() === hoveredApp()}
+                  theme={theme()}
+                  itemHeight={layout().elements.itemHeight}
+                />
+              )}
             </For>
           </box>
         </box>
