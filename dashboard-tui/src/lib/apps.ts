@@ -38,30 +38,12 @@ export async function listApps(searchTerm?: string): Promise<Application[]> {
 }
 
 /**
- * Extracts basename from desktop entry name for app launching
- * @param entryName - The entry name (e.g., "com.mitchellh.ghostty.desktop")
- * @returns The basename (e.g., "ghostty")
- * @see Converts reverse-DNS names to simple names to avoid astal-apps segfaults
- */
-export function extractAppBasename(entryName: string): string {
-  return (
-    entryName
-      .replace(/\.desktop$/, "")
-      .split(".")
-      .pop() ?? ""
-  )
-}
-
-/**
- * Launches an application by its entry name (desktop file name)
- * @param entryName - The entry name of the application to launch (e.g., "kitty.desktop")
+ * Launches an application by its name
+ * @param name - The display name of the application (e.g., "Ghostty", "Passwords and Keys")
  * @returns Promise that resolves when the application is launched
- * @see Uses basename of entry (e.g., "com.mitchellh.ghostty.desktop" → "ghostty") to avoid astal-apps segfaults with reverse-DNS names
  */
-export async function launchApp(entryName: string): Promise<void> {
-  const basename = extractAppBasename(entryName)
-
-  const proc = Bun.spawn(["astal-apps", "--launch", basename], {
+export async function launchApp(name: string): Promise<void> {
+  const proc = Bun.spawn(["astal-apps", "--launch", name], {
     stderr: "pipe",
   })
 

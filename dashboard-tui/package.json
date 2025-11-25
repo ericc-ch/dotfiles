@@ -4,7 +4,7 @@
   "scripts": {
     "build": "bun run ./scripts/build.ts",
     "format": "prettier --write .",
-    "start": "bun run ./src/main.tsx",
+    "start:dashboard": "bun run ./src/dashboard.tsx",
     "typecheck": "tsc"
   },
   "dependencies": {

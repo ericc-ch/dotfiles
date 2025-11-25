@@ -1,5 +1,5 @@
 import { createSignal, onCleanup, onMount } from "solid-js"
-import { useTheme } from "../providers/theme"
+import { useTheme } from "../../providers/theme"
 
 const defaultLocale = Intl.DateTimeFormat().resolvedOptions().locale
 

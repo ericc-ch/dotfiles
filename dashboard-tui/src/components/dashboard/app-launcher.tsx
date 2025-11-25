@@ -9,11 +9,11 @@ import {
   type Component,
   type ParentComponent,
 } from "solid-js"
-import { launchApp, listApps, type Application } from "../lib/apps"
-import { type ColorPalette } from "../lib/color"
-import { debouncedSignal } from "../lib/debounce"
-import { truncate } from "../lib/truncate"
-import { useTheme } from "../providers/theme"
+import { launchApp, listApps, type Application } from "../../lib/apps"
+import { type ColorPalette } from "../../lib/color"
+import { debouncedSignal } from "../../lib/debounce"
+import { truncate } from "../../lib/truncate"
+import { useTheme } from "../../providers/theme"
 import { Backdrop } from "./backdrop"
 
 const AppListItem: Component<{
@@ -143,7 +143,7 @@ export const AppLauncher: ParentComponent<{
     if (!appToLaunch) return
 
     try {
-      await launchApp(appToLaunch.entry)
+      await launchApp(appToLaunch.name)
       closeLauncher()
     } catch (error) {
       console.error("Failed to launch app:", error)

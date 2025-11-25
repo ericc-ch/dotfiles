@@ -1,10 +1,13 @@
-import { useKeyboard, useRenderer } from "@opentui/solid"
+import { ConsolePosition } from "@opentui/core"
+import { render, useKeyboard, useRenderer } from "@opentui/solid"
 import { createSignal } from "solid-js"
-import { AppLauncher } from "./components/app-launcher"
-import { Clock } from "./components/clock"
-import { useTheme } from "./providers/theme"
 
-export const App = () => {
+import { AppLauncher } from "./components/dashboard/app-launcher"
+import { Clock } from "./components/dashboard/clock"
+import { RouterProvider } from "./providers/dashboard/router"
+import { ThemeProvider, useTheme } from "./providers/theme"
+
+const App = () => {
   const renderer = useRenderer()
   const theme = useTheme()
 
@@ -54,3 +57,20 @@ export const App = () => {
     </box>
   )
 }
+
+render(
+  () => (
+    <ThemeProvider>
+      <RouterProvider initialRoute="home">
+        <App />
+      </RouterProvider>
+    </ThemeProvider>
+  ),
+  {
+    exitOnCtrlC: false,
+    consoleOptions: {
+      sizePercent: 100,
+      position: ConsolePosition.RIGHT,
+    },
+  },
+)

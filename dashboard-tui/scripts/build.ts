@@ -8,7 +8,7 @@ import fs from "node:fs/promises"
 const rootDir = path.join(import.meta.dir, "..")
 const distDir = path.join(rootDir, "./dist/")
 
-const dashboardEntry = path.join(rootDir, "./src/main.tsx")
+const dashboardEntry = path.join(rootDir, "./src/dashboard.tsx")
 const dashboardOut = path.join(distDir, "./dashboard")
 
 if (await fs.exists(distDir)) {

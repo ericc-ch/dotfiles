@@ -36,7 +36,7 @@ window-rule {
 }
 
 binds {
-    Mod+T { spawn "kitty"; }
+    Mod+T { spawn "kitty" "--single-instance"; }
     Mod+E { spawn "nautilus"; }
 
     XF86AudioRaiseVolume allow-when-locked=true { spawn "pamixer" "-i" "5"; }
