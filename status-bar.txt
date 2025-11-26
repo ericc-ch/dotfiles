@@ -1,0 +1,26 @@
+  WIFI-5G  |    65% (Headphones)  |    Wed 26 Nov    13:17
+  CPU: 12%  |    MEM: 4.2GB  |    GPU: 24%  |    Bat: 80%
+
+[   Signal: Excellent ] [   Vol: 40% ] [   13:17:33 ]
+[   Load: 1.54 ] [   Used: 30% ] [   Tmp: 45°C ]
+
+  SSID  •    50%  •    13:17
+  10%  •    8GB  •    10%
+
+  NET [█████░░]  |    VOL [██████░░░░] (Ext. Speaker)  |  13:45
+  CPU [██░░░░░░░░]  |    RAM [████░░░░░░]  |    GPU [█░░░░░░░░░]
+
+  Signal: ▂▄▆█  |    Audio:   ▂▃▄▅ (50%)  |    Nov 26, 13:45
+  CPU:  ▂      |    RAM:  ▂▃▅     |    GPU: █▇▆▅
+
+  WIFI ●●●○  ::    VOL ●●●●●○○○○○  ::    13:45
+  CPU ▰▱▱▱▱  ::    MEM ▰▰▱▱▱  ::    GPU ▰▱▱▱▱
+
+  Link: 100% ▓▓▓▓  |    Vol: 35% ▌▎   |    13:45:01
+  CPU: 12% ▏   |    RAM: 4.2G ▍   |    GPU: 60% ▋
+
+  Wifi ▅▇█  |    DAC ▮▮▮▮▯ 80%  |    CPU ▃▅▂ 12%  |    MEM ▅▅  |    14:30
+  Link: Good    Load ⣀⣄⣤⣦ 24%    Use ⣀⣀⣄ 4G    Vol ⠤⠤⠤⠤⠤  Wed 26, 13:45
+
+[NET: 100%] [VOL: Spkr ═══----] [CPU: 10% ▓▒▒▒] [GPU: 5% ░░░░] 2025-11-26 13:45
+  WIFI(5G):-50dBm    Headset:35%    12%[ ▂▃ ]    3.2G[ ▅▅ ]    Wed 13:45:01
