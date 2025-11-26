@@ -1,3 +1,4 @@
+spawn-at-startup "/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1"
 spawn-sh-at-startup "wbg ~/dotfiles/assets/debian.png"
 
 environment {

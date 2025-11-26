@@ -7,7 +7,12 @@ const App = () => {
   const theme = useTheme()
 
   return (
-    <box height={1} width="100%" backgroundColor={theme().bg.normal}>
+    <box
+      height={1}
+      width="100%"
+      backgroundColor={theme().bg.normal}
+      flexDirection="row"
+    >
       <Clock />
     </box>
   )

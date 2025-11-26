@@ -47,12 +47,11 @@ const App = () => {
       <box
         paddingLeft={1}
         paddingRight={1}
-        backgroundColor={theme().bg.lighter}
         position="absolute"
         bottom={0}
         width="100%"
       >
-        <text>[q] Quit [space] App Launcher</text>
+        <text fg={theme().fg.normal}>[q] Quit [space] App Launcher</text>
       </box>
     </box>
   )

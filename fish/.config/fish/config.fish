@@ -1,21 +1,30 @@
 set -g fish_greeting
 
+# XDG base directories
+set -q XDG_CONFIG_HOME || set -gx XDG_CONFIG_HOME $HOME/.config
+set -q XDG_DATA_HOME || set -gx XDG_DATA_HOME $HOME/.local/share
+set -q XDG_CACHE_HOME || set -gx XDG_CACHE_HOME $HOME/.cache
+
 # makefile
-set -gx MAKEFLAGS -j 4
+set -gx MAKEFLAGS -j(nproc)
 # ssh agent
 set -gx SSH_AUTH_SOCK "$XDG_RUNTIME_DIR/ssh-agent.socket"
 # flatpak
-set -gx XDG_DATA_DIRS $XDG_DATA_DIRS /var/lib/flatpak/exports/share $HOME/.local/share/flatpak/exports/share
+for dir in /var/lib/flatpak/exports/share $HOME/.local/share/flatpak/exports/share
+    if not contains $dir $XDG_DATA_DIRS
+        set -gx XDG_DATA_DIRS $XDG_DATA_DIRS $dir
+    end
+end
 # pnpm
 set -gx PNPM_HOME "$HOME/.local/share/pnpm"
 
-# Add tool directories to PATH
-fish_add_path --append --path \
-    $HOME/.bun/bin \
-    $HOME/.fly/bin \
-    $HOME/go/bin \
+# Add tool directories to PATH (highest priority first)
+fish_add_path \
     $HOME/.local/bin \
-    $HOME/.local/share/pnpm \
+    $HOME/.bun/bin \
+    $HOME/go/bin \
+    $PNPM_HOME \
+    $HOME/.fly/bin \
     /usr/local/go/bin
 
 # deno
