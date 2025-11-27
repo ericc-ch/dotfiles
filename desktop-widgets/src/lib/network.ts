@@ -67,6 +67,123 @@ export interface NetworkStatus {
 }
 
 // -----------------------------------------------------------------------------
+// Monitor Event Types
+// -----------------------------------------------------------------------------
+
+/**
+ * Event type from nmcli monitor
+ */
+export type MonitorEventType =
+  | "connected"
+  | "disconnected"
+  | "connecting"
+  | "connectivity"
+
+/**
+ * Connectivity state from nmcli monitor
+ */
+export type ConnectivityState = "full" | "limited" | "none"
+
+/**
+ * Event emitted by nmcli monitor
+ */
+export interface MonitorEvent {
+  /** Event type */
+  type: MonitorEventType
+  /** Device name (e.g., "wlan0") */
+  device?: string | undefined
+  /** SSID when connecting to a network */
+  ssid?: string | undefined
+  /** Connectivity state */
+  connectivity?: ConnectivityState | undefined
+}
+
+/**
+ * Options for createNetworkMonitor
+ */
+export interface NetworkMonitorOptions {
+  /** Called when network connects, with full connection info */
+  onConnect?: (status: NetworkStatus) => void
+  /** Called when network disconnects */
+  onDisconnect?: () => void
+  /** Called when signal strength changes (wifi only) */
+  onSignalChange?: (signal: number) => void
+  /** Called on error */
+  onError?: (error: Error) => void
+  /** Signal polling interval in ms (default: 1000) */
+  signalPollInterval?: number
+}
+
+/**
+ * Parses a line from nmcli monitor output
+ * @param line - Raw line from nmcli monitor
+ * @returns Parsed event or null if line is not relevant
+ * @see https://networkmanager.dev/docs/api/latest/nmcli.html
+ */
+export function parseMonitorLine(line: string): MonitorEvent | null {
+  // "wlan0: connected"
+  const connectedMatch = line.match(/^(\w+): connected$/)
+  if (connectedMatch) {
+    return { type: "connected", device: connectedMatch[1] }
+  }
+
+  // "wlan0: disconnected"
+  const disconnectedMatch = line.match(/^(\w+): disconnected$/)
+  if (disconnectedMatch) {
+    return { type: "disconnected", device: disconnectedMatch[1] }
+  }
+
+  // "wlan0: using connection 'Chili'"
+  const usingMatch = line.match(/^(\w+): using connection '(.+)'$/)
+  if (usingMatch) {
+    return { type: "connecting", device: usingMatch[1], ssid: usingMatch[2] }
+  }
+
+  // "Connectivity is now 'full'"
+  const connectivityMatch = line.match(/^Connectivity is now '(\w+)'$/)
+  if (connectivityMatch) {
+    return {
+      type: "connectivity",
+      connectivity: connectivityMatch[1] as ConnectivityState,
+    }
+  }
+
+  return null
+}
+
+// -----------------------------------------------------------------------------
+// WiFi Signal (fast path via /proc/net/wireless)
+// -----------------------------------------------------------------------------
+
+/**
+ * Reads WiFi signal strength from /proc/net/wireless
+ * Much faster than nmcli (~1ms vs ~11ms)
+ * @param device - WiFi device name (default: "wlan0")
+ * @returns Signal strength 0-100% or null if not available
+ * @see https://www.kernel.org/doc/Documentation/ABI/testing/procfs-net-wireless
+ */
+export async function readWifiSignal(device = "wlan0"): Promise<number | null> {
+  try {
+    const file = Bun.file("/proc/net/wireless")
+    const text = await file.text()
+
+    // Format: " wlan0: 0000   32.  -78.  -256 ..."
+    //                         ^^ link quality (0-70 scale)
+    const regex = new RegExp(`^\\s*${device}:\\s+\\d+\\s+(\\d+)\\.`, "m")
+    const match = text.match(regex)
+    if (!match?.[1]) return null
+
+    const linkQuality = parseInt(match[1], 10)
+    // Convert 0-70 scale to 0-100 percentage
+    return Math.round((linkQuality / 70) * 100)
+  } catch {
+    return null
+  }
+}
+
+// -----------------------------------------------------------------------------
+// WiFi
+// -----------------------------------------------------------------------------
 // WiFi
 // -----------------------------------------------------------------------------
 
@@ -347,4 +464,118 @@ export async function getActiveConnection(): Promise<NetworkStatus | null> {
   }
 
   return null
+}
+
+// -----------------------------------------------------------------------------
+// Network Monitor
+// -----------------------------------------------------------------------------
+
+/**
+ * Creates a network monitor that watches for connection changes and signal updates
+ * Uses nmcli monitor for connection events and /proc/net/wireless for signal polling
+ * @param options - Monitor options with callbacks
+ * @returns Stop function to cleanup the monitor
+ * @see https://networkmanager.dev/docs/api/latest/nmcli.html
+ */
+export function createNetworkMonitor(
+  options: NetworkMonitorOptions,
+): () => void {
+  let proc: ReturnType<typeof Bun.spawn> | null = null
+  let signalInterval: ReturnType<typeof setInterval> | null = null
+  let stopped = false
+  let currentDevice: string | null = null
+
+  const startMonitor = () => {
+    if (stopped) return
+
+    proc = Bun.spawn(["nmcli", "monitor"], {
+      stdout: "pipe",
+      stderr: "ignore",
+      onExit() {
+        // Auto-restart if not explicitly stopped
+        if (!stopped) {
+          setTimeout(startMonitor, 1000)
+        }
+      },
+    })
+
+    const reader = (proc.stdout as ReadableStream<Uint8Array>).getReader()
+    const decoder = new TextDecoder()
+    let buffer = ""
+
+    const readLoop = async () => {
+      try {
+        while (!stopped) {
+          const { done, value } = await reader.read()
+          if (done) break
+
+          buffer += decoder.decode(value, { stream: true })
+          const lines = buffer.split("\n")
+          buffer = lines.pop() ?? ""
+
+          for (const line of lines) {
+            const event = parseMonitorLine(line)
+            if (!event) continue
+
+            if (event.type === "connected" && event.device) {
+              currentDevice = event.device
+              try {
+                const status = await getActiveConnection()
+                if (status) options.onConnect?.(status)
+              } catch (err) {
+                options.onError?.(err as Error)
+              }
+            } else if (event.type === "disconnected") {
+              currentDevice = null
+              options.onDisconnect?.()
+            }
+          }
+        }
+      } catch (err) {
+        if (!stopped) {
+          options.onError?.(err as Error)
+        }
+      }
+    }
+
+    readLoop()
+  }
+
+  const startSignalPolling = () => {
+    const interval = options.signalPollInterval ?? 1000
+
+    signalInterval = setInterval(async () => {
+      if (stopped || !currentDevice) return
+
+      const signal = await readWifiSignal(currentDevice)
+      if (signal !== null) {
+        options.onSignalChange?.(signal)
+      }
+    }, interval)
+  }
+
+  // Initialize
+  const init = async () => {
+    try {
+      const status = await getActiveConnection()
+      if (status) {
+        currentDevice = status.device
+        options.onConnect?.(status)
+      }
+    } catch (err) {
+      options.onError?.(err as Error)
+    }
+
+    startMonitor()
+    startSignalPolling()
+  }
+
+  init()
+
+  // Return stop function
+  return () => {
+    stopped = true
+    proc?.kill()
+    if (signalInterval) clearInterval(signalInterval)
+  }
 }

@@ -1,8 +1,8 @@
-import { createResource, onCleanup, onMount } from "solid-js"
-import { getActiveConnection } from "../../lib/network"
+import { createSignal, onCleanup, onMount } from "solid-js"
+
+import { createNetworkMonitor, type NetworkStatus } from "../../lib/network"
 import { useTheme } from "../../providers/theme"
 
-const POLL_INTERVAL_MS = 5000
 const SIGNAL_BARS = 5
 
 /**
@@ -18,20 +18,28 @@ function signalToBars(signal: number): string {
 export const Stats = () => {
   const theme = useTheme()
 
-  const [network, { refetch }] = createResource(
-    () => true,
-    () => getActiveConnection(),
-    { initialValue: null },
-  )
+  const [network, setNetwork] = createSignal<NetworkStatus | null>(null)
+  const [signal, setSignal] = createSignal<number>(0)
 
   onMount(() => {
-    const interval = setInterval(() => {
-      refetch()
-    }, POLL_INTERVAL_MS)
-
-    onCleanup(() => {
-      clearInterval(interval)
+    const stop = createNetworkMonitor({
+      onConnect: (status) => {
+        setNetwork(status)
+        if (status.signal !== undefined) {
+          setSignal(status.signal)
+        }
+      },
+      onDisconnect: () => {
+        setNetwork(null)
+        setSignal(0)
+      },
+      onSignalChange: (sig) => {
+        setSignal(sig)
+      },
+      signalPollInterval: 1000,
     })
+
+    onCleanup(stop)
   })
 
   const label = () => {
@@ -45,7 +53,7 @@ export const Stats = () => {
     const conn = network()
     if (!conn) return signalToBars(0)
     if (conn.type === "ethernet") return "" // No signal for ethernet
-    return signalToBars(conn.signal ?? 0)
+    return signalToBars(signal())
   }
 
   return (
