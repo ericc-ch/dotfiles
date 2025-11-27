@@ -1,0 +1,61 @@
+# === Original / Standard ===
+  WIFI-5G  |    65% (Headphones)  |    Wed 26 Nov    13:17
+  CPU: 12%  |    MEM: 4.2GB  |    GPU: 24%  |    Bat: 80%
+
+[   Signal: Excellent ] [   Vol: 40% ] [   13:17:33 ]
+[   Load: 1.54 ] [   Used: 30% ] [   Tmp: 45°C ]
+
+  SSID  •    50%  •    13:17
+  10%  •    8GB  •    10%
+
+# === Visual Bars (Blocks & Dots) ===
+  NET [█████░░]  |    VOL [██████░░░░] (Ext. Speaker)  |  13:45
+  CPU [██░░░░░░░░]  |    RAM [████░░░░░░]  |    GPU [█░░░░░░░░░]
+
+  WIFI ●●●○  ::    VOL ●●●●●○○○○○  ::    13:45
+  CPU ▰▱▱▱▱  ::    MEM ▰▰▱▱▱  ::    GPU ▰▱▱▱▱
+
+  Link: 100% ▓▓▓▓  |    Vol: 35% ▌▎   |    13:45:01
+  CPU: 12% ▏   |    RAM: 4.2G ▍   |    GPU: 60% ▋
+
+[NET: 100%] [VOL: Spkr ═══----] [CPU: 10% ▓▒▒▒] [GPU: 5% ░░░░] 2025-11-26 13:45
+
+# === Dynamic / Equalizer Style ===
+  Signal: ▂▄▆█  |    Audio:   ▂▃▄▅ (50%)  |    Nov 26, 13:45
+  CPU:  ▂      |    RAM:  ▂▃▅     |    GPU: █▇▆▅
+
+  Wifi ▅▇█  |    DAC ▮▮▮▮▯ 80%  |    CPU ▃▅▂ 12%  |    MEM ▅▅  |    14:30
+  Link: Good    Load ⣀⣄⣤⣦ 24%    Use ⣀⣀⣄ 4G    Vol ⠤⠤⠤⠤⠤  Wed 26, 13:45
+  WIFI(5G):-50dBm    Headset:35%    12%[ ▂▃ ]    3.2G[ ▅▅ ]    Wed 13:45:01
+
+# === Minimalist & Clean ===
+13:45  •    Wifi  •    45%  •    12%
+ 13:45    5G    40%    12%    4GB
+Wed 27  /  13:45  /    Connected  /    65%
+
+# === Powerline & Segmented ===
+  100%   45%   12%   13:45
+   Wifi  100%   Vol  45%  13:45
+
+# === Sliders & Toggles ===
+  ───O──  |    ──O────  |    13:45
+[ON]  Wifi   [45%]  Vol   [12%]  CPU   13:45
+  ■■■■□    ■■□□□    ■□□□□    13:45
+
+# === Retro / Terminal ===
+<WIFI:ON> <VOL:45%> <CPU:12%> [13:45]
+// SYSTEM_READY // NET:OK // VOL:45 // T:1345
+>_ 13:45 | net_stat: 100% | aud_vol: 45% | sys_load: 0.12
+
+# === Data Dense / Technical ===
+  192.168.1.50 ⬇12MB/s |   Sink: PCM2704 (dB: -10) |   4.2GHz (45°C)
+NET: 5G (54Mbps) | AUDIO: Headphones (Muted) | MEM: 4.2/16GB | BAT: Discharging (80%)
+
+# === Geometric Shapes (Filled/Empty) ===
+  Link ◆◆◆◇◇  ::    Vol ◆◆◆◆◇  ::    Bat ◆◆◆◆◆
+  Wifi ◈◈◈◇◇  ::    Vol ◈◈◈◈◇  ::    CPU ◈◇◇◇◇
+
+  Net ▣▣▣▢▢  ::    Vol ▣▣▣▣▢  ::    13:45
+  Sig ■■■□□  ::    Aud ■■■■□  ::    pwr ■■□□□
+  WIFI ▪▪▪▪▫  ::    VOL ▪▪▪▫▫  ::    CPU ▪▫▫▫▫
+  Link ▓▓▓▒░  ::    Vol ▓▓▓▓▒  ::    13:45
