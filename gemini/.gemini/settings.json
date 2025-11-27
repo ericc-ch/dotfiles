@@ -5,9 +5,19 @@
     }
   },
   "general": {
-    "previewFeatures": true
+    "previewFeatures": true,
+    "disableAutoUpdate": true,
+    "enablePromptCompletion": true
   },
   "context": {
     "fileName": ["AGENTS.md"]
+  },
+  "ui": {
+    "footer": {
+      "hideContextPercentage": false
+    },
+    "showMemoryUsage": true,
+    "showModelInfoInChat": true,
+    "showStatusInTitle": true
   }
 }
