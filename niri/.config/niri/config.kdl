@@ -1,4 +1,6 @@
 spawn-at-startup "/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1"
+// spawn-at-startup "kitty" "+kitten" "panel" "bar"
+spawn-at-startup "kitty" "--single-instance"
 spawn-sh-at-startup "wbg ~/dotfiles/assets/debian.png"
 
 environment {

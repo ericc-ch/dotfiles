@@ -23,7 +23,7 @@ const App = () => {
     }
 
     if (event.name === "space") {
-      event.preventDefault()
+      if (!showAppLauncher()) event.preventDefault()
       setShowAppLauncher(true)
     }
   })
