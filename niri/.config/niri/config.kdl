@@ -42,7 +42,7 @@ binds {
     Mod+T { spawn "kitty" "--single-instance"; }
     Mod+E { spawn "nautilus"; }
 
-    XF86AudioRaiseVolume allow-when-locked=true { spawn "pamixer" "-i" "5"; }
+    XF86AudioRaiseVolume allow-when-locked=true { spawn "pamixer" "-u" "-i" "5"; }
     XF86AudioLowerVolume allow-when-locked=true { spawn "pamixer" "-d" "5"; }
     XF86AudioMute        allow-when-locked=true { spawn "pamixer" "-t"; }
 

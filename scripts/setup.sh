@@ -1,10 +1,8 @@
 #!/bin/bash
 
-# --- Script to setup an Arch-based system with dotfiles and fish ---
-
 set -e # Exit immediately if a command exits with a non-zero status.
 
-DOTFILES_DIR="$HOME/dotfiles"
+# DOTFILES_DIR="$HOME/dotfiles"
 
 echo "Installing paru (AUR helper)..."
 
@@ -52,6 +50,9 @@ echo "Installing required packages..."
 # Packages sorted from most fundamental to least fundamental
 sudo pacman -S --noconfirm \
   stow \
+  docker \
+  docker-buildx \
+  docker-compose \
   qt5-wayland \
   gnome-keyring \
   polkit-gnome \
@@ -67,7 +68,8 @@ sudo pacman -S --noconfirm \
   papirus-icon-theme \
   seahorse \
   gwenview \
-  kitty || {
+  kitty \
+  libreoffice-still || {
   echo "Error: Failed to install packages. Exiting."
   exit 1
 }
@@ -76,10 +78,10 @@ sudo pacman -S --noconfirm \
 paru -S --noconfirm \
   libastal-meta \
   wbg \
-  zen-browser-bin \
-  helium-browser-bin \
   qt5ct-kde \
-  qt6ct-kde || {
+  qt6ct-kde \
+  zen-browser-bin \
+  helium-browser-bin || {
   echo "Error: Failed to install packages. Exiting."
   exit 1
 }
