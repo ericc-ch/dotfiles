@@ -1,11 +1,19 @@
-import { render } from "@opentui/solid"
+import { render, useKeyboard, useRenderer } from "@opentui/solid"
 
 import { ThemeProvider, useTheme } from "./providers/theme"
 import { Clock } from "./components/bar/clock"
 import { Stats } from "./components/bar/stats"
+import { ConsolePosition } from "@opentui/core"
 
 const App = () => {
+  const renderer = useRenderer()
   const theme = useTheme()
+
+  useKeyboard((event) => {
+    if (event.name === "f12") {
+      renderer.console.toggle()
+    }
+  })
 
   return (
     <box
@@ -29,5 +37,9 @@ render(
   ),
   {
     useKittyKeyboard: true,
+    consoleOptions: {
+      sizePercent: 100,
+      position: ConsolePosition.RIGHT,
+    },
   },
 )

@@ -36,7 +36,7 @@ export const Stats = () => {
       onSignalChange: (sig) => {
         setSignal(sig)
       },
-      signalPollInterval: 1000,
+      signalPollInterval: 10_000,
     })
 
     onCleanup(stop)

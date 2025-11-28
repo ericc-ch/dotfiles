@@ -220,10 +220,10 @@ function parseWifiListOutput(output: string): WifiNetwork[] {
       ssid,
       bssid,
       signal: signal ? parseInt(signal, 10) : 0,
-      rate: rate || undefined,
-      frequency: freq || undefined,
+      rate: rate ?? undefined,
+      frequency: freq ?? undefined,
       channel: chan ? parseInt(chan, 10) : undefined,
-      security: security || undefined,
+      security: security ?? undefined,
       active: active === "yes",
     })
   }
@@ -321,7 +321,7 @@ export async function listEthernetDevices(): Promise<EthernetDevice[]> {
     devices.push({
       device,
       state: ethState,
-      connection: connection || undefined,
+      connection: connection ?? undefined,
       speed: undefined, // Will be populated below
     })
   }
@@ -371,10 +371,10 @@ function parseWifiOutput(output: string): NetworkStatus | null {
       type: "wifi",
       device,
       signal: signal ? parseInt(signal, 10) : undefined,
-      rate: rate || undefined,
-      frequency: freq || undefined,
+      rate: rate ?? undefined,
+      frequency: freq ?? undefined,
       channel: chan ? parseInt(chan, 10) : undefined,
-      security: security || undefined,
+      security: security ?? undefined,
     }
   }
   return null
@@ -499,17 +499,21 @@ export function createNetworkMonitor(
       },
     })
 
-    const reader = (proc.stdout as ReadableStream<Uint8Array>).getReader()
+    if (!(proc.stdout instanceof ReadableStream)) {
+      options.onError?.(new Error("Failed to capture nmcli stdout"))
+      return
+    }
+
     const decoder = new TextDecoder()
     let buffer = ""
+    const stdout = proc.stdout as ReadableStream<Uint8Array>
 
     const readLoop = async () => {
       try {
-        while (!stopped) {
-          const { done, value } = await reader.read()
-          if (done) break
+        for await (const chunk of stdout) {
+          if (stopped) break
 
-          buffer += decoder.decode(value, { stream: true })
+          buffer += decoder.decode(chunk, { stream: true })
           const lines = buffer.split("\n")
           buffer = lines.pop() ?? ""
 
