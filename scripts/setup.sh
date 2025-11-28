@@ -67,7 +67,6 @@ sudo pacman -S --noconfirm \
   breeze-gtk \
   papirus-icon-theme \
   seahorse \
-  gwenview \
   kitty \
   libreoffice-still || {
   echo "Error: Failed to install packages. Exiting."

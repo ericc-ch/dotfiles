@@ -58,6 +58,7 @@ export const Stats = () => {
 
   return (
     <text fg={theme().fg.normal}>
+      {"  "}
       {label()} {bars()}
     </text>
   )
