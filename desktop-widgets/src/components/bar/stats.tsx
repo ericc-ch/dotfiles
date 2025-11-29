@@ -76,16 +76,23 @@ export const Stats = () => {
   }
 
   const volumeStats = () => {
-    const label = muted() ? "󰝟" : "󰕾"
-    const bars = toBars(muted() ? 0 : volume())
+    const icon = muted() ? "󰝟" : "󰕾"
+    const bars = toBars(volume())
 
-    return `${label} ${volume()}% ${bars}`
+    return (
+      <box flexDirection="row" gap={1}>
+        <text fg={theme().fg.normal}>{icon}</text>
+        <text fg={muted() ? theme().fg.darker : theme().fg.normal}>
+          {volume()}% {bars}
+        </text>
+      </box>
+    )
   }
 
   return (
     <box flexDirection="row" gap={1}>
       <text fg={theme().fg.normal}>{networkStats()}</text>
-      <text fg={theme().fg.normal}>{volumeStats()}</text>
+      {volumeStats()}
     </box>
   )
 }
