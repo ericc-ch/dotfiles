@@ -92,6 +92,7 @@ export const Stats = () => {
   return (
     <box flexDirection="row" gap={1}>
       <text fg={theme().fg.normal}>{networkStats()}</text>
+      <text fg={theme().fg.normal}>/</text>
       {volumeStats()}
     </box>
   )
