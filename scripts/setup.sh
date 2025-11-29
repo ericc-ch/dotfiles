@@ -68,7 +68,8 @@ sudo pacman -S --noconfirm \
   papirus-icon-theme \
   seahorse \
   kitty \
-  libreoffice-still || {
+  libreoffice-still \
+  pamixer || {
   echo "Error: Failed to install packages. Exiting."
   exit 1
 }
