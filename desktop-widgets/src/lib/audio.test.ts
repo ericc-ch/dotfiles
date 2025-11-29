@@ -1,9 +1,12 @@
 import { describe, expect, test } from "bun:test"
 import {
+  createAudioMonitor,
   getDefaultSink,
+  getDefaultSinkVolume,
   getDefaultSource,
   listSinks,
   listSources,
+  parseSubscribeLine,
   setDefaultSink,
   setDefaultSource,
 } from "./audio"
@@ -172,5 +175,117 @@ describe("pactl utilities", () => {
     expect(async () => {
       await setDefaultSource("invalid_device_name_12345")
     }).toThrow()
+  })
+
+  test("getDefaultSinkVolume returns volume and muted status", async () => {
+    const result = await getDefaultSinkVolume()
+
+    expect(typeof result.volume).toBe("number")
+    expect(result.volume).toBeGreaterThanOrEqual(0)
+    expect(result.volume).toBeLessThanOrEqual(150) // Volume can exceed 100%
+    expect(typeof result.muted).toBe("boolean")
+  })
+})
+
+describe("parseSubscribeLine", () => {
+  test("parses sink change event", () => {
+    const event = parseSubscribeLine("Event 'change' on sink #56")
+    expect(event).toEqual({
+      action: "change",
+      object: "sink",
+      index: 56,
+    })
+  })
+
+  test("parses source change event", () => {
+    const event = parseSubscribeLine("Event 'change' on source #57")
+    expect(event).toEqual({
+      action: "change",
+      object: "source",
+      index: 57,
+    })
+  })
+
+  test("parses server change event", () => {
+    const event = parseSubscribeLine("Event 'change' on server #0")
+    expect(event).toEqual({
+      action: "change",
+      object: "server",
+      index: 0,
+    })
+  })
+
+  test("parses client new event", () => {
+    const event = parseSubscribeLine("Event 'new' on client #123")
+    expect(event).toEqual({
+      action: "new",
+      object: "client",
+      index: 123,
+    })
+  })
+
+  test("parses client remove event", () => {
+    const event = parseSubscribeLine("Event 'remove' on client #123")
+    expect(event).toEqual({
+      action: "remove",
+      object: "client",
+      index: 123,
+    })
+  })
+
+  test("parses card change event", () => {
+    const event = parseSubscribeLine("Event 'change' on card #44")
+    expect(event).toEqual({
+      action: "change",
+      object: "card",
+      index: 44,
+    })
+  })
+
+  test("parses sink-input event", () => {
+    const event = parseSubscribeLine("Event 'new' on sink-input #100")
+    expect(event).toEqual({
+      action: "new",
+      object: "sink-input",
+      index: 100,
+    })
+  })
+
+  test("returns null for invalid lines", () => {
+    expect(parseSubscribeLine("")).toBeNull()
+    expect(parseSubscribeLine("Got SIGINT, exiting.")).toBeNull()
+    expect(parseSubscribeLine("random text")).toBeNull()
+    expect(parseSubscribeLine("Event 'change' on sink")).toBeNull()
+  })
+})
+
+describe("createAudioMonitor", () => {
+  test("calls onVolumeChange with initial volume", async () => {
+    let receivedVolume: { volume: number; muted: boolean } | null = null
+
+    const stop = createAudioMonitor({
+      onVolumeChange: (status) => {
+        receivedVolume = status
+      },
+    })
+
+    // Wait for init to complete
+    await new Promise((resolve) => setTimeout(resolve, 100))
+
+    expect(receivedVolume).not.toBeNull()
+    expect(typeof receivedVolume!.volume).toBe("number")
+    expect(typeof receivedVolume!.muted).toBe("boolean")
+
+    stop()
+  })
+
+  test("stop function kills the process", async () => {
+    const stop = createAudioMonitor({})
+
+    // Wait for monitor to start
+    await new Promise((resolve) => setTimeout(resolve, 100))
+
+    // Should not throw
+    stop()
   })
 })
