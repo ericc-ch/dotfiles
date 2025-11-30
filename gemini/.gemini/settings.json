@@ -6,8 +6,7 @@
   },
   "general": {
     "previewFeatures": true,
-    "disableAutoUpdate": true,
-    "enablePromptCompletion": true
+    "disableAutoUpdate": true
   },
   "context": {
     "fileName": ["AGENTS.md"]
