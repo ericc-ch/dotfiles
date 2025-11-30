@@ -1,6 +1,4 @@
-// https://github.com/sst/opentui/tree/main/packages/solid
-// LMAO gotta make a PR for this
-import solidPlugin from "../node_modules/@opentui/solid/scripts/solid-plugin"
+import solidPlugin from "@opentui/solid/bun-plugin"
 
 import path from "node:path"
 import fs from "node:fs/promises"
