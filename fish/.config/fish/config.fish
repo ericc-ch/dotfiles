@@ -21,6 +21,7 @@ set -gx PNPM_HOME "$HOME/.local/share/pnpm"
 # Add tool directories to PATH (highest priority first)
 fish_add_path \
     $HOME/.local/bin \
+    $HOME/.bun/bin \
     $XDG_CACHE_HOME/.bun/bin \
     $HOME/go/bin \
     $PNPM_HOME \
