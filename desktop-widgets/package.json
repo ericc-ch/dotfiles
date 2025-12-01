@@ -11,8 +11,8 @@
     "typecheck": "tsc"
   },
   "dependencies": {
-    "@opentui/core": "^0.1.53",
-    "@opentui/solid": "^0.1.53",
+    "@opentui/core": "^0.1.54",
+    "@opentui/solid": "^0.1.54",
     "solid-js": "^1.9.10"
   },
   "devDependencies": {
