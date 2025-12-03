@@ -1,3 +1,7 @@
+## Context
+
+Before implementing any feature, always reference `@.context/effect/` to understand Effect conventions, patterns, and best practices. Follow Effect-TS idioms consistently throughout the codebase.
+
 ## Build & Test Commands
 
 - **Run app**: `bun run src/main.tsx` or `bun start`
@@ -11,12 +15,8 @@
 
 - **Formatting**: Prettier with no semicolons, experimental ternaries enabled
 - **Imports**: Group by external packages first, then local imports with blank line separation
-- **Types**: Prefer explicit types for function parameters/returns; export interfaces/types when reusable
 - **Naming**: camelCase for functions/variables, PascalCase for components/types
-- **Error handling**: Throw errors with descriptive messages including context (e.g., exit codes, command output)
-- **JSDoc**: Use for all exported functions with `@param`, `@returns`, and `@see` for references
 - **Nullish coalescing**: Prefer `??` over `||` for default values (only treats `null`/`undefined` as nullish)
-- **Async/await**: Preferred over `.then()` chains; handle errors with try/catch or `.catch()`
 - **SolidJS**: Use signals (`createSignal`), resources (`createResource`), and JSX with `@opentui/solid` components
 
 ## Testing

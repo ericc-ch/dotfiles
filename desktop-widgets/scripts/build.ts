@@ -1,3 +1,4 @@
+#!/usr/bin/env bun
 import solidPlugin from "@opentui/solid/bun-plugin"
 
 import path from "node:path"
