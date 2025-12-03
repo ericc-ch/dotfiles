@@ -12,8 +12,6 @@ overview {
 }
 
 input {
-    warp-mouse-to-focus
-
     mouse {
         accel-profile "flat"
     }
