@@ -1,7 +1,6 @@
 import { Command } from "@effect/platform"
 import type { ExitCode } from "@effect/platform/CommandExecutor"
-import { Data, Effect, pipe, Schema } from "effect"
-import { decodeUnknown } from "effect/Schema"
+import { Chunk, Data, Effect, Schema, Stream } from "effect"
 
 const Application = Schema.Struct({
   name: Schema.String,
@@ -23,31 +22,42 @@ export class CommandError extends Data.TaggedError("CommandError")<{
   readonly stderr?: string
 }> {}
 
-export const listApps = (search?: string) =>
-  pipe(
+export const listApps = (search?: string) => {
+  const command =
     search ?
       Command.make("astal-apps", "--search", search, "--json")
-    : Command.make("astal-apps", "--json"),
+    : Command.make("astal-apps", "--json")
+
+  return command.pipe(
     Command.string,
-    Effect.flatMap((output) => decodeUnknown(ApplicatonsFromString)(output)),
+    Effect.flatMap((output) =>
+      Schema.decodeUnknown(ApplicatonsFromString)(output),
+    ),
   )
+}
 
 export const launchApp = (name: string) => {
   const command = ["astal-apps", "--launch", name] as const
 
-  return pipe(
-    Command.make(...command),
+  return Command.make(...command).pipe(
     Command.start,
-    Effect.flatMap(process => Effect.all([
-      process.exitCode,
-      process.stderr,
-    ]))
+    Effect.scoped,
+    Effect.flatMap((process) =>
+      Effect.all({
+        exitCode: process.exitCode,
+        stderr: process.stderr.pipe(
+          Stream.decodeText(),
+          Stream.runCollect,
+          Effect.map(Chunk.join("")),
+        ),
+      }),
+    ),
     Effect.filterOrFail(
-      ([code]) => code === 0,
-      (code) =>
+      ({ exitCode }) => exitCode === 0,
+      (result) =>
         new CommandError({
           command,
-          exitCode: code,
+          ...result,
         }),
     ),
   )

@@ -1,9 +1,11 @@
 import { describe, test, expect } from "bun:test"
 import { listApps, launchApp } from "./apps"
+import { Runtime } from "./runtime"
+import { Exit } from "effect"
 
 describe("listApps", () => {
   test("returns array of applications", async () => {
-    const apps = await listApps()
+    const apps = await Runtime.runPromise(listApps())
 
     expect(apps).toBeDefined()
     expect(Array.isArray(apps)).toBe(true)
@@ -11,7 +13,7 @@ describe("listApps", () => {
   })
 
   test("each app has required properties", async () => {
-    const apps = await listApps()
+    const apps = await Runtime.runPromise(listApps())
     const app = apps[0]
 
     expect(app).toBeDefined()
@@ -27,20 +29,20 @@ describe("listApps", () => {
 
 describe("listApps with search", () => {
   test("returns filtered apps by search term", async () => {
-    const apps = await listApps("terminal")
+    const apps = await Runtime.runPromise(listApps())
 
     expect(apps).toBeDefined()
     expect(Array.isArray(apps)).toBe(true)
   })
 
   test("returns empty array for non-matching search", async () => {
-    const apps = await listApps("xyznonexistentapp12345")
+    const apps = await Runtime.runPromise(listApps())
 
     expect(Array.isArray(apps)).toBe(true)
   })
 
   test("returns empty array for non-matching search", async () => {
-    const apps = await listApps("xyznonexistentapp12345")
+    const apps = await Runtime.runPromise(listApps())
 
     expect(Array.isArray(apps)).toBe(true)
   })
@@ -48,8 +50,10 @@ describe("listApps with search", () => {
 
 describe("launchApp", () => {
   test("throws error for invalid app name", async () => {
-    expect(async () => {
-      await launchApp("nonexistent app 12345")
-    }).toThrow()
+    const exit = await Runtime.runPromiseExit(
+      launchApp("nonexistent app 12345"),
+    )
+
+    expect(Exit.isFailure(exit)).toBe(true)
   })
 })
