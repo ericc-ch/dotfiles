@@ -9,7 +9,9 @@
     "disableAutoUpdate": true
   },
   "context": {
-    "fileName": ["AGENTS.md"]
+    "fileName": [
+      "AGENTS.md"
+    ]
   },
   "ui": {
     "footer": {
@@ -17,6 +19,32 @@
     },
     "showMemoryUsage": true,
     "showModelInfoInChat": true,
-    "showStatusInTitle": true
+    "showStatusInTitle": true,
+    "customThemes": {
+      "Gruvbox": {
+        "name": "Gruvbox",
+        "type": "custom",
+        "Background": "#1d2021",
+        "Foreground": "#d4be98",
+        "LightBlue": "#7daea3",
+        "AccentBlue": "#7daea3",
+        "AccentPurple": "#d3869b",
+        "AccentCyan": "#89b482",
+        "AccentGreen": "#a9b665",
+        "AccentYellow": "#d8a657",
+        "AccentRed": "#ea6962",
+        "Comment": "#7c6f64",
+        "Gray": "#928374",
+        "DiffAdded": "#32361a",
+        "DiffRemoved": "#3c1f1e",
+        "DiffModified": "#0d3138",
+        "GradientColors": [
+          "#7daea3",
+          "#d3869b",
+          "#ea6962"
+        ]
+      }
+    },
+    "theme": "Gruvbox"
   }
 }

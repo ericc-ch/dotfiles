@@ -1,5 +1,7 @@
 import { Command } from "@effect/platform"
+import { decode } from "@effect/platform/ChannelSchema"
 import { Effect, pipe, Schema } from "effect"
+import { decodeUnknown } from "effect/Schema"
 
 const Application = Schema.Struct({
   name: Schema.String,
@@ -12,7 +14,10 @@ const Application = Schema.Struct({
   categories: Schema.Array(Schema.String),
 })
 
-const parseApplications = Schema.parseJson(Schema.Array(Application))
+const Applications = Schema.Array(Application)
+const ApplicatonsFromString = Schema.parseJson(Applications)
+
+decodeUnknown(ApplicatonsFromString)("asd")
 
 /**
  * Lists or searches for applications
@@ -42,15 +47,14 @@ const parseApplications = Schema.parseJson(Schema.Array(Application))
 //   return JSON.parse(output) as Application[]
 // }
 
-export const listApps = Effect.fn(function* (search?: string) {
-  return pipe(
+export const listApps = (search?: string) =>
+  pipe(
     search ?
       Command.make("astal-apps", "--search", search, "--json")
     : Command.make("astal-apps", "--json"),
     Command.string,
-    Effect.map((output) => Schema.json),
+    Effect.flatMap((output) => decodeUnknown(ApplicatonsFromString)(output)),
   )
-})
 
 // const parseApps = Schema.parsej
 
