@@ -3,7 +3,9 @@ import path from "node:path"
 import fs from "node:fs"
 
 const rootDir = path.join(import.meta.dir, "..")
-const gitRoot = await Bun.$`git rev-parse --show-toplevel`.text().then(s => s.trim())
+const gitRoot = await Bun.$`git rev-parse --show-toplevel`
+  .text()
+  .then((s) => s.trim())
 const contextDir = path.join(rootDir, ".context/effect")
 
 // Subtree prefix is relative to git root
@@ -22,7 +24,9 @@ if (remoteCheck.exitCode !== 0) {
 // Add subtree if directory doesn't exist (must run from git root)
 if (!fs.existsSync(contextDir)) {
   console.log("Adding effect subtree...")
-  await Bun.$`git subtree add --prefix=${subtreePrefix} --squash effect main`.cwd(gitRoot)
+  await Bun.$`git subtree add --prefix=${subtreePrefix} --squash effect main`.cwd(
+    gitRoot,
+  )
 } else {
   console.log(".context/effect already exists, use context-pull.ts to update")
 }

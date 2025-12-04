@@ -27,29 +27,49 @@ export const AppRuntime = ManagedRuntime.make(BunContext.layer)
 import * as Command from "@effect/platform/Command"
 import type { CommandExecutor } from "@effect/platform/CommandExecutor"
 import type { PlatformError } from "@effect/platform/Error"
-import * as Data from "effect/Data"
 import * as Effect from "effect/Effect"
+import { pipe } from "effect/Function"
+import * as Schema from "effect/Schema"
 
-export interface Application {
-  name: string
-  entry: string
-  executable: string
-  description: string | null
-  icon_name: string
-  frequency: number
-  keywords: string[]
-  categories: string[]
-}
+// Schema for application data
+const Application = Schema.Struct({
+  name: Schema.String,
+  entry: Schema.String,
+  executable: Schema.String,
+  description: Schema.NullOr(Schema.String),
+  icon_name: Schema.String,
+  frequency: Schema.Number,
+  keywords: Schema.Array(Schema.String),
+  categories: Schema.Array(Schema.String),
+})
 
-// Simple error for non-zero exit codes
-export class CommandError extends Data.TaggedError("CommandError")<{
-  readonly command: string
-  readonly exitCode: number
-}> {}
+export type Application = typeof Application.Type
+
+// Parse JSON string into array of Applications
+const Applications = Schema.Array(Application)
+const decodeApplications = Schema.decodeUnknown(Schema.parseJson(Applications))
+
+// Tagged error for parse failures
+export class ParseError extends Schema.TaggedError<ParseError>()("ParseError", {
+  message: Schema.String,
+}) {}
+
+// Tagged error for non-zero exit codes
+export class CommandError extends Schema.TaggedError<CommandError>()(
+  "CommandError",
+  {
+    command: Schema.String,
+    exitCode: Schema.Number,
+  },
+) {}
 
 export const listApps = (
   searchTerm?: string,
-): Effect.Effect<Application[], PlatformError, CommandExecutor> =>
+): Effect.Effect<
+  readonly Application[],
+  PlatformError | ParseError,
+  CommandExecutor
+> =>
   Effect.gen(function* () {
     const command =
       searchTerm ?
@@ -57,8 +77,31 @@ export const listApps = (
       : Command.make("astal-apps", "--json")
 
     const output = yield* Command.string(command)
-    return JSON.parse(output) as Application[]
+    const apps = yield* decodeApplications(output).pipe(
+      Effect.mapError((e) => new ParseError({ message: e.message })),
+    )
+    return apps
   })
+
+// Alt: pipe style
+export const listAppsAlt = (
+  searchTerm?: string,
+): Effect.Effect<
+  readonly Application[],
+  PlatformError | ParseError,
+  CommandExecutor
+> =>
+  pipe(
+    searchTerm ?
+      Command.make("astal-apps", "--search", searchTerm, "--json")
+    : Command.make("astal-apps", "--json"),
+    Command.string,
+    Effect.flatMap((output) =>
+      decodeApplications(output).pipe(
+        Effect.mapError((e) => new ParseError({ message: e.message })),
+      ),
+    ),
+  )
 
 export const launchApp = (
   name: string,
@@ -74,6 +117,25 @@ export const launchApp = (
       })
     }
   })
+
+// Alt: pipe style
+export const launchAppAlt = (
+  name: string,
+): Effect.Effect<void, PlatformError | CommandError, CommandExecutor> =>
+  pipe(
+    Command.make("astal-apps", "--launch", name),
+    Command.exitCode,
+    Effect.flatMap((code) =>
+      code !== 0 ?
+        Effect.fail(
+          new CommandError({
+            command: `astal-apps --launch ${name}`,
+            exitCode: code,
+          }),
+        )
+      : Effect.void,
+    ),
+  )
 ```
 
 ### 3. `src/lib/apps.test.ts` (update)
@@ -83,7 +145,7 @@ import { describe, test, expect } from "bun:test"
 import * as Effect from "effect/Effect"
 import * as Exit from "effect/Exit"
 import { AppRuntime } from "./runtime"
-import { listApps, launchApp } from "./apps"
+import { listApps, launchApp, Application } from "./apps"
 
 describe("listApps", () => {
   test("returns array of applications", async () => {
@@ -158,18 +220,53 @@ process.on("SIGTERM", () => AppRuntime.dispose())
 ### Error Handling
 
 - `PlatformError` - built-in error for spawn failures, permission denied, etc.
+- `ParseError` - custom tagged error for schema validation failures
 - `CommandError` - custom tagged error for non-zero exit codes (since `Command.exitCode` doesn't fail)
-- `JSON.parse` throws as defect (untyped) - acceptable for now
 
-### Tagged Errors
+### Schema
 
 ```ts
-import * as Data from "effect/Data"
+import * as Schema from "effect/Schema"
 
-export class CommandError extends Data.TaggedError("CommandError")<{
-  readonly command: string
-  readonly exitCode: number
-}> {}
+// Define a struct schema for plain data
+const Application = Schema.Struct({
+  name: Schema.String,
+  description: Schema.NullOr(Schema.String),
+  keywords: Schema.Array(Schema.String),
+})
+
+// Extract the type from the schema
+type Application = typeof Application.Type
+
+// Parse JSON string directly into typed array
+const Applications = Schema.Array(Application)
+const decodeApplications = Schema.decodeUnknown(Schema.parseJson(Applications))
+
+// Usage: yields ParseError on invalid JSON or schema mismatch
+const apps =
+  yield
+  * decodeApplications(jsonString).pipe(
+    Effect.mapError((e) => new ParseError({ message: e.message })),
+  )
+```
+
+### Tagged Errors (with Schema)
+
+```ts
+import * as Schema from "effect/Schema"
+
+// Define tagged errors using Schema.TaggedError
+export class ParseError extends Schema.TaggedError<ParseError>()("ParseError", {
+  message: Schema.String,
+}) {}
+
+export class CommandError extends Schema.TaggedError<CommandError>()(
+  "CommandError",
+  {
+    command: Schema.String,
+    exitCode: Schema.Number,
+  },
+) {}
 
 // Usage: yield* new CommandError({ command: "...", exitCode: 1 })
 ```

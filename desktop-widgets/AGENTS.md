@@ -1,6 +1,6 @@
 ## Context
 
-**CRITICAL:** Before implementing any feature, you **MUST** reference `@.context/effect/` to understand Effect conventions, patterns, and best practices. It is mandatory to follow Effect-TS idioms consistently throughout the codebase. Do not guess—verify against the context.
+**CRITICAL:** Whenever you are asked or need to do something related to Effect, you **MUST** reference `@.context/effect/` to understand Effect conventions, patterns, and best practices. It is mandatory to follow Effect-TS idioms consistently throughout the codebase. Do not guess—verify against the context.
 
 ## Build & Test Commands
 

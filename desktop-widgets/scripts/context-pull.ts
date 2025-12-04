@@ -2,7 +2,9 @@
 import path from "node:path"
 
 const rootDir = path.join(import.meta.dir, "..")
-const gitRoot = await Bun.$`git rev-parse --show-toplevel`.text().then(s => s.trim())
+const gitRoot = await Bun.$`git rev-parse --show-toplevel`
+  .text()
+  .then((s) => s.trim())
 const contextDir = path.join(rootDir, ".context/effect")
 
 // Subtree prefix is relative to git root
@@ -18,6 +20,8 @@ if (remoteCheck.exitCode !== 0) {
 
 // Must run from git root
 console.log("Pulling effect subtree updates...")
-await Bun.$`git subtree pull --prefix=${subtreePrefix} --squash effect main`.cwd(gitRoot)
+await Bun.$`git subtree pull --prefix=${subtreePrefix} --squash effect main`.cwd(
+  gitRoot,
+)
 
 console.log("Done!")
