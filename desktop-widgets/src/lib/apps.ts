@@ -1,6 +1,6 @@
 import { Command } from "@effect/platform"
-import { decode } from "@effect/platform/ChannelSchema"
-import { Effect, pipe, Schema } from "effect"
+import type { ExitCode } from "@effect/platform/CommandExecutor"
+import { Data, Effect, pipe, Schema } from "effect"
 import { decodeUnknown } from "effect/Schema"
 
 const Application = Schema.Struct({
@@ -17,35 +17,11 @@ const Application = Schema.Struct({
 const Applications = Schema.Array(Application)
 const ApplicatonsFromString = Schema.parseJson(Applications)
 
-decodeUnknown(ApplicatonsFromString)("asd")
-
-/**
- * Lists or searches for applications
- * @param searchTerm - Optional search term to filter applications (results are sorted by relevance when provided)
- * @returns Promise that resolves to an array of applications
- */
-// export async function listApps(searchTerm?: string): Promise<Application[]> {
-//   const args =
-//     searchTerm ?
-//       ["astal-apps", "--search", searchTerm, "--json"]
-//     : ["astal-apps", "--json"]
-
-//   const proc = Bun.spawn(args, {
-//     stderr: "pipe",
-//   })
-
-//   const output = await proc.stdout.text()
-//   const exitCode = await proc.exited
-
-//   if (exitCode !== 0) {
-//     const errorOutput = await proc.stderr.text()
-//     throw new Error(
-//       `astal-apps command failed with exit code ${exitCode}: ${errorOutput}`,
-//     )
-//   }
-
-//   return JSON.parse(output) as Application[]
-// }
+export class CommandError extends Data.TaggedError("CommandError")<{
+  readonly command: ReadonlyArray<string>
+  readonly exitCode: ExitCode
+  readonly stderr?: string
+}> {}
 
 export const listApps = (search?: string) =>
   pipe(
@@ -56,24 +32,23 @@ export const listApps = (search?: string) =>
     Effect.flatMap((output) => decodeUnknown(ApplicatonsFromString)(output)),
   )
 
-// const parseApps = Schema.parsej
+export const launchApp = (name: string) => {
+  const command = ["astal-apps", "--launch", name] as const
 
-/**
- * Launches an application by its name
- * @param name - The display name of the application (e.g., "Ghostty", "Passwords and Keys")
- * @returns Promise that resolves when the application is launched
- */
-export async function launchApp(name: string): Promise<void> {
-  const proc = Bun.spawn(["astal-apps", "--launch", name], {
-    stderr: "pipe",
-  })
-
-  const exitCode = await proc.exited
-
-  if (exitCode !== 0) {
-    const errorOutput = await proc.stderr.text()
-    throw new Error(
-      `astal-apps command failed with exit code ${exitCode}: ${errorOutput}`,
-    )
-  }
+  return pipe(
+    Command.make(...command),
+    Command.start,
+    Effect.flatMap(process => Effect.all([
+      process.exitCode,
+      process.stderr,
+    ]))
+    Effect.filterOrFail(
+      ([code]) => code === 0,
+      (code) =>
+        new CommandError({
+          command,
+          exitCode: code,
+        }),
+    ),
+  )
 }

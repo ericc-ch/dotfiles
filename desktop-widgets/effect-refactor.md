@@ -27,9 +27,12 @@ export const AppRuntime = ManagedRuntime.make(BunContext.layer)
 import * as Command from "@effect/platform/Command"
 import type { CommandExecutor } from "@effect/platform/CommandExecutor"
 import type { PlatformError } from "@effect/platform/Error"
+import * as Chunk from "effect/Chunk"
+import * as Data from "effect/Data"
 import * as Effect from "effect/Effect"
 import { pipe } from "effect/Function"
 import * as Schema from "effect/Schema"
+import * as Stream from "effect/Stream"
 
 // Schema for application data
 const Application = Schema.Struct({
@@ -50,18 +53,25 @@ const Applications = Schema.Array(Application)
 const decodeApplications = Schema.decodeUnknown(Schema.parseJson(Applications))
 
 // Tagged error for parse failures
-export class ParseError extends Schema.TaggedError<ParseError>()("ParseError", {
-  message: Schema.String,
-}) {}
+export class ParseError extends Data.TaggedError("ParseError")<{
+  readonly message: string
+}> {}
 
 // Tagged error for non-zero exit codes
-export class CommandError extends Schema.TaggedError<CommandError>()(
-  "CommandError",
-  {
-    command: Schema.String,
-    exitCode: Schema.Number,
-  },
-) {}
+export class CommandError extends Data.TaggedError("CommandError")<{
+  readonly command: string
+  readonly exitCode: number
+  readonly stderr: string
+}> {}
+
+// Helper to collect a stream of bytes into a string
+const streamToString = (stream: Stream.Stream<Uint8Array, PlatformError>) =>
+  pipe(
+    stream,
+    Stream.decodeText(),
+    Stream.runCollect,
+    Effect.map(Chunk.join("")),
+  )
 
 export const listApps = (
   searchTerm?: string,
@@ -105,37 +115,49 @@ export const listAppsAlt = (
 
 export const launchApp = (
   name: string,
-): Effect.Effect<void, PlatformError | CommandError, CommandExecutor> =>
+): Effect.Effect<number, PlatformError | CommandError, CommandExecutor> =>
   Effect.gen(function* () {
     const command = Command.make("astal-apps", "--launch", name)
-    const code = yield* Command.exitCode(command)
+    const process = yield* Command.start(command)
+    const exitCode = yield* process.exitCode
 
-    if (code !== 0) {
+    if (exitCode !== 0) {
+      const stderr = yield* streamToString(process.stderr)
       yield* new CommandError({
         command: `astal-apps --launch ${name}`,
-        exitCode: code,
+        exitCode,
+        stderr,
       })
     }
+
+    return exitCode
   })
 
 // Alt: pipe style
 export const launchAppAlt = (
   name: string,
-): Effect.Effect<void, PlatformError | CommandError, CommandExecutor> =>
-  pipe(
-    Command.make("astal-apps", "--launch", name),
-    Command.exitCode,
-    Effect.flatMap((code) =>
-      code !== 0 ?
-        Effect.fail(
+): Effect.Effect<number, PlatformError | CommandError, CommandExecutor> =>
+  Effect.gen(function* () {
+    const command = Command.make("astal-apps", "--launch", name)
+    const process = yield* Command.start(command)
+    const [exitCode, stderr] = yield* Effect.all([
+      process.exitCode,
+      streamToString(process.stderr),
+    ])
+
+    return yield* pipe(
+      Effect.succeed(exitCode),
+      Effect.filterOrFail(
+        (code) => code === 0,
+        () =>
           new CommandError({
             command: `astal-apps --launch ${name}`,
-            exitCode: code,
+            exitCode,
+            stderr,
           }),
-        )
-      : Effect.void,
-    ),
-  )
+      ),
+    )
+  })
 ```
 
 ### 3. `src/lib/apps.test.ts` (update)
@@ -216,6 +238,29 @@ process.on("SIGTERM", () => AppRuntime.dispose())
 - `Command.string(command)` - runs and returns stdout as string, fails with `PlatformError` on spawn errors
 - `Command.exitCode(command)` - runs and returns exit code (does NOT fail on non-zero)
 - `Command.lines(command)` - runs and returns stdout as array of lines
+- `Command.start(command)` - starts process, returns `Process` with access to streams
+
+**Capturing stderr:**
+
+```ts
+import * as Stream from "effect/Stream"
+import * as Chunk from "effect/Chunk"
+
+// Helper to collect a stream of bytes into a string
+const streamToString = (stream: Stream.Stream<Uint8Array, PlatformError>) =>
+  pipe(
+    stream,
+    Stream.decodeText(),
+    Stream.runCollect,
+    Effect.map(Chunk.join("")),
+  )
+
+// Use Command.start() to access process streams
+const process = yield * Command.start(command)
+const exitCode = yield * process.exitCode
+const stderr = yield * streamToString(process.stderr)
+const stdout = yield * streamToString(process.stdout)
+```
 
 ### Error Handling
 
@@ -250,26 +295,155 @@ const apps =
   )
 ```
 
-### Tagged Errors (with Schema)
+### Tagged Errors
+
+There are three TaggedError variants in Effect:
+
+**`Data.TaggedError`** — lightweight, no runtime validation
+
+```ts
+import * as Data from "effect/Data"
+
+export class CommandError extends Data.TaggedError("CommandError")<{
+  readonly command: string
+  readonly exitCode: number
+}> {}
+
+// Usage: yield* new CommandError({ command: "...", exitCode: 1 })
+```
+
+**`Schema.TaggedError`** — full schema support, runtime validation, JSON encoding
 
 ```ts
 import * as Schema from "effect/Schema"
 
-// Define tagged errors using Schema.TaggedError
-export class ParseError extends Schema.TaggedError<ParseError>()("ParseError", {
+export class HttpError extends Schema.TaggedError<HttpError>()("HttpError", {
+  status: Schema.Number,
+  message: Schema.String,
+}) {
+  get description(): string {
+    return `HTTP ${this.status}: ${this.message}`
+  }
+}
+```
+
+**`Micro.TaggedError`** — for Micro effects (experimental)
+
+**When to use:**
+
+- `Data.TaggedError` — internal domain errors, simple error types
+- `Schema.TaggedError` — API boundaries, need validation/encoding, custom methods
+
+### Schema.TaggedError Deep Dive
+
+`Schema.TaggedError` provides capabilities that `Data.TaggedError` doesn't have:
+
+**1. Encoding/Decoding from unknown data**
+
+```ts
+class ApiError extends Schema.TaggedError<ApiError>()("ApiError", {
+  code: Schema.Number,
   message: Schema.String,
 }) {}
 
-export class CommandError extends Schema.TaggedError<CommandError>()(
-  "CommandError",
+// Decode from JSON (e.g., from HTTP response)
+const error = Schema.decodeUnknownSync(ApiError)({
+  _tag: "ApiError",
+  code: 404,
+  message: "Not found",
+})
+
+// Encode back to JSON
+const json = Schema.encodeSync(ApiError)(error)
+```
+
+**2. Custom methods and computed properties**
+
+```ts
+class HttpRequestError extends Schema.TaggedError<HttpRequestError>()(
+  "HttpRequestError",
   {
-    command: Schema.String,
-    exitCode: Schema.Number,
+    method: Schema.String,
+    url: Schema.String,
+    status: Schema.Number,
+    reason: Schema.Literal("Timeout", "NetworkError", "ServerError"),
   },
+) {
+  get message(): string {
+    return `${this.method} ${this.url} failed: ${this.reason} (${this.status})`
+  }
+
+  get isRetryable(): boolean {
+    return this.reason === "Timeout" || this.status >= 500
+  }
+}
+```
+
+**3. HTTP API integration with status codes**
+
+```ts
+import { HttpApiSchema } from "@effect/platform"
+
+class Unauthorized extends Schema.TaggedError<Unauthorized>()(
+  "Unauthorized",
+  { message: Schema.String },
+  HttpApiSchema.annotations({ status: 401 }),
 ) {}
 
-// Usage: yield* new CommandError({ command: "...", exitCode: 1 })
+class NotFound extends Schema.TaggedError<NotFound>()(
+  "NotFound",
+  { resource: Schema.String },
+  HttpApiSchema.annotations({ status: 404 }),
+) {}
 ```
+
+**4. Union of errors for comprehensive handling**
+
+```ts
+const AppError = Schema.Union(Unauthorized, NotFound, HttpRequestError)
+
+// Decode any error from the union
+const parseError = Schema.decodeUnknown(AppError)
+```
+
+**5. JSON Schema generation (for API docs)**
+
+```ts
+import * as JSONSchema from "effect/JSONSchema"
+
+const schema = JSONSchema.make(ApiError)
+// Generates OpenAPI-compatible JSON Schema
+```
+
+**6. Custom constructors with `.make()`**
+
+```ts
+class ValidationError extends Schema.TaggedError<ValidationError>()(
+  "ValidationError",
+  { field: Schema.String, message: Schema.String },
+) {
+  static forRequired(field: string) {
+    return new ValidationError({ field, message: `${field} is required` })
+  }
+}
+
+// All work
+new ValidationError({ field: "email", message: "invalid" })
+ValidationError.make({ field: "email", message: "invalid" })
+ValidationError.forRequired("email")
+```
+
+**Summary: Schema.TaggedError unique features**
+
+| Feature                | Data.TaggedError | Schema.TaggedError |
+| ---------------------- | ---------------- | ------------------ |
+| Lightweight            | ✅               | ❌                 |
+| Runtime validation     | ❌               | ✅                 |
+| Encode/decode JSON     | ❌               | ✅                 |
+| Custom methods         | ❌               | ✅                 |
+| HTTP status mapping    | ❌               | ✅                 |
+| JSON Schema generation | ❌               | ✅                 |
+| Union composition      | ❌               | ✅                 |
 
 ## Execution Order
 
@@ -280,6 +454,106 @@ export class CommandError extends Schema.TaggedError<CommandError>()(
 5. Add disposal handlers to `src/bar.tsx` and `src/dashboard.tsx`
 6. Run `bun test`
 7. Run `bun run typecheck`
+
+## JSDoc Conventions
+
+Effect uses consistent JSDoc patterns:
+
+**Standard tags:**
+
+- `@since` — version when API was introduced
+- `@category` — functional grouping (e.g., "constructors", "combinators", "guards")
+- `@example` — code examples with TypeScript
+- `@experimental` — for unstable APIs
+- `@see` — cross-references to related functions
+
+**Effect function documentation:**
+
+````ts
+/**
+ * Lists installed applications, optionally filtered by search term.
+ *
+ * **When to Use**
+ *
+ * Use this to populate app launchers or search interfaces.
+ *
+ * **Example**
+ *
+ * ```ts
+ * import { Effect } from "effect"
+ * import { listApps } from "./apps"
+ *
+ * //      ┌─── Effect<readonly Application[], PlatformError | ParseError, CommandExecutor>
+ * //      ▼
+ * const program = listApps("terminal")
+ * ```
+ *
+ * @since 1.0.0
+ * @category queries
+ */
+export const listApps = (searchTerm?: string): Effect.Effect<...> => ...
+````
+
+**Type signature comments:**
+
+```ts
+// Show the full Effect signature inline
+//      ┌─── Effect<number, CommandError, CommandExecutor>
+//      ▼
+const result = launchApp("Firefox")
+```
+
+**Sections to include:**
+
+- **When to Use** — scenarios where the function is appropriate
+- **Details** — in-depth explanation of behavior
+- **Example** — concrete usage with types shown
+
+**Schema documentation:**
+
+```ts
+/**
+ * Schema for desktop application metadata.
+ *
+ * @since 1.0.0
+ * @category schemas
+ */
+const Application = Schema.Struct({
+  /** Display name of the application */
+  name: Schema.String,
+  /** .desktop file path */
+  entry: Schema.String,
+  /** Executable command */
+  executable: Schema.String,
+  /** Optional description from .desktop file */
+  description: Schema.NullOr(Schema.String),
+  /** Icon name for theming */
+  icon_name: Schema.String,
+  /** Launch frequency for sorting */
+  frequency: Schema.Number,
+  /** Search keywords */
+  keywords: Schema.Array(Schema.String),
+  /** Desktop categories (e.g., "Utility", "Development") */
+  categories: Schema.Array(Schema.String),
+})
+```
+
+**Tagged error documentation:**
+
+```ts
+/**
+ * Error thrown when a command exits with non-zero status.
+ *
+ * @since 1.0.0
+ * @category errors
+ */
+export class CommandError extends Data.TaggedError("CommandError")<{
+  /** The full command that was executed */
+  readonly command: string
+  /** The non-zero exit code */
+  readonly exitCode: number
+}> {}
+```
 
 ## Reference
 
