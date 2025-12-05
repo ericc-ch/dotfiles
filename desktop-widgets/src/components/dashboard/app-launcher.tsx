@@ -148,10 +148,10 @@ export const AppLauncher: ParentComponent<{
     if (!appToLaunch) return
 
     try {
-      await launchApp(appToLaunch.name)
+      await AppRuntime.runPromise(launchApp(appToLaunch.name))
       closeLauncher()
     } catch (error) {
-      console.error("Failed to launch app:", error)
+      console.error("Failed to launch app:", error, JSON.stringify(error))
     }
   }
 

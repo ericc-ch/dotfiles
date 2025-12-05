@@ -1,6 +1,6 @@
 import { Command } from "@effect/platform"
 import type { ExitCode } from "@effect/platform/CommandExecutor"
-import { Data, Effect, Schema, Stream } from "effect"
+import { Data, Effect, pipe, Schema, Stream } from "effect"
 
 export const Application = Schema.Struct({
   name: Schema.String,
@@ -36,28 +36,19 @@ export const listApps = (search?: string) => {
   )
 }
 
-export const launchApp = (name: string) => {
+export const launchApp = Effect.fn(function* (name: string) {
   const command = ["astal-apps", "--launch", name] as const
 
-  return Command.make(...command).pipe(
-    Command.start,
-    Effect.scoped,
-    Effect.flatMap((process) =>
-      Effect.all({
-        exitCode: process.exitCode,
-        stderr: process.stderr.pipe(
-          Stream.decodeText(),
-          Stream.runFold("", (acc, chunk) => acc + chunk),
-        ),
-      }),
-    ),
-    Effect.filterOrFail(
-      ({ exitCode }) => exitCode === 0,
-      (result) =>
-        new CommandError({
-          command,
-          ...result,
-        }),
-    ),
-  )
-}
+  const process = yield* Command.make(...command).pipe(Command.start)
+  const exitCode = yield* process.exitCode
+
+  if (exitCode !== 0) {
+    const stderr = yield* pipe(
+      process.stderr,
+      Stream.decodeText(),
+      Stream.runFold("", (acc, chunk) => acc + chunk),
+    )
+
+    return yield* new CommandError({ command, exitCode, stderr })
+  }
+}, Effect.scoped)
