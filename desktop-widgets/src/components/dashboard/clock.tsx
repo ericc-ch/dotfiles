@@ -1,4 +1,4 @@
-import { Effect, Fiber, Stream } from "effect"
+import { Duration, Effect, Fiber, pipe, Schedule } from "effect"
 import { createSignal, onCleanup, onMount } from "solid-js"
 import { AppRuntime } from "../../lib/runtime"
 import { useTheme } from "../../providers/theme"
@@ -20,11 +20,12 @@ export const Clock = () => {
   const [current, setCurrent] = createSignal(new Date())
 
   onMount(() => {
-    const clockStream = Stream.tick("1 second").pipe(
-      Stream.runForEach(() => Effect.sync(() => setCurrent(new Date()))),
+    const updateClock = pipe(
+      Effect.sync(() => setCurrent(new Date())),
+      Effect.repeat(Schedule.spaced(Duration.seconds(1))),
     )
 
-    const fiber = AppRuntime.runFork(clockStream)
+    const fiber = AppRuntime.runFork(updateClock)
 
     onCleanup(() => {
       AppRuntime.runFork(Fiber.interrupt(fiber))
