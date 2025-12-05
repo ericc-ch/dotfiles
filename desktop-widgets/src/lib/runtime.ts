@@ -1,4 +1,4 @@
 import { BunContext } from "@effect/platform-bun"
 import { ManagedRuntime } from "effect"
 
-export const Runtime = ManagedRuntime.make(BunContext.layer)
+export const AppRuntime = ManagedRuntime.make(BunContext.layer)

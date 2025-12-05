@@ -1,9 +1,12 @@
+import { ConsolePosition } from "@opentui/core"
 import { render, useKeyboard, useRenderer } from "@opentui/solid"
-
-import { ThemeProvider, useTheme } from "./providers/theme"
 import { Clock } from "./components/bar/clock"
 import { Stats } from "./components/bar/stats"
-import { ConsolePosition } from "@opentui/core"
+import { AppRuntime } from "./lib/runtime"
+import { ThemeProvider, useTheme } from "./providers/theme"
+
+process.on("SIGINT", () => AppRuntime.dispose())
+process.on("SIGTERM", () => AppRuntime.dispose())
 
 const App = () => {
   const renderer = useRenderer()

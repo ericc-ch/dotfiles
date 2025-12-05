@@ -1,8 +1,8 @@
 import { Command } from "@effect/platform"
 import type { ExitCode } from "@effect/platform/CommandExecutor"
-import { Chunk, Data, Effect, Schema, Stream } from "effect"
+import { Data, Effect, Schema, Stream } from "effect"
 
-const Application = Schema.Struct({
+export const Application = Schema.Struct({
   name: Schema.String,
   entry: Schema.String,
   executable: Schema.String,
@@ -13,8 +13,8 @@ const Application = Schema.Struct({
   categories: Schema.Array(Schema.String),
 })
 
-const Applications = Schema.Array(Application)
-const ApplicatonsFromString = Schema.parseJson(Applications)
+export const Applications = Schema.Array(Application)
+export const ApplicatonsFromString = Schema.parseJson(Applications)
 
 export class CommandError extends Data.TaggedError("CommandError")<{
   readonly command: ReadonlyArray<string>
@@ -47,8 +47,7 @@ export const launchApp = (name: string) => {
         exitCode: process.exitCode,
         stderr: process.stderr.pipe(
           Stream.decodeText(),
-          Stream.runCollect,
-          Effect.map(Chunk.join("")),
+          Stream.runFold("", (acc, chunk) => acc + chunk),
         ),
       }),
     ),

@@ -1,4 +1,6 @@
+import { Effect, Fiber, Stream } from "effect"
 import { createSignal, onCleanup, onMount } from "solid-js"
+import { AppRuntime } from "../../lib/runtime"
 import { useTheme } from "../../providers/theme"
 
 const defaultLocale = Intl.DateTimeFormat().resolvedOptions().locale
@@ -18,12 +20,14 @@ export const Clock = () => {
   const [current, setCurrent] = createSignal(new Date())
 
   onMount(() => {
-    const interval = setInterval(() => {
-      setCurrent(new Date())
-    }, 1000)
+    const clockStream = Stream.tick("1 second").pipe(
+      Stream.runForEach(() => Effect.sync(() => setCurrent(new Date()))),
+    )
+
+    const fiber = AppRuntime.runFork(clockStream)
 
     onCleanup(() => {
-      return () => clearInterval(interval)
+      AppRuntime.runFork(Fiber.interrupt(fiber))
     })
   })
 

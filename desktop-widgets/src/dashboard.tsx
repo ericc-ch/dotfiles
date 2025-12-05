@@ -1,11 +1,14 @@
 import { ConsolePosition } from "@opentui/core"
 import { render, useKeyboard, useRenderer } from "@opentui/solid"
 import { createSignal } from "solid-js"
-
 import { AppLauncher } from "./components/dashboard/app-launcher"
 import { Clock } from "./components/dashboard/clock"
+import { AppRuntime } from "./lib/runtime"
 import { RouterProvider } from "./providers/dashboard/router"
 import { ThemeProvider, useTheme } from "./providers/theme"
+
+process.on("SIGINT", () => AppRuntime.dispose())
+process.on("SIGTERM", () => AppRuntime.dispose())
 
 const App = () => {
   const renderer = useRenderer()

@@ -9,15 +9,16 @@ import {
   type Component,
   type ParentComponent,
 } from "solid-js"
-import { launchApp, listApps, type Application } from "../../lib/apps"
+import { Application, launchApp, listApps } from "../../lib/apps"
 import { type ColorPalette } from "../../lib/color"
 import { debouncedSignal } from "../../lib/debounce"
+import { AppRuntime } from "../../lib/runtime"
 import { truncate } from "../../lib/truncate"
 import { useTheme } from "../../providers/theme"
 import { Backdrop } from "./backdrop"
 
 const AppListItem: Component<{
-  app: Application
+  app: typeof Application.Type
   isHovered: boolean
   theme: ColorPalette
   itemHeight: number
@@ -94,9 +95,13 @@ export const AppLauncher: ParentComponent<{
   const debouncedSearch = debouncedSignal(search, 200)
   const [hoveredApp, setHoveredApp] = createSignal(0)
 
-  const [apps] = createResource(debouncedSearch, (search) => listApps(search), {
-    initialValue: [],
-  })
+  const [apps] = createResource(
+    debouncedSearch,
+    (search) => AppRuntime.runPromise(listApps(search)),
+    {
+      initialValue: [],
+    },
+  )
   const trimmedApps = () => apps().slice(0, layout().maxItems)
 
   const closeLauncher = () => {

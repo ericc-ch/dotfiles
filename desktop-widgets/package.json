@@ -13,8 +13,8 @@
   "dependencies": {
     "@effect/platform": "^0.93.6",
     "@effect/platform-bun": "^0.86.0",
-    "@opentui/core": "^0.1.55",
-    "@opentui/solid": "^0.1.55",
+    "@opentui/core": "^0.1.56",
+    "@opentui/solid": "^0.1.56",
     "effect": "^3.19.8",
     "solid-js": "^1.9.10"
   },
