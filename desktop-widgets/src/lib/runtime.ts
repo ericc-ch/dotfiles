@@ -1,4 +1,7 @@
 import { BunContext } from "@effect/platform-bun"
-import { ManagedRuntime } from "effect"
+import { Layer, ManagedRuntime } from "effect"
+import { DaemonManager } from "./daemon-manager"
 
-export const AppRuntime = ManagedRuntime.make(BunContext.layer)
+const AppLayer = Layer.merge(DaemonManager.Default, BunContext.layer)
+
+export const AppRuntime = ManagedRuntime.make(AppLayer)

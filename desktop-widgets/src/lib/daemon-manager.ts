@@ -1,21 +1,137 @@
-import { Effect, MutableHashMap, Schedule, SubscriptionRef } from "effect"
+import { Command } from "@effect/platform"
+import type { PlatformError } from "@effect/platform/Error"
+import {
+  Data,
+  Duration,
+  Effect,
+  Fiber,
+  MutableHashMap,
+  Option,
+  pipe,
+  Stream,
+  SubscriptionRef,
+} from "effect"
+
+type DaemonState = "running" | "stopped"
 
 interface Daemon {
   name: string
   command: [string, ...string[]]
-  state: "running" | "stopped"
+  state: SubscriptionRef.SubscriptionRef<DaemonState>
+  fiber?: Fiber.RuntimeFiber<never, DaemonDiedError | PlatformError>
 }
+
+class DaemonNotFoundError extends Data.TaggedError("DaemonNotFoundError")<{
+  readonly daemonName: string
+}> {}
+
+class DaemonDiedError extends Data.TaggedError("DaemonDiedError")<{
+  readonly daemon: Daemon
+  readonly exitCode: number
+  readonly message: string
+}> {}
 
 export class DaemonManager extends Effect.Service<DaemonManager>()(
   "DaemonManager",
   {
-    effect: Effect.gen(function* () {
+    scoped: Effect.gen(function* () {
       const daemons = MutableHashMap.empty<string, Daemon>()
+      const scope = yield* Effect.scope
 
-      const runDaemon = Effect.fn
+      const set = Effect.fn(function* (
+        daemon: Omit<Daemon, "state" | "fiber">,
+      ) {
+        const existing = MutableHashMap.get(daemons, daemon.name)
+
+        if (Option.isNone(existing)) {
+          const state = yield* SubscriptionRef.make<DaemonState>("stopped")
+
+          return MutableHashMap.set(daemons, daemon.name, {
+            ...daemon,
+            state,
+          })
+        }
+
+        return MutableHashMap.set(daemons, daemon.name, {
+          ...daemon,
+          state: existing.value.state,
+        })
+      })
+
+      const start = Effect.fn(function* (name: string) {
+        const daemon = MutableHashMap.get(daemons, name)
+
+        if (Option.isNone(daemon)) {
+          return yield* new DaemonNotFoundError({ daemonName: name })
+        }
+
+        const state = yield* SubscriptionRef.get(daemon.value.state)
+        if (state === "running") {
+          return
+        }
+
+        const spawnDaemon = Effect.gen(function* () {
+          console.log("spawnDaemon: about to start command")
+          const process = yield* pipe(
+            Command.make(...daemon.value.command),
+            Command.start,
+          )
+          console.log(`Process spawned, pid:`, process.pid)
+
+          const exitCode = yield* process.exitCode
+          const message = yield* pipe(
+            process.stderr,
+            Stream.decodeText(),
+            Stream.runFold("", (acc, chunk) => acc + chunk),
+          )
+
+          return yield* new DaemonDiedError({
+            daemon: daemon.value,
+            exitCode,
+            message,
+          })
+        }).pipe(
+          Effect.onInterrupt(() =>
+            Effect.gen(function* () {
+              console.log("spawnDaemon: interrupting daemon process...")
+              console.log("spawnDaemon: fiber interrupted!")
+              yield* Effect.sleep(Duration.seconds(5))
+            }),
+          ),
+          Effect.scoped,
+        )
+
+        const fiber = yield* Effect.forkIn(spawnDaemon, scope)
+        yield* SubscriptionRef.set(daemon.value.state, "running")
+
+        MutableHashMap.set(daemons, name, {
+          ...daemon.value,
+          fiber,
+        })
+      })
+
+      const stop = Effect.fn(function* (name: string) {
+        const daemon = MutableHashMap.get(daemons, name)
+
+        if (Option.isNone(daemon)) {
+          return yield* new DaemonNotFoundError({ daemonName: name })
+        }
+
+        if (daemon.value.fiber) {
+          yield* Fiber.interrupt(daemon.value.fiber)
+          yield* SubscriptionRef.set(daemon.value.state, "stopped")
+        }
+      })
+
+      const list = Effect.fn(function* () {
+        return MutableHashMap.values(daemons)
+      })
 
       return {
-        register: (config: DaemonConfig) => {},
+        set,
+        start,
+        stop,
+        list,
       }
     }),
   },

@@ -856,15 +856,61 @@ interface LogEvent {
 ```typescript
 import { Data } from "effect"
 
-class DaemonError extends Data.TaggedError("DaemonError")<{
+/** Daemon is not registered */
+class DaemonNotFound extends Data.TaggedError("DaemonNotFound")<{
   readonly daemon: DaemonName
-  readonly reason:
-    | "not_found"
-    | "already_running"
-    | "start_failed"
-    | "max_restarts"
-  readonly message: string
 }> {}
+
+/** Daemon is already running (for non-idempotent operations) */
+class DaemonAlreadyRunning extends Data.TaggedError("DaemonAlreadyRunning")<{
+  readonly daemon: DaemonName
+}> {}
+
+/** Process failed to start or exited unexpectedly */
+class DaemonStartFailed extends Data.TaggedError("DaemonStartFailed")<{
+  readonly daemon: DaemonName
+  readonly exitCode: number
+}> {}
+
+/** Daemon exceeded maximum restart attempts */
+class DaemonMaxRestarts extends Data.TaggedError("DaemonMaxRestarts")<{
+  readonly daemon: DaemonName
+  readonly attempts: number
+}> {}
+
+/** Output capture not enabled for this daemon */
+class DaemonOutputNotCaptured extends Data.TaggedError(
+  "DaemonOutputNotCaptured",
+)<{
+  readonly daemon: DaemonName
+}> {}
+
+/** Union type for all daemon errors */
+type DaemonError =
+  | DaemonNotFound
+  | DaemonAlreadyRunning
+  | DaemonStartFailed
+  | DaemonMaxRestarts
+  | DaemonOutputNotCaptured
+```
+
+**Benefits of separate error classes:**
+
+1. **Type-level error tracking** — function signatures show exactly which errors can occur
+2. **`catchTag` / `catchTags`** — match errors directly by tag, no nested conditionals
+3. **Different payloads** — each error carries only relevant data (e.g., `exitCode` for start failures)
+4. **Better narrowing** — handlers receive the specific error type, not a union
+
+```typescript
+// Example: handling specific errors
+yield
+  * dm.start("audio").pipe(
+    Effect.catchTags({
+      DaemonNotFound: (e) => Effect.log(`${e.daemon} not registered`),
+      DaemonStartFailed: (e) =>
+        Effect.log(`Failed with exit code ${e.exitCode}`),
+    }),
+  )
 ```
 
 ---
@@ -882,21 +928,23 @@ interface DaemonManager {
   ) => Effect.Effect<void>
 
   // Lifecycle
-  readonly start: (name: DaemonName) => Effect.Effect<void, DaemonError>
+  readonly start: (name: DaemonName) => Effect.Effect<void, DaemonNotFound>
   readonly stop: (name: DaemonName) => Effect.Effect<void>
-  readonly restart: (name: DaemonName) => Effect.Effect<void, DaemonError>
+  readonly restart: (name: DaemonName) => Effect.Effect<void, DaemonNotFound>
 
   // Status
   readonly getState: (
     name: DaemonName,
-  ) => Effect.Effect<DaemonState, DaemonError>
+  ) => Effect.Effect<DaemonState, DaemonNotFound>
   readonly subscribe: (
     name: DaemonName,
-  ) => Stream.Stream<DaemonState, DaemonError>
+  ) => Stream.Stream<DaemonState, DaemonNotFound>
 
   // Output (for daemons with captureOutput: true)
   // Single consumer per daemon - use Stream (pull-based)
-  readonly getOutput: (name: DaemonName) => Stream.Stream<string, DaemonError>
+  readonly getOutput: (
+    name: DaemonName,
+  ) => Stream.Stream<string, DaemonNotFound | DaemonOutputNotCaptured>
 
   // Logs (multiple consumers - uses PubSub internally)
   readonly logs: () => Stream.Stream<LogEvent>
@@ -1185,16 +1233,48 @@ export interface LogEvent {
   readonly message: string
 }
 
-/** Errors that can occur in daemon management */
-export class DaemonError extends Data.TaggedError("DaemonError")<{
+// =============================================================================
+// Errors (separate tagged classes for better catchTag support)
+// =============================================================================
+
+/** Daemon is not registered */
+export class DaemonNotFound extends Data.TaggedError("DaemonNotFound")<{
   readonly daemon: DaemonName
-  readonly reason:
-    | "not_found"
-    | "already_running"
-    | "start_failed"
-    | "max_restarts"
-  readonly message: string
 }> {}
+
+/** Daemon is already running (for non-idempotent operations) */
+export class DaemonAlreadyRunning extends Data.TaggedError(
+  "DaemonAlreadyRunning",
+)<{
+  readonly daemon: DaemonName
+}> {}
+
+/** Process failed to start or exited unexpectedly */
+export class DaemonStartFailed extends Data.TaggedError("DaemonStartFailed")<{
+  readonly daemon: DaemonName
+  readonly exitCode: number
+}> {}
+
+/** Daemon exceeded maximum restart attempts */
+export class DaemonMaxRestarts extends Data.TaggedError("DaemonMaxRestarts")<{
+  readonly daemon: DaemonName
+  readonly attempts: number
+}> {}
+
+/** Output capture not enabled for this daemon */
+export class DaemonOutputNotCaptured extends Data.TaggedError(
+  "DaemonOutputNotCaptured",
+)<{
+  readonly daemon: DaemonName
+}> {}
+
+/** Union type for all daemon errors */
+export type DaemonError =
+  | DaemonNotFound
+  | DaemonAlreadyRunning
+  | DaemonStartFailed
+  | DaemonMaxRestarts
+  | DaemonOutputNotCaptured
 
 // =============================================================================
 // Schedule Builder
@@ -1250,7 +1330,10 @@ interface DaemonInternals {
   readonly config: DaemonConfig
   readonly stateRef: SubscriptionRef.SubscriptionRef<DaemonState>
   readonly outputQueue: Queue.Queue<string> | null
-  fiber: Fiber.RuntimeFiber<void, PlatformError | DaemonError> | null
+  fiber: Fiber.RuntimeFiber<
+    void,
+    PlatformError | DaemonNotFound | DaemonStartFailed
+  > | null
   intentionalStop: boolean
 }
 
@@ -1306,15 +1389,14 @@ export class DaemonManager extends Effect.Service<DaemonManager>()(
       // ---------------------------------------------------------------------
       const runDaemon = (
         name: DaemonName,
-      ): Effect.Effect<void, PlatformError | DaemonError> =>
+      ): Effect.Effect<
+        void,
+        PlatformError | DaemonNotFound | DaemonStartFailed
+      > =>
         Effect.gen(function* () {
           const maybeInternals = getDaemon(name)
           if (Option.isNone(maybeInternals)) {
-            return yield* new DaemonError({
-              daemon: name,
-              reason: "not_found",
-              message: `Daemon "${name}" is not registered`,
-            })
+            return yield* new DaemonNotFound({ daemon: name })
           }
 
           const internals = maybeInternals.value
@@ -1365,11 +1447,7 @@ export class DaemonManager extends Effect.Service<DaemonManager>()(
 
             // Throw to trigger retry
             return yield* Effect.fail(
-              new DaemonError({
-                daemon: name,
-                reason: "start_failed",
-                message: `Process exited with code ${exitCode}`,
-              }),
+              new DaemonStartFailed({ daemon: name, exitCode }),
             )
           }).pipe(
             Effect.scoped,
@@ -1401,15 +1479,16 @@ export class DaemonManager extends Effect.Service<DaemonManager>()(
             Effect.catchAll((error) =>
               Effect.gen(function* () {
                 if (!internals.intentionalStop) {
+                  const errorMessage =
+                    error instanceof DaemonStartFailed ?
+                      `Process exited with code ${error.exitCode}`
+                    : String(error)
                   yield* updateState(name, (s) => ({
                     ...s,
                     status: "failed" as const,
-                    lastError:
-                      error instanceof DaemonError ?
-                        error.message
-                      : String(error),
+                    lastError: errorMessage,
                   }))
-                  yield* log(name, "error", `Daemon failed: ${error}`)
+                  yield* log(name, "error", `Daemon failed: ${errorMessage}`)
                 }
               }),
             ),
@@ -1466,15 +1545,11 @@ export class DaemonManager extends Effect.Service<DaemonManager>()(
          * Start a registered daemon.
          * Idempotent - if already running, returns success.
          */
-        start: (name: DaemonName): Effect.Effect<void, DaemonError> =>
+        start: (name: DaemonName): Effect.Effect<void, DaemonNotFound> =>
           Effect.gen(function* () {
             const maybeInternals = getDaemon(name)
             if (Option.isNone(maybeInternals)) {
-              return yield* new DaemonError({
-                daemon: name,
-                reason: "not_found",
-                message: `Daemon "${name}" is not registered`,
-              })
+              return yield* new DaemonNotFound({ daemon: name })
             }
 
             const internals = maybeInternals.value
@@ -1529,15 +1604,11 @@ export class DaemonManager extends Effect.Service<DaemonManager>()(
         /**
          * Restart a daemon (stop then start).
          */
-        restart: (name: DaemonName): Effect.Effect<void, DaemonError> =>
+        restart: (name: DaemonName): Effect.Effect<void, DaemonNotFound> =>
           Effect.gen(function* () {
             const maybeInternals = getDaemon(name)
             if (Option.isNone(maybeInternals)) {
-              return yield* new DaemonError({
-                daemon: name,
-                reason: "not_found",
-                message: `Daemon "${name}" is not registered`,
-              })
+              return yield* new DaemonNotFound({ daemon: name })
             }
 
             const internals = maybeInternals.value
@@ -1573,15 +1644,13 @@ export class DaemonManager extends Effect.Service<DaemonManager>()(
         /**
          * Get the current state of a daemon.
          */
-        getState: (name: DaemonName): Effect.Effect<DaemonState, DaemonError> =>
+        getState: (
+          name: DaemonName,
+        ): Effect.Effect<DaemonState, DaemonNotFound> =>
           Effect.gen(function* () {
             const maybeInternals = getDaemon(name)
             if (Option.isNone(maybeInternals)) {
-              return yield* new DaemonError({
-                daemon: name,
-                reason: "not_found",
-                message: `Daemon "${name}" is not registered`,
-              })
+              return yield* new DaemonNotFound({ daemon: name })
             }
             return yield* SubscriptionRef.get(maybeInternals.value.stateRef)
           }),
@@ -1592,18 +1661,12 @@ export class DaemonManager extends Effect.Service<DaemonManager>()(
          */
         subscribe: (
           name: DaemonName,
-        ): Stream.Stream<DaemonState, DaemonError> =>
+        ): Stream.Stream<DaemonState, DaemonNotFound> =>
           Stream.unwrap(
             Effect.gen(function* () {
               const maybeInternals = getDaemon(name)
               if (Option.isNone(maybeInternals)) {
-                return Stream.fail(
-                  new DaemonError({
-                    daemon: name,
-                    reason: "not_found",
-                    message: `Daemon "${name}" is not registered`,
-                  }),
-                )
+                return Stream.fail(new DaemonNotFound({ daemon: name }))
               }
               return maybeInternals.value.stateRef.changes
             }),
@@ -1614,27 +1677,19 @@ export class DaemonManager extends Effect.Service<DaemonManager>()(
          * Only works if daemon was registered with captureOutput: true.
          * Single consumer - use for processing daemon output.
          */
-        getOutput: (name: DaemonName): Stream.Stream<string, DaemonError> =>
+        getOutput: (
+          name: DaemonName,
+        ): Stream.Stream<string, DaemonNotFound | DaemonOutputNotCaptured> =>
           Stream.unwrap(
             Effect.gen(function* () {
               const maybeInternals = getDaemon(name)
               if (Option.isNone(maybeInternals)) {
-                return Stream.fail(
-                  new DaemonError({
-                    daemon: name,
-                    reason: "not_found",
-                    message: `Daemon "${name}" is not registered`,
-                  }),
-                )
+                return Stream.fail(new DaemonNotFound({ daemon: name }))
               }
               const internals = maybeInternals.value
               if (!internals.outputQueue) {
                 return Stream.fail(
-                  new DaemonError({
-                    daemon: name,
-                    reason: "not_found",
-                    message: `Daemon "${name}" was not configured with captureOutput: true`,
-                  }),
+                  new DaemonOutputNotCaptured({ daemon: name }),
                 )
               }
               return Stream.fromQueue(internals.outputQueue)
@@ -1812,7 +1867,7 @@ We use Effect's `MutableHashMap` for internal state because:
 // MutableHashMap pattern
 const maybeInternals = MutableHashMap.get(daemons, name)
 if (Option.isNone(maybeInternals)) {
-  return yield* new DaemonError({ ... })
+  return yield * new DaemonNotFound({ daemon: name })
 }
 const internals = maybeInternals.value
 ```

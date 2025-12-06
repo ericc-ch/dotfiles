@@ -109,3 +109,143 @@ yield * Effect.fail(new MyError({ message: "boom" }))
 ```
 
 No need to wrap in `Effect.fail()` — just `yield*` the error directly.
+
+---
+
+## `forkDaemon` vs `forkScoped` vs `forkIn` — Process Cleanup
+
+When spawning long-running child processes (daemons), choosing the right fork method determines whether processes get cleaned up on shutdown.
+
+### The Problem
+
+`@effect/platform`'s `Command.start` spawns processes with `detached: true` on Linux. The process is only killed in the `acquireRelease` finalizer, which only runs when the **Scope closes**.
+
+### Fork Methods Compared
+
+| Method                  | Where fiber lives        | Cleaned up by `dispose()`?     |
+| ----------------------- | ------------------------ | ------------------------------ |
+| `forkDaemon`            | `globalScope` (detached) | ❌ NO — orphaned!              |
+| `forkScoped`            | Caller's context scope   | ✅ Yes, IF caller has a Scope  |
+| `forkIn(effect, scope)` | Specified scope          | ✅ Yes, when that scope closes |
+
+### Why `forkDaemon` Doesn't Clean Up
+
+`forkDaemon` explicitly detaches the fiber from ALL scopes:
+
+```typescript
+// Fiber goes to globalScope — no parent, no cleanup
+yield * Effect.forkDaemon(spawnProcess)
+
+// When ManagedRuntime.dispose() is called:
+// - It closes ITS scope
+// - globalScope fibers are NOT touched
+// - Child process stays alive as orphan!
+```
+
+### Why `forkScoped` Often Fails
+
+`forkScoped` looks for a Scope in the **current Effect context**:
+
+```typescript
+// Inside Effect.gen — but does it have a Scope?
+const program = Effect.gen(function* () {
+  yield* forkScoped(spawnProcess) // ❌ "Service not found: effect/Scope"
+})
+
+runtime.runPromise(program) // No Scope provided!
+```
+
+**Scope exists in context when:**
+
+- Inside `Effect.scoped(...)` block
+- Inside a `Layer.scoped` / `scoped:` service
+- Explicitly provided
+
+**Scope does NOT exist in:**
+
+- Bare `Effect.gen(...)` without scoped wrapper
+- Direct `runPromise(effect)` calls
+
+### The Solution: `forkIn` with Captured Scope
+
+Capture the scope during service initialization, use it later:
+
+```typescript
+class DaemonManager extends Effect.Service<DaemonManager>()(
+  "DaemonManager",
+  {
+    scoped: Effect.gen(function* () {  // Layer.scoped provides a Scope!
+      const scope = yield* Effect.scope  // Capture it
+
+      const start = Effect.fn(function* (name: string) {
+        const spawnDaemon = Effect.gen(function* () {
+          const proc = yield* Command.make("my-daemon").pipe(Command.start)
+          yield* proc.exitCode  // Wait for process
+        }).pipe(Effect.scoped)
+
+        // Fork into the CAPTURED scope, not caller's context
+        yield* Effect.forkIn(spawnDaemon, scope)
+      })
+
+      return { start }
+    }),
+  },
+)
+```
+
+**How it works:**
+
+1. `scoped:` creates a Layer that provides a Scope tied to ManagedRuntime
+2. `yield* Effect.scope` captures that scope as a variable
+3. `forkIn(effect, scope)` forks into that specific scope
+4. When `runtime.dispose()` closes, the service's scope closes
+5. Fibers in that scope are interrupted
+6. `Command.start`'s finalizer runs `killProcessGroup(-pid)`
+7. Child process is properly terminated
+
+### Testing Proof
+
+```
+| Fork Method    | Process Survived dispose()? |
+|----------------|----------------------------|
+| forkDaemon     | ✅ YES — ORPHANED          |
+| forkIn(e, scope) | ❌ NO — Properly killed   |
+```
+
+### Key Insight
+
+The child process cleanup happens in `Command.start`'s `acquireRelease` finalizer. That finalizer ONLY runs when:
+
+1. The fiber is interrupted, AND
+2. The `Effect.scoped` wrapper's scope closes
+
+With `forkDaemon`, the fiber is never interrupted by `dispose()`, so the finalizer never runs.
+
+---
+
+## `@opentui/core` Signal Handling
+
+`@opentui/core` registers aggressive signal handlers on import:
+
+```javascript
+;["SIGINT", "SIGTERM", "SIGQUIT", "SIGABRT"].forEach((signal) => {
+  process.on(signal, () => {
+    process.exit() // Immediate exit, no cleanup!
+  })
+})
+```
+
+**Impact:** If a signal arrives, `process.exit()` is called immediately, bypassing any async cleanup like `runtime.dispose()`.
+
+**Solution:** Use `exitOnCtrlC: false` and handle Ctrl+C manually:
+
+```typescript
+render(() => <App />, { exitOnCtrlC: false })
+
+useKeyboard((event) => {
+  if (event.ctrl && event.name === "c") {
+    // Properly dispose before exiting
+    AppRuntime.dispose().finally(() => process.exit(0))
+  }
+})
+```
