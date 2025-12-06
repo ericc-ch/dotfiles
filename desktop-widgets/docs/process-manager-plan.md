@@ -116,7 +116,7 @@ Network Service
 ### Basic Usage
 
 ```typescript
-import { Effect } from "effect"
+import { Effect, Stream } from "effect"
 import { DaemonManager } from "./lib/daemon-manager"
 
 const program = Effect.gen(function* () {
@@ -900,20 +900,26 @@ interface DaemonManager {
 
   // Logs (multiple consumers - uses PubSub internally)
   readonly logs: () => Stream.Stream<LogEvent>
+
+  // Management
+  readonly listDaemons: () => Effect.Effect<DaemonName[]>
+  readonly unregister: (name: DaemonName) => Effect.Effect<void>
 }
 ```
 
 ### Behavioral Notes
 
-| Method        | Behavior                                                       |
-| ------------- | -------------------------------------------------------------- |
-| `start()`     | **Idempotent** - if already running, returns success (no-op)   |
-| `stop()`      | Sends SIGTERM to process, updates state to "stopped"           |
-| `restart()`   | Equivalent to `stop()` then `start()`                          |
-| `getState()`  | Returns current state snapshot                                 |
-| `subscribe()` | Returns Stream of state changes (current + future)             |
-| `getOutput()` | Returns Stream of stdout lines (only if `captureOutput: true`) |
-| `logs()`      | Returns Stream from internal PubSub (multiple consumers OK)    |
+| Method          | Behavior                                                       |
+| --------------- | -------------------------------------------------------------- |
+| `start()`       | **Idempotent** - if already running, returns success (no-op)   |
+| `stop()`        | Sends SIGTERM to process, updates state to "stopped"           |
+| `restart()`     | Equivalent to `stop()` then `start()`                          |
+| `getState()`    | Returns current state snapshot                                 |
+| `subscribe()`   | Returns Stream of state changes (current + future)             |
+| `getOutput()`   | Returns Stream of stdout lines (only if `captureOutput: true`) |
+| `logs()`        | Returns Stream from internal PubSub (multiple consumers OK)    |
+| `listDaemons()` | Returns array of all registered daemon names                   |
+| `unregister()`  | Stops daemon if running, then removes from registry            |
 
 ---
 
@@ -933,7 +939,7 @@ const buildSchedule = (policy: RestartPolicy) => {
   // Cap maximum delay
   if (policy.maxDelay) {
     const maxDelay = Duration.decode(policy.maxDelay)
-    schedule = schedule.pipe(Schedule.delayed((d) => Duration.min(d, maxDelay)))
+    schedule = Schedule.delayed(schedule, (d) => Duration.min(d, maxDelay))
   }
 
   // Limit restart attempts
@@ -986,9 +992,7 @@ const aggressive: RestartPolicy = {
 3. Implement `buildSchedule()` from `RestartPolicy`
 4. Create `DaemonManager` service using `Effect.Service`
 5. Implement internal state management:
-   - `Map<DaemonName, DaemonConfig>` for registered daemons
-   - `Map<DaemonName, SubscriptionRef<DaemonState>>` for daemon states
-   - `Map<DaemonName, Fiber>` for running daemon fibers
+   - `MutableHashMap<DaemonName, DaemonInternals>` for all daemon state
    - `PubSub<LogEvent>` for centralized logging
 
 ### Phase 2: Process Lifecycle
@@ -1107,3 +1111,752 @@ class Network extends Effect.Service<Network>()("Network", {
 - Dependency ordering (start A before B)
 - Graceful shutdown with SIGTERM → SIGKILL timeout
 - Resource monitoring (optional)
+
+---
+
+## Complete Implementation
+
+This is the full implementation for `src/lib/daemon-manager.ts`. Copy this file and adapt as needed.
+
+```typescript
+import { Command } from "@effect/platform"
+import type { PlatformError } from "@effect/platform/Error"
+import {
+  Data,
+  Duration,
+  Effect,
+  Fiber,
+  MutableHashMap,
+  Option,
+  pipe,
+  PubSub,
+  Queue,
+  Schedule,
+  Stream,
+  SubscriptionRef,
+} from "effect"
+
+// =============================================================================
+// Types
+// =============================================================================
+
+/** Unique identifier for a daemon */
+export type DaemonName = string
+
+/** Restart policy configuration */
+export interface RestartPolicy {
+  /** Base delay for exponential backoff (e.g., "1 second") */
+  readonly baseDelay: Duration.DurationInput
+  /** Maximum delay cap (e.g., "30 seconds") */
+  readonly maxDelay?: Duration.DurationInput
+  /** Maximum restart attempts (undefined = infinite) */
+  readonly maxAttempts?: number
+  /** Add jitter to prevent thundering herd (default: true) */
+  readonly jitter?: boolean
+}
+
+/** Configuration for a daemon */
+export interface DaemonConfig {
+  /** Command to run: [executable, ...args] */
+  readonly command: readonly [string, ...string[]]
+  /** Restart policy configuration */
+  readonly restartPolicy: RestartPolicy
+  /** Whether to capture stdout for consumer processing (default: false) */
+  readonly captureOutput?: boolean
+}
+
+/** Current state of a daemon */
+export interface DaemonState {
+  /** Current daemon status */
+  readonly status: "running" | "stopped" | "restarting" | "failed"
+  /** Number of times daemon has been restarted */
+  readonly restartCount: number
+  /** Last error message if any */
+  readonly lastError?: string
+  /** When the daemon was last started */
+  readonly startedAt?: Date
+}
+
+/** Log event from daemon manager */
+export interface LogEvent {
+  readonly timestamp: Date
+  readonly level: "debug" | "info" | "warn" | "error"
+  readonly daemon: DaemonName
+  readonly message: string
+}
+
+/** Errors that can occur in daemon management */
+export class DaemonError extends Data.TaggedError("DaemonError")<{
+  readonly daemon: DaemonName
+  readonly reason:
+    | "not_found"
+    | "already_running"
+    | "start_failed"
+    | "max_restarts"
+  readonly message: string
+}> {}
+
+// =============================================================================
+// Schedule Builder
+// =============================================================================
+
+/**
+ * Builds a Schedule from a RestartPolicy configuration.
+ *
+ * The schedule determines the delay between restart attempts:
+ * - Uses exponential backoff starting from baseDelay
+ * - Optionally adds jitter to prevent thundering herd
+ * - Optionally caps the maximum delay
+ * - Optionally limits the number of restart attempts
+ */
+export const buildSchedule = (
+  policy: RestartPolicy,
+): Schedule.Schedule<unknown> => {
+  // Start with exponential backoff
+  let schedule: Schedule.Schedule<Duration.Duration> = Schedule.exponential(
+    policy.baseDelay,
+  )
+
+  // Add jitter by default (varies delay 80%-120%)
+  if (policy.jitter !== false) {
+    schedule = Schedule.jittered(schedule)
+  }
+
+  // Cap maximum delay if specified
+  if (policy.maxDelay !== undefined) {
+    const maxDelay = Duration.decode(policy.maxDelay)
+    schedule = Schedule.map(schedule, (d) => Duration.min(d, maxDelay))
+  }
+
+  // Limit restart attempts if specified
+  if (policy.maxAttempts !== undefined) {
+    // intersect ensures both conditions must be met:
+    // - exponential delay AND still within max attempts
+    return pipe(
+      schedule,
+      Schedule.intersect(Schedule.recurs(policy.maxAttempts)),
+    )
+  }
+
+  return schedule
+}
+
+// =============================================================================
+// Internal State Types
+// =============================================================================
+
+/** Internal state for a running daemon */
+interface DaemonInternals {
+  readonly config: DaemonConfig
+  readonly stateRef: SubscriptionRef.SubscriptionRef<DaemonState>
+  readonly outputQueue: Queue.Queue<string> | null
+  fiber: Fiber.RuntimeFiber<void, PlatformError | DaemonError> | null
+  intentionalStop: boolean
+}
+
+// =============================================================================
+// DaemonManager Service
+// =============================================================================
+
+export class DaemonManager extends Effect.Service<DaemonManager>()(
+  "DaemonManager",
+  {
+    effect: Effect.gen(function* () {
+      // Internal state - using MutableHashMap (Effect-idiomatic, returns Option)
+      const daemons = MutableHashMap.empty<DaemonName, DaemonInternals>()
+      const logPubSub = yield* PubSub.sliding<LogEvent>(1000)
+
+      // ---------------------------------------------------------------------
+      // Helper: Get daemon internals (returns Option)
+      // ---------------------------------------------------------------------
+      const getDaemon = (name: DaemonName): Option.Option<DaemonInternals> =>
+        MutableHashMap.get(daemons, name)
+
+      // ---------------------------------------------------------------------
+      // Helper: Publish a log event
+      // ---------------------------------------------------------------------
+      const log = (
+        daemon: DaemonName,
+        level: LogEvent["level"],
+        message: string,
+      ): Effect.Effect<void> =>
+        PubSub.publish(logPubSub, {
+          timestamp: new Date(),
+          level,
+          daemon,
+          message,
+        }).pipe(Effect.asVoid)
+
+      // ---------------------------------------------------------------------
+      // Helper: Update daemon state
+      // ---------------------------------------------------------------------
+      const updateState = (
+        name: DaemonName,
+        update: (state: DaemonState) => DaemonState,
+      ): Effect.Effect<void> =>
+        Effect.gen(function* () {
+          const maybeInternals = getDaemon(name)
+          if (Option.isSome(maybeInternals)) {
+            yield* SubscriptionRef.update(maybeInternals.value.stateRef, update)
+          }
+        })
+
+      // ---------------------------------------------------------------------
+      // Helper: Run the daemon process with restart logic
+      // ---------------------------------------------------------------------
+      const runDaemon = (
+        name: DaemonName,
+      ): Effect.Effect<void, PlatformError | DaemonError> =>
+        Effect.gen(function* () {
+          const maybeInternals = getDaemon(name)
+          if (Option.isNone(maybeInternals)) {
+            return yield* new DaemonError({
+              daemon: name,
+              reason: "not_found",
+              message: `Daemon "${name}" is not registered`,
+            })
+          }
+
+          const internals = maybeInternals.value
+          const { config, outputQueue } = internals
+          const schedule = buildSchedule(config.restartPolicy)
+
+          // The main daemon loop - runs and restarts on failure
+          yield* Effect.gen(function* () {
+            // Update state to running
+            yield* updateState(name, (s) => ({
+              ...s,
+              status: "running" as const,
+              startedAt: new Date(),
+            }))
+            yield* log(
+              name,
+              "info",
+              `Starting daemon: ${config.command.join(" ")}`,
+            )
+
+            // Spawn the process
+            const process = yield* Command.make(...config.command).pipe(
+              Command.start,
+            )
+
+            // If capturing output, pipe stdout to the queue
+            if (outputQueue) {
+              yield* pipe(
+                process.stdout,
+                Stream.decodeText(),
+                Stream.splitLines,
+                Stream.runForEach((line) => Queue.offer(outputQueue, line)),
+                Effect.fork,
+              )
+            }
+
+            // Wait for process to exit
+            const exitCode = yield* process.exitCode
+
+            // Check if this was an intentional stop
+            if (internals.intentionalStop) {
+              yield* log(name, "info", "Daemon stopped intentionally")
+              return // Don't throw, don't restart
+            }
+
+            // Process exited unexpectedly
+            yield* log(name, "warn", `Daemon exited with code ${exitCode}`)
+
+            // Throw to trigger retry
+            return yield* Effect.fail(
+              new DaemonError({
+                daemon: name,
+                reason: "start_failed",
+                message: `Process exited with code ${exitCode}`,
+              }),
+            )
+          }).pipe(
+            Effect.scoped,
+            // Retry with the configured schedule
+            Effect.retry({
+              schedule,
+              while: () => {
+                // Don't retry if intentionally stopped
+                if (internals.intentionalStop) return false
+                // Don't retry if daemon was unregistered
+                if (Option.isNone(getDaemon(name))) return false
+                return true
+              },
+            }),
+            // Before each retry, update state to "restarting"
+            Effect.tapErrorCause(() =>
+              Effect.gen(function* () {
+                if (!internals.intentionalStop) {
+                  yield* updateState(name, (s) => ({
+                    ...s,
+                    status: "restarting" as const,
+                    restartCount: s.restartCount + 1,
+                  }))
+                  yield* log(name, "info", "Restarting daemon...")
+                }
+              }),
+            ),
+            // If all retries exhausted, mark as failed
+            Effect.catchAll((error) =>
+              Effect.gen(function* () {
+                if (!internals.intentionalStop) {
+                  yield* updateState(name, (s) => ({
+                    ...s,
+                    status: "failed" as const,
+                    lastError:
+                      error instanceof DaemonError ?
+                        error.message
+                      : String(error),
+                  }))
+                  yield* log(name, "error", `Daemon failed: ${error}`)
+                }
+              }),
+            ),
+          )
+        })
+
+      // =====================================================================
+      // Public API
+      // =====================================================================
+
+      return {
+        /**
+         * Register a daemon configuration.
+         * Does not start the daemon - call start() after registering.
+         */
+        register: (
+          name: DaemonName,
+          config: DaemonConfig,
+        ): Effect.Effect<void> =>
+          Effect.gen(function* () {
+            const maybeExisting = getDaemon(name)
+            if (Option.isSome(maybeExisting)) {
+              // Already registered, update config
+              MutableHashMap.set(daemons, name, {
+                ...maybeExisting.value,
+                config,
+              })
+              yield* log(name, "debug", "Daemon config updated")
+              return
+            }
+
+            // Create initial state
+            const stateRef = yield* SubscriptionRef.make<DaemonState>({
+              status: "stopped",
+              restartCount: 0,
+            })
+
+            // Create output queue if capturing output
+            const outputQueue =
+              config.captureOutput ? yield* Queue.unbounded<string>() : null
+
+            MutableHashMap.set(daemons, name, {
+              config,
+              stateRef,
+              outputQueue,
+              fiber: null,
+              intentionalStop: false,
+            })
+
+            yield* log(name, "info", "Daemon registered")
+          }),
+
+        /**
+         * Start a registered daemon.
+         * Idempotent - if already running, returns success.
+         */
+        start: (name: DaemonName): Effect.Effect<void, DaemonError> =>
+          Effect.gen(function* () {
+            const maybeInternals = getDaemon(name)
+            if (Option.isNone(maybeInternals)) {
+              return yield* new DaemonError({
+                daemon: name,
+                reason: "not_found",
+                message: `Daemon "${name}" is not registered`,
+              })
+            }
+
+            const internals = maybeInternals.value
+
+            // Check if already running
+            const currentState = yield* SubscriptionRef.get(internals.stateRef)
+            if (
+              currentState.status === "running"
+              || currentState.status === "restarting"
+            ) {
+              yield* log(name, "debug", "Daemon already running")
+              return
+            }
+
+            // Reset intentional stop flag
+            internals.intentionalStop = false
+
+            // Fork the daemon runner
+            const fiber = yield* Effect.fork(runDaemon(name))
+            internals.fiber = fiber
+          }),
+
+        /**
+         * Stop a running daemon.
+         * Sends SIGTERM to the process.
+         */
+        stop: (name: DaemonName): Effect.Effect<void> =>
+          Effect.gen(function* () {
+            const maybeInternals = getDaemon(name)
+            if (Option.isNone(maybeInternals)) return
+
+            const internals = maybeInternals.value
+
+            // Set intentional stop flag to prevent restarts
+            internals.intentionalStop = true
+
+            // Interrupt the daemon fiber (this will kill the process)
+            if (internals.fiber) {
+              yield* Fiber.interrupt(internals.fiber)
+              internals.fiber = null
+            }
+
+            // Update state
+            yield* updateState(name, (s) => ({
+              ...s,
+              status: "stopped" as const,
+            }))
+
+            yield* log(name, "info", "Daemon stopped")
+          }),
+
+        /**
+         * Restart a daemon (stop then start).
+         */
+        restart: (name: DaemonName): Effect.Effect<void, DaemonError> =>
+          Effect.gen(function* () {
+            const maybeInternals = getDaemon(name)
+            if (Option.isNone(maybeInternals)) {
+              return yield* new DaemonError({
+                daemon: name,
+                reason: "not_found",
+                message: `Daemon "${name}" is not registered`,
+              })
+            }
+
+            const internals = maybeInternals.value
+
+            yield* log(name, "info", "Restarting daemon...")
+
+            // Stop (don't yield the error, stop always succeeds)
+            yield* Effect.gen(function* () {
+              internals.intentionalStop = true
+              if (internals.fiber) {
+                yield* Fiber.interrupt(internals.fiber)
+                internals.fiber = null
+              }
+            })
+
+            // Reset state for fresh start
+            yield* updateState(name, (s) => ({
+              ...s,
+              status: "stopped" as const,
+              restartCount: 0, // Reset count on manual restart
+              lastError: undefined,
+            }))
+
+            // Small delay to ensure cleanup
+            yield* Effect.sleep("100 millis")
+
+            // Start fresh
+            internals.intentionalStop = false
+            const fiber = yield* Effect.fork(runDaemon(name))
+            internals.fiber = fiber
+          }),
+
+        /**
+         * Get the current state of a daemon.
+         */
+        getState: (name: DaemonName): Effect.Effect<DaemonState, DaemonError> =>
+          Effect.gen(function* () {
+            const maybeInternals = getDaemon(name)
+            if (Option.isNone(maybeInternals)) {
+              return yield* new DaemonError({
+                daemon: name,
+                reason: "not_found",
+                message: `Daemon "${name}" is not registered`,
+              })
+            }
+            return yield* SubscriptionRef.get(maybeInternals.value.stateRef)
+          }),
+
+        /**
+         * Subscribe to state changes for a daemon.
+         * Returns current state immediately, then all future changes.
+         */
+        subscribe: (
+          name: DaemonName,
+        ): Stream.Stream<DaemonState, DaemonError> =>
+          Stream.unwrap(
+            Effect.gen(function* () {
+              const maybeInternals = getDaemon(name)
+              if (Option.isNone(maybeInternals)) {
+                return Stream.fail(
+                  new DaemonError({
+                    daemon: name,
+                    reason: "not_found",
+                    message: `Daemon "${name}" is not registered`,
+                  }),
+                )
+              }
+              return maybeInternals.value.stateRef.changes
+            }),
+          ),
+
+        /**
+         * Get stdout output stream for a daemon.
+         * Only works if daemon was registered with captureOutput: true.
+         * Single consumer - use for processing daemon output.
+         */
+        getOutput: (name: DaemonName): Stream.Stream<string, DaemonError> =>
+          Stream.unwrap(
+            Effect.gen(function* () {
+              const maybeInternals = getDaemon(name)
+              if (Option.isNone(maybeInternals)) {
+                return Stream.fail(
+                  new DaemonError({
+                    daemon: name,
+                    reason: "not_found",
+                    message: `Daemon "${name}" is not registered`,
+                  }),
+                )
+              }
+              const internals = maybeInternals.value
+              if (!internals.outputQueue) {
+                return Stream.fail(
+                  new DaemonError({
+                    daemon: name,
+                    reason: "not_found",
+                    message: `Daemon "${name}" was not configured with captureOutput: true`,
+                  }),
+                )
+              }
+              return Stream.fromQueue(internals.outputQueue)
+            }),
+          ),
+
+        /**
+         * Subscribe to log events from all daemons.
+         * Multiple consumers supported.
+         */
+        logs: (): Stream.Stream<LogEvent> =>
+          Stream.unwrapScoped(
+            Effect.map(PubSub.subscribe(logPubSub), Stream.fromQueue),
+          ),
+
+        /**
+         * Get all registered daemon names.
+         */
+        listDaemons: (): Effect.Effect<DaemonName[]> =>
+          Effect.sync(() => MutableHashMap.keys(daemons)),
+
+        /**
+         * Unregister a daemon. Stops it first if running.
+         */
+        unregister: (name: DaemonName): Effect.Effect<void> =>
+          Effect.gen(function* () {
+            const maybeInternals = getDaemon(name)
+            if (Option.isNone(maybeInternals)) return
+
+            const internals = maybeInternals.value
+
+            // Stop if running
+            internals.intentionalStop = true
+            if (internals.fiber) {
+              yield* Fiber.interrupt(internals.fiber)
+            }
+
+            // Shutdown output queue if exists
+            if (internals.outputQueue) {
+              yield* Queue.shutdown(internals.outputQueue)
+            }
+
+            MutableHashMap.remove(daemons, name)
+            yield* log(name, "info", "Daemon unregistered")
+          }),
+      }
+    }),
+  },
+) {}
+
+// =============================================================================
+// Common Restart Policies
+// =============================================================================
+
+/** Conservative: Back off quickly, give up after 10 attempts */
+export const conservativePolicy: RestartPolicy = {
+  baseDelay: "1 second",
+  maxDelay: "30 seconds",
+  maxAttempts: 10,
+  jitter: true,
+}
+
+/** Persistent: Never give up, but back off to avoid hammering */
+export const persistentPolicy: RestartPolicy = {
+  baseDelay: "1 second",
+  maxDelay: "1 minute",
+  maxAttempts: undefined,
+  jitter: true,
+}
+
+/** Aggressive: Quick restarts for critical services */
+export const aggressivePolicy: RestartPolicy = {
+  baseDelay: "100 millis",
+  maxDelay: "5 seconds",
+  maxAttempts: 20,
+  jitter: true,
+}
+```
+
+---
+
+## Usage Example
+
+Here's how to use the DaemonManager in your app:
+
+```typescript
+import { Effect, Stream } from "effect"
+import { DaemonManager, persistentPolicy } from "./lib/daemon-manager"
+
+const program = Effect.gen(function* () {
+  const dm = yield* DaemonManager
+
+  // 1. Register daemons
+  yield* dm.register("audio", {
+    command: ["pactl", "subscribe"],
+    restartPolicy: persistentPolicy,
+    captureOutput: true,
+  })
+
+  yield* dm.register("network", {
+    command: ["nmcli", "monitor"],
+    restartPolicy: persistentPolicy,
+    captureOutput: true,
+  })
+
+  // 2. Start daemons
+  yield* dm.start("audio")
+  yield* dm.start("network")
+
+  // 3. Process audio output in background
+  yield* dm.getOutput("audio").pipe(
+    Stream.tap((line) => Effect.log(`[audio] ${line}`)),
+    Stream.runDrain,
+    Effect.fork,
+  )
+
+  // 4. Subscribe to state changes
+  yield* dm.subscribe("audio").pipe(
+    Stream.tap((state) =>
+      Effect.log(
+        `Audio daemon: ${state.status} (restarts: ${state.restartCount})`,
+      ),
+    ),
+    Stream.runDrain,
+    Effect.fork,
+  )
+
+  // 5. Watch all logs
+  yield* dm.logs().pipe(
+    Stream.tap((log) =>
+      Effect.log(`[${log.daemon}] ${log.level}: ${log.message}`),
+    ),
+    Stream.runDrain,
+    Effect.fork,
+  )
+
+  // Keep running...
+  yield* Effect.never
+})
+
+// Provide DaemonManager layer and run
+program.pipe(Effect.provide(DaemonManager.Default), Effect.runPromise)
+```
+
+---
+
+## Integrating with AppRuntime
+
+Update your `runtime.ts` to include DaemonManager:
+
+```typescript
+import { BunContext } from "@effect/platform-bun"
+import { Layer, ManagedRuntime } from "effect"
+import { DaemonManager } from "./daemon-manager"
+
+// Combine layers
+const AppLayer = Layer.merge(BunContext.layer, DaemonManager.Default)
+
+export const AppRuntime = ManagedRuntime.make(AppLayer)
+```
+
+---
+
+## Key Implementation Notes
+
+### 1. Why `MutableHashMap` instead of JavaScript `Map`
+
+We use Effect's `MutableHashMap` for internal state because:
+
+- **Effect-idiomatic** - This is what Effect's own internal code uses (see `FiberMap`, `Cache`)
+- **Safer API** - `.get()` returns `Option<V>` instead of `V | undefined`, forcing explicit null handling
+- **Effect-aware** - Implements `Equal`, `Hash`, `Inspectable` interfaces
+
+```typescript
+// MutableHashMap pattern
+const maybeInternals = MutableHashMap.get(daemons, name)
+if (Option.isNone(maybeInternals)) {
+  return yield* new DaemonError({ ... })
+}
+const internals = maybeInternals.value
+```
+
+Note: Services CAN hold internal mutable state - this is a common and accepted pattern in Effect (see `Cache`, `FiberMap` in Effect's source code with explicit `// mutable by design` comments).
+
+### 2. Why `Effect.scoped` is inside the retry loop
+
+The process lifecycle (`Command.start`) requires a scope. By placing `Effect.scoped` around just the process-running code (not the whole daemon), we ensure:
+
+- Each restart attempt gets a fresh scope
+- The scope closes when the process exits, cleaning up resources
+- The retry logic operates outside the scope
+
+### 3. How restart detection works
+
+We use an `intentionalStop` flag:
+
+- Set to `true` before calling `stop()` or during `unregister()`
+- Checked in the retry `while` predicate
+- Prevents restart when the stop was intentional
+
+### 4. Output streaming with Queue
+
+We use an unbounded `Queue` for output:
+
+- Process stdout is split by lines and offered to the queue
+- `getOutput()` returns a `Stream.fromQueue()`
+- Single consumer model (queue items are taken, not broadcast)
+
+If you need multiple consumers for output, you could change this to use a `PubSub` instead.
+
+### 5. Logs use PubSub
+
+Logs are broadcast via `PubSub.sliding(1000)`:
+
+- Multiple subscribers can consume logs independently
+- Sliding strategy means old logs are dropped if consumers are slow
+- 1000 capacity provides reasonable buffer
+
+### 6. State changes via SubscriptionRef
+
+Each daemon has a `SubscriptionRef<DaemonState>`:
+
+- `.changes` stream provides current value + all future updates
+- Multiple UI components can subscribe independently
+- Updates are atomic and immediately visible
