@@ -225,7 +225,7 @@ With `forkDaemon`, the fiber is never interrupted by `dispose()`, so the finaliz
 
 ## `@opentui/core` Signal Handling
 
-`@opentui/core` registers aggressive signal handlers on import:
+`@opentui/core` registers signal handlers via the `Renderer` class (see [renderer.ts](https://github.com/sst/opentui/blob/main/packages/core/src/renderer.ts) — `exitSignals` config and `addExitListeners` method):
 
 ```javascript
 ;["SIGINT", "SIGTERM", "SIGQUIT", "SIGABRT"].forEach((signal) => {
