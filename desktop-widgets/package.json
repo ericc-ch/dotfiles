@@ -6,6 +6,7 @@
     "predeploy": "bun run build",
     "deploy": "bun run ./scripts/deploy.ts",
     "format": "prettier --write .",
+    "start:launcher": "bun run ./src/launcher.tsx",
     "start:bar": "bun run ./src/bar.tsx",
     "start:dashboard": "bun run ./src/dashboard.tsx",
     "typecheck": "tsc"
