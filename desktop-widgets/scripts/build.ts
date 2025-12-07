@@ -15,15 +15,20 @@ const entries = [
 
 await fs.mkdir(distDir, { recursive: true })
 
-for (const { name, entry } of entries) {
-  await Bun.build({
-    entrypoints: [path.join(rootDir, entry)],
-    plugins: [solidPlugin],
-    compile: {
-      autoloadBunfig: false,
-      autoloadDotenv: false,
-      outfile: path.join(distDir, name),
-    },
+await Promise.all(
+  entries.map(async ({ name, entry }) => {
+    await Bun.build({
+      entrypoints: [path.join(rootDir, entry)],
+      plugins: [solidPlugin],
+      minify: true,
+      // bytecode: true, // requires CJS (no top-level await)
+      // sourcemap: "external",
+      compile: {
+        autoloadBunfig: false,
+        autoloadDotenv: false,
+        outfile: path.join(distDir, name),
+      },
+    })
+    console.log(`Built ${name}`)
   })
-  console.log(`Built ${name}`)
-}
+)
