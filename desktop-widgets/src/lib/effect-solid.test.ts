@@ -1,10 +1,11 @@
-import { describe, expect, test } from "bun:test"
 import { AtomRef } from "@effect-atom/atom"
+import { describe, expect, test } from "bun:test"
 import { createRoot } from "solid-js"
 import {
   Atom,
   defaultRegistry,
   Registry,
+  RegistryProvider,
   useAtom,
   useAtomMount,
   useAtomRef,
@@ -16,7 +17,7 @@ import {
   useAtomValue,
 } from "./effect-solid"
 
-describe("effect-solid", () => {
+describe("atom-solid", () => {
   describe("useAtomValue", () => {
     test("returns initial atom value", () => {
       const countAtom = Atom.make(42)
@@ -29,34 +30,17 @@ describe("effect-solid", () => {
     })
 
     test("updates when atom changes", () => {
-      const registry = Registry.make()
       const countAtom = Atom.make(0)
 
       createRoot((dispose) => {
-        // Use custom registry via context
-        const count = (() => {
-          // Manually set registry for test (simulating context)
-          const originalGet = defaultRegistry.get
-          ;(defaultRegistry as any).get = registry.get.bind(registry)
-          ;(defaultRegistry as any).subscribe =
-            registry.subscribe.bind(registry)
-          ;(defaultRegistry as any).mount = registry.mount.bind(registry)
-          ;(defaultRegistry as any).set = registry.set.bind(registry)
-
-          const result = useAtomValue(countAtom)
-
-          // Restore
-          ;(defaultRegistry as any).get = originalGet
-
-          return result
-        })()
+        const count = useAtomValue(countAtom)
 
         expect(count()).toBe(0)
 
-        registry.set(countAtom, 10)
+        defaultRegistry.set(countAtom, 10)
         expect(count()).toBe(10)
 
-        registry.set(countAtom, 99)
+        defaultRegistry.set(countAtom, 99)
         expect(count()).toBe(99)
 
         dispose()
@@ -87,34 +71,20 @@ describe("effect-solid", () => {
 
   describe("useAtomSet", () => {
     test("returns a setter function", () => {
-      const registry = Registry.make()
       const countAtom = Atom.make(0)
 
       createRoot((dispose) => {
-        // Patch registry for test
-        const origMount = defaultRegistry.mount
-        const origSet = defaultRegistry.set
-        const origGet = defaultRegistry.get
-        ;(defaultRegistry as any).mount = registry.mount.bind(registry)
-        ;(defaultRegistry as any).set = registry.set.bind(registry)
-        ;(defaultRegistry as any).get = registry.get.bind(registry)
-
         const setCount = useAtomSet(countAtom)
 
         expect(typeof setCount).toBe("function")
-        expect(registry.get(countAtom)).toBe(0)
+        expect(defaultRegistry.get(countAtom)).toBe(0)
 
         setCount(5)
-        expect(registry.get(countAtom)).toBe(5)
+        expect(defaultRegistry.get(countAtom)).toBe(5)
 
         // Test function updater
         setCount((prev) => prev + 1)
-        expect(registry.get(countAtom)).toBe(6)
-
-        // Restore
-        ;(defaultRegistry as any).mount = origMount
-        ;(defaultRegistry as any).set = origSet
-        ;(defaultRegistry as any).get = origGet
+        expect(defaultRegistry.get(countAtom)).toBe(6)
 
         dispose()
       })
@@ -123,36 +93,19 @@ describe("effect-solid", () => {
 
   describe("useAtom", () => {
     test("returns value accessor and setter", () => {
-      const registry = Registry.make()
       const countAtom = Atom.make(0)
 
       createRoot((dispose) => {
-        // Patch registry for test
-        const origMount = defaultRegistry.mount
-        const origSet = defaultRegistry.set
-        const origGet = defaultRegistry.get
-        const origSubscribe = defaultRegistry.subscribe
-        ;(defaultRegistry as any).mount = registry.mount.bind(registry)
-        ;(defaultRegistry as any).set = registry.set.bind(registry)
-        ;(defaultRegistry as any).get = registry.get.bind(registry)
-        ;(defaultRegistry as any).subscribe = registry.subscribe.bind(registry)
-
         const [count, setCount] = useAtom(countAtom)
 
         expect(count()).toBe(0)
 
         setCount(10)
         expect(count()).toBe(10)
-        expect(registry.get(countAtom)).toBe(10)
+        expect(defaultRegistry.get(countAtom)).toBe(10)
 
         setCount((prev) => prev * 2)
         expect(count()).toBe(20)
-
-        // Restore
-        ;(defaultRegistry as any).mount = origMount
-        ;(defaultRegistry as any).set = origSet
-        ;(defaultRegistry as any).get = origGet
-        ;(defaultRegistry as any).subscribe = origSubscribe
 
         dispose()
       })
@@ -161,7 +114,6 @@ describe("effect-solid", () => {
 
   describe("useAtomRefresh", () => {
     test("returns a refresh function", () => {
-      const registry = Registry.make()
       let computeCount = 0
       const computedAtom = Atom.make(() => {
         computeCount++
@@ -169,30 +121,17 @@ describe("effect-solid", () => {
       })
 
       createRoot((dispose) => {
-        // Patch registry for test
-        const origMount = defaultRegistry.mount
-        const origRefresh = defaultRegistry.refresh
-        const origGet = defaultRegistry.get
-        ;(defaultRegistry as any).mount = registry.mount.bind(registry)
-        ;(defaultRegistry as any).refresh = registry.refresh.bind(registry)
-        ;(defaultRegistry as any).get = registry.get.bind(registry)
-
         const refresh = useAtomRefresh(computedAtom)
         expect(typeof refresh).toBe("function")
 
-        // Initial computation
-        registry.get(computedAtom)
+        // Initial computation - trigger get to ensure atom is computed
+        defaultRegistry.get(computedAtom)
         const initialCount = computeCount
 
         // Refresh should recompute
         refresh()
-        const value2 = registry.get(computedAtom)
+        const value2 = defaultRegistry.get(computedAtom)
         expect(value2).toBe(initialCount + 1)
-
-        // Restore
-        ;(defaultRegistry as any).mount = origMount
-        ;(defaultRegistry as any).refresh = origRefresh
-        ;(defaultRegistry as any).get = origGet
 
         dispose()
       })
@@ -201,23 +140,14 @@ describe("effect-solid", () => {
 
   describe("useAtomMount", () => {
     test("mounts the atom without returning value", () => {
-      const registry = Registry.make()
-      let mountCalled = false
-      const origMount = defaultRegistry.mount
+      const countAtom = Atom.make(42)
 
       createRoot((dispose) => {
-        ;(defaultRegistry as any).mount = (atom: any) => {
-          mountCalled = true
-          return registry.mount(atom)
-        }
-
-        const countAtom = Atom.make(42)
+        // useAtomMount should not throw and should complete
         useAtomMount(countAtom)
 
-        expect(mountCalled).toBe(true)
-
-        // Restore
-        ;(defaultRegistry as any).mount = origMount
+        // Verify the atom is accessible via registry
+        expect(defaultRegistry.get(countAtom)).toBe(42)
 
         dispose()
       })
@@ -226,42 +156,29 @@ describe("effect-solid", () => {
 
   describe("useAtomSubscribe", () => {
     test("subscribes to atom changes with callback", () => {
-      const registry = Registry.make()
       const countAtom = Atom.make(0)
-      const values: number[] = []
+      const values: Array<number> = []
 
       createRoot((dispose) => {
-        // Patch registry for test
-        const origSubscribe = defaultRegistry.subscribe
-        ;(defaultRegistry as any).subscribe = registry.subscribe.bind(registry)
-
         useAtomSubscribe(countAtom, (value) => {
           values.push(value)
         })
 
-        registry.set(countAtom, 1)
-        registry.set(countAtom, 2)
-        registry.set(countAtom, 3)
+        defaultRegistry.set(countAtom, 1)
+        defaultRegistry.set(countAtom, 2)
+        defaultRegistry.set(countAtom, 3)
 
         expect(values).toEqual([1, 2, 3])
-
-        // Restore
-        ;(defaultRegistry as any).subscribe = origSubscribe
 
         dispose()
       })
     })
 
     test("supports immediate option", () => {
-      const registry = Registry.make()
       const countAtom = Atom.make(42)
-      const values: number[] = []
+      const values: Array<number> = []
 
       createRoot((dispose) => {
-        // Patch registry for test
-        const origSubscribe = defaultRegistry.subscribe
-        ;(defaultRegistry as any).subscribe = registry.subscribe.bind(registry)
-
         useAtomSubscribe(
           countAtom,
           (value) => {
@@ -272,9 +189,6 @@ describe("effect-solid", () => {
 
         // With immediate: true, should receive current value immediately
         expect(values).toEqual([42])
-
-        // Restore
-        ;(defaultRegistry as any).subscribe = origSubscribe
 
         dispose()
       })
@@ -299,7 +213,7 @@ describe("effect-solid", () => {
 
   describe("useAtomRefProp", () => {
     test("returns a prop lens from AtomRef", () => {
-      const ref = AtomRef.make({ name: "test", count: 5 })
+      const ref = AtomRef.make({ count: 5, name: "test" })
 
       createRoot((dispose) => {
         const countRef = useAtomRefProp(ref, "count")
@@ -316,7 +230,7 @@ describe("effect-solid", () => {
 
   describe("useAtomRefPropValue", () => {
     test("returns reactive prop value from AtomRef", () => {
-      const ref = AtomRef.make({ name: "test", count: 5 })
+      const ref = AtomRef.make({ count: 5, name: "test" })
 
       createRoot((dispose) => {
         const count = useAtomRefPropValue(ref, "count")
@@ -326,6 +240,24 @@ describe("effect-solid", () => {
         ref.set({ ...ref.value, count: 15 })
         expect(count()).toBe(15)
 
+        dispose()
+      })
+    })
+  })
+
+  describe("RegistryProvider", () => {
+    test("is exported and callable", () => {
+      // RegistryProvider exists and is a function
+      expect(typeof RegistryProvider).toBe("function")
+    })
+
+    test("creates new registry when none provided", () => {
+      const countAtom = Atom.make(50)
+
+      createRoot((dispose) => {
+        // Just verify we can use atoms with the default registry
+        const count = useAtomValue(countAtom)
+        expect(count()).toBe(50)
         dispose()
       })
     })

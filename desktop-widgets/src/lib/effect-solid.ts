@@ -1,34 +1,72 @@
 /**
- * Solid bindings for @effect-atom/atom
- * Following the official React/Vue API patterns
+ * @since 1.0.0
  */
-import * as AtomNs from "@effect-atom/atom/Atom"
-import type * as AtomRefNs from "@effect-atom/atom/AtomRef"
+import * as Atom from "@effect-atom/atom/Atom"
+import type * as AtomRef from "@effect-atom/atom/AtomRef"
 import * as Registry from "@effect-atom/atom/Registry"
-import type * as ResultNs from "@effect-atom/atom/Result"
+import type * as Result from "@effect-atom/atom/Result"
+import { Effect } from "effect"
 import * as Cause from "effect/Cause"
-import * as Effect from "effect/Effect"
 import * as Exit from "effect/Exit"
 import { globalValue } from "effect/GlobalValue"
-import type { Accessor } from "solid-js"
+import type { Accessor, ParentProps } from "solid-js"
 import { createContext, createSignal, onCleanup, useContext } from "solid-js"
 
-// Re-exports
-export * as Atom from "@effect-atom/atom/Atom"
-export * as AtomHttpApi from "@effect-atom/atom/AtomHttpApi"
-export * as AtomRef from "@effect-atom/atom/AtomRef"
-export * as AtomRpc from "@effect-atom/atom/AtomRpc"
-export * as Hydration from "@effect-atom/atom/Hydration"
-export * as Registry from "@effect-atom/atom/Registry"
+/**
+ * @since 1.0.0
+ * @category re-exports
+ */
+export { Atom }
+
+/**
+ * @since 1.0.0
+ * @category re-exports
+ */
+export { Registry }
+
+/**
+ * @since 1.0.0
+ * @category re-exports
+ */
 export * as Result from "@effect-atom/atom/Result"
 
 /**
- * Context for providing a custom registry
+ * @since 1.0.0
+ * @category re-exports
+ */
+export * as AtomRef from "@effect-atom/atom/AtomRef"
+
+/**
+ * @since 1.0.0
+ * @category re-exports
+ */
+export * as AtomHttpApi from "@effect-atom/atom/AtomHttpApi"
+
+/**
+ * @since 1.0.0
+ * @category re-exports
+ */
+export * as AtomRpc from "@effect-atom/atom/AtomRpc"
+
+/**
+ * @since 1.0.0
+ * @category re-exports
+ */
+export * as Hydration from "@effect-atom/atom/Hydration"
+
+// -----------------------------------------------------------------------------
+// Context
+// -----------------------------------------------------------------------------
+
+/**
+ * @since 1.0.0
+ * @category context
  */
 export const RegistryContext = createContext<Registry.Registry>()
 
 /**
- * Default global registry (singleton)
+ * @since 1.0.0
+ * @category context
  */
 export const defaultRegistry: Registry.Registry = globalValue(
   "@effect-atom/atom-solid/defaultRegistry",
@@ -36,50 +74,101 @@ export const defaultRegistry: Registry.Registry = globalValue(
 )
 
 /**
- * Get the current registry from context or fall back to default
+ * @since 1.0.0
+ * @category context
  */
 export const useRegistry = (): Registry.Registry => {
   return useContext(RegistryContext) ?? defaultRegistry
 }
 
 /**
- * Subscribe to an atom's value reactively
+ * @since 1.0.0
+ * @category context
  */
-export const useAtomValue: {
-  <A>(atom: AtomNs.Atom<A>): Accessor<A>
-  <A, B>(atom: AtomNs.Atom<A>, f: (_: A) => B): Accessor<B>
-} = <A, B>(atom: AtomNs.Atom<A>, f?: (_: A) => B): Accessor<A | B> => {
-  const registry = useRegistry()
-
-  if (f) {
-    const mappedAtom = AtomNs.map(atom, f)
-    const [value, setValue] = createSignal<B>(registry.get(mappedAtom))
-
-    const unsubscribe = registry.subscribe(mappedAtom, (nextValue) => {
-      setValue(() => nextValue)
+export const RegistryProvider = (
+  props: ParentProps<{
+    readonly registry?: Registry.Registry | undefined
+    readonly initialValues?:
+      | Iterable<readonly [Atom.Atom<any>, any]>
+      | undefined
+  }>,
+): ReturnType<typeof RegistryContext.Provider> => {
+  const registry =
+    props.registry
+    ?? Registry.make({
+      initialValues: props.initialValues,
     })
-    onCleanup(unsubscribe)
 
-    return value
-  }
+  onCleanup(() => {
+    if (!props.registry) {
+      registry.dispose()
+    }
+  })
 
+  return RegistryContext.Provider({
+    value: registry,
+    children: props.children,
+  })
+}
+
+// -----------------------------------------------------------------------------
+// Internal helpers
+// -----------------------------------------------------------------------------
+
+function useStore<A>(
+  registry: Registry.Registry,
+  atom: Atom.Atom<A>,
+): Accessor<A> {
   const [value, setValue] = createSignal<A>(registry.get(atom))
-
   const unsubscribe = registry.subscribe(atom, (nextValue) => {
     setValue(() => nextValue)
   })
   onCleanup(unsubscribe)
-
   return value
 }
 
-/**
- * Mount an atom (keep it alive while component exists)
- */
-export const useAtomMount = <A>(atom: AtomNs.Atom<A>): void => {
-  const registry = useRegistry()
+function mountAtom<A>(registry: Registry.Registry, atom: Atom.Atom<A>): void {
   const unmount = registry.mount(atom)
   onCleanup(unmount)
+}
+
+function setAtom<
+  R,
+  W,
+  Mode extends "value" | "promise" | "promiseExit" = never,
+>(
+  registry: Registry.Registry,
+  atom: Atom.Writable<R, W>,
+  options?: {
+    readonly mode?:
+      | ([R] extends [Result.Result<any, any>] ? Mode : "value")
+      | undefined
+  },
+): "promise" extends Mode ? (value: W) => Promise<Result.Result.Success<R>>
+: "promiseExit" extends Mode ?
+  (
+    value: W,
+  ) => Promise<Exit.Exit<Result.Result.Success<R>, Result.Result.Failure<R>>>
+: (value: W | ((value: R) => W)) => void {
+  if (options?.mode === "promise" || options?.mode === "promiseExit") {
+    return ((value: W) => {
+      registry.set(atom, value)
+      const promise = Effect.runPromiseExit(
+        Registry.getResult(
+          registry,
+          atom as Atom.Atom<Result.Result<any, any>>,
+          { suspendOnWaiting: true },
+        ),
+      )
+      return options!.mode === "promise" ? promise.then(flattenExit) : promise
+    }) as any
+  }
+  return ((value: W | ((value: R) => W)) => {
+    registry.set(
+      atom,
+      typeof value === "function" ? (value as any)(registry.get(atom)) : value,
+    )
+  }) as any
 }
 
 const flattenExit = <A, E>(exit: Exit.Exit<A, E>): A => {
@@ -87,141 +176,105 @@ const flattenExit = <A, E>(exit: Exit.Exit<A, E>): A => {
   throw Cause.squash(exit.cause)
 }
 
+// -----------------------------------------------------------------------------
+// Hooks
+// -----------------------------------------------------------------------------
+
 /**
- * Get a setter function for a writable atom
+ * @since 1.0.0
+ * @category hooks
+ */
+export const useAtomValue: {
+  <A>(atom: Atom.Atom<A>): Accessor<A>
+  <A, B>(atom: Atom.Atom<A>, f: (_: A) => B): Accessor<B>
+} = <A, B>(atom: Atom.Atom<A>, f?: (_: A) => B): Accessor<A | B> => {
+  const registry = useRegistry()
+  if (f) {
+    return useStore(registry, Atom.map(atom, f))
+  }
+  return useStore(registry, atom)
+}
+
+/**
+ * @since 1.0.0
+ * @category hooks
+ */
+export const useAtomMount = <A>(atom: Atom.Atom<A>): void => {
+  const registry = useRegistry()
+  mountAtom(registry, atom)
+}
+
+/**
+ * @since 1.0.0
+ * @category hooks
  */
 export const useAtomSet = <
   R,
   W,
   Mode extends "value" | "promise" | "promiseExit" = never,
 >(
-  atom: AtomNs.Writable<R, W>,
+  atom: Atom.Writable<R, W>,
   options?: {
-    readonly mode?: [R] extends [ResultNs.Result<any, any>] ? Mode
-    : "value" | undefined
+    readonly mode?:
+      | ([R] extends [Result.Result<any, any>] ? Mode : "value")
+      | undefined
   },
-): "promise" extends Mode ? (value: W) => Promise<ResultNs.Result.Success<R>>
+): "promise" extends Mode ? (value: W) => Promise<Result.Result.Success<R>>
 : "promiseExit" extends Mode ?
   (
     value: W,
-  ) => Promise<
-    Exit.Exit<ResultNs.Result.Success<R>, ResultNs.Result.Failure<R>>
-  >
-: (value: W | ((prev: R) => W)) => void => {
+  ) => Promise<Exit.Exit<Result.Result.Success<R>, Result.Result.Failure<R>>>
+: (value: W | ((value: R) => W)) => void => {
   const registry = useRegistry()
-
-  // Mount the atom (keeps it alive while component exists)
-  const unmount = registry.mount(atom)
-  onCleanup(unmount)
-
-  if (options?.mode === "promise" || options?.mode === "promiseExit") {
-    return ((value: W) => {
-      registry.set(atom, value)
-      const promise = Effect.runPromiseExit(
-        Registry.getResult(
-          registry,
-          atom as AtomNs.Atom<ResultNs.Result<any, any>>,
-          { suspendOnWaiting: true },
-        ),
-      )
-      return options.mode === "promise" ? promise.then(flattenExit) : promise
-    }) as any
-  }
-
-  return ((value: W | ((prev: R) => W)) => {
-    registry.set(
-      atom,
-      typeof value === "function" ?
-        (value as (prev: R) => W)(registry.get(atom))
-      : value,
-    )
-  }) as any
+  mountAtom(registry, atom)
+  return setAtom(registry, atom, options)
 }
 
 /**
- * Refresh an atom (re-run its effect/computation)
+ * @since 1.0.0
+ * @category hooks
  */
-export const useAtomRefresh = <A>(atom: AtomNs.Atom<A>): (() => void) => {
+export const useAtomRefresh = <A>(atom: Atom.Atom<A>): (() => void) => {
   const registry = useRegistry()
-
-  // Mount the atom
-  const unmount = registry.mount(atom)
-  onCleanup(unmount)
-
+  mountAtom(registry, atom)
   return () => registry.refresh(atom)
 }
 
 /**
- * Subscribe to an atom's value and get a setter (for writable atoms)
+ * @since 1.0.0
+ * @category hooks
  */
 export const useAtom = <
   R,
   W,
   const Mode extends "value" | "promise" | "promiseExit" = never,
 >(
-  atom: AtomNs.Writable<R, W>,
+  atom: Atom.Writable<R, W>,
   options?: {
-    readonly mode?: [R] extends [ResultNs.Result<any, any>] ? Mode
-    : "value" | undefined
+    readonly mode?:
+      | ([R] extends [Result.Result<any, any>] ? Mode : "value")
+      | undefined
   },
 ): readonly [
   value: Accessor<R>,
   write: "promise" extends Mode ?
-    (value: W) => Promise<ResultNs.Result.Success<R>>
+    (value: W) => Promise<Result.Result.Success<R>>
   : "promiseExit" extends Mode ?
     (
       value: W,
-    ) => Promise<
-      Exit.Exit<ResultNs.Result.Success<R>, ResultNs.Result.Failure<R>>
-    >
+    ) => Promise<Exit.Exit<Result.Result.Success<R>, Result.Result.Failure<R>>>
   : (value: W | ((value: R) => W)) => void,
 ] => {
   const registry = useRegistry()
-  const [value, setValue] = createSignal<R>(registry.get(atom))
-
-  // Mount the atom
-  const unmount = registry.mount(atom)
-  onCleanup(unmount)
-
-  // Subscribe to changes
-  const unsubscribe = registry.subscribe(atom, (nextValue) => {
-    setValue(() => nextValue)
-  })
-  onCleanup(unsubscribe)
-
-  let setter: any
-
-  if (options?.mode === "promise" || options?.mode === "promiseExit") {
-    setter = (newValue: W) => {
-      registry.set(atom, newValue)
-      const promise = Effect.runPromiseExit(
-        Registry.getResult(
-          registry,
-          atom as AtomNs.Atom<ResultNs.Result<any, any>>,
-          { suspendOnWaiting: true },
-        ),
-      )
-      return options.mode === "promise" ? promise.then(flattenExit) : promise
-    }
-  } else {
-    setter = (newValue: W | ((prev: R) => W)) => {
-      registry.set(
-        atom,
-        typeof newValue === "function" ?
-          (newValue as (prev: R) => W)(registry.get(atom))
-        : newValue,
-      )
-    }
-  }
-
-  return [value, setter] as const
+  return [useStore(registry, atom), setAtom(registry, atom, options)] as const
 }
 
 /**
- * Subscribe to atom changes with a callback
+ * @since 1.0.0
+ * @category hooks
  */
 export const useAtomSubscribe = <A>(
-  atom: AtomNs.Atom<A>,
+  atom: Atom.Atom<A>,
   f: (_: A) => void,
   options?: { readonly immediate?: boolean },
 ): void => {
@@ -231,9 +284,10 @@ export const useAtomSubscribe = <A>(
 }
 
 /**
- * Subscribe to an AtomRef's value reactively
+ * @since 1.0.0
+ * @category hooks
  */
-export const useAtomRef = <A>(ref: AtomRefNs.ReadonlyRef<A>): Accessor<A> => {
+export const useAtomRef = <A>(ref: AtomRef.ReadonlyRef<A>): Accessor<A> => {
   const [value, setValue] = createSignal<A>(ref.value)
   const unsubscribe = ref.subscribe((next) => {
     setValue(() => next)
@@ -243,17 +297,19 @@ export const useAtomRef = <A>(ref: AtomRefNs.ReadonlyRef<A>): Accessor<A> => {
 }
 
 /**
- * Get a prop lens from an AtomRef
+ * @since 1.0.0
+ * @category hooks
  */
 export const useAtomRefProp = <A, K extends keyof A>(
-  ref: AtomRefNs.AtomRef<A>,
+  ref: AtomRef.AtomRef<A>,
   prop: K,
-): AtomRefNs.AtomRef<A[K]> => ref.prop(prop)
+): AtomRef.AtomRef<A[K]> => ref.prop(prop)
 
 /**
- * Get a prop value from an AtomRef
+ * @since 1.0.0
+ * @category hooks
  */
 export const useAtomRefPropValue = <A, K extends keyof A>(
-  ref: AtomRefNs.AtomRef<A>,
+  ref: AtomRef.AtomRef<A>,
   prop: K,
 ): Accessor<A[K]> => useAtomRef(useAtomRefProp(ref, prop))
