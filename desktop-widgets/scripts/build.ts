@@ -10,6 +10,7 @@ const distDir = path.join(rootDir, "./dist/")
 const entries = [
   { name: "dashboard", entry: "./src/dashboard.tsx" },
   { name: "bar", entry: "./src/bar.tsx" },
+  { name: "launcher", entry: "./src/launcher.tsx" },
 ]
 
 await fs.mkdir(distDir, { recursive: true })

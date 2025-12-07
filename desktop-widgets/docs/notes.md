@@ -333,3 +333,166 @@ WITH shared MemoMap:
 - Using `@effect-atom/atom` with `Atom.runtime()` alongside `ManagedRuntime`
 - Services with internal mutable state (like `MutableHashMap`, `Ref`, etc.)
 - Any case where two separate Effect "entry points" need to share the same service instance
+
+---
+
+## `MutableHashMap` Returns `Option`
+
+Effect-idiomatic mutable collections return `Option`, forcing explicit null handling instead of `undefined`:
+
+```typescript
+const maybeInternals = MutableHashMap.get(daemons, name)
+if (Option.isNone(maybeInternals)) {
+  return yield * new DaemonNotFound({ daemon: name })
+}
+const internals = maybeInternals.value
+```
+
+---
+
+## `Effect.scoped` Inside Retry Loops
+
+When retrying scoped resources (like processes), scope must be **inside** the retry — each attempt needs a fresh scope:
+
+```typescript
+// Correct: each retry gets fresh scope
+Effect.gen(function* () {
+  const process = yield* Command.start(cmd)
+  yield* process.exitCode
+}).pipe(
+  Effect.scoped, // Scope closes per attempt
+  Effect.retry(schedule),
+)
+```
+
+---
+
+## Separate `TaggedError` Classes for `catchTags`
+
+Use individual error classes instead of a union with `_tag` property — enables clean `catchTags` pattern matching:
+
+```typescript
+class DaemonNotFound extends Data.TaggedError("DaemonNotFound")<{
+  daemon: string
+}> {}
+class DaemonStartFailed extends Data.TaggedError("DaemonStartFailed")<{
+  daemon: string
+  exitCode: number
+}> {}
+
+// Clean error handling
+yield
+  * dm.start("audio").pipe(
+    Effect.catchTags({
+      DaemonNotFound: (e) => Effect.log(`${e.daemon} not registered`),
+      DaemonStartFailed: (e) => Effect.log(`Exit code ${e.exitCode}`),
+    }),
+  )
+```
+
+---
+
+## `Schedule.intersect` for AND Conditions
+
+Combine schedules where **both** must allow continuation (uses longer delay):
+
+```typescript
+// Exponential backoff AND max 10 attempts
+Schedule.exponential("1 second").pipe(
+  Schedule.jittered,
+  Schedule.intersect(Schedule.recurs(10)),
+)
+```
+
+---
+
+## `SubscriptionRef` vs `PubSub`
+
+| Use Case                           | Choice            | Why                                       |
+| ---------------------------------- | ----------------- | ----------------------------------------- |
+| Reactive state (current + changes) | `SubscriptionRef` | Subscribers get current value immediately |
+| Event stream (fire-and-forget)     | `PubSub`          | Multiple consumers, no "current" state    |
+
+---
+
+## `Stream.unwrap` for Conditional Streams
+
+When stream creation itself can fail, use `Stream.unwrap` to lift an `Effect<Stream>` into a `Stream`:
+
+```typescript
+subscribe: (name) =>
+  Stream.unwrap(
+    Effect.gen(function* () {
+      const internals = yield* getDaemonOrFail(name)
+      return internals.stateRef.changes
+    }),
+  )
+```
+
+---
+
+## `Atom.debounce` — Trailing Edge Debounce
+
+```typescript
+const debouncedAtom = Atom.debounce(sourceAtom, 200)
+// or
+const debouncedAtom = sourceAtom.pipe(Atom.debounce(200))
+```
+
+- Trailing edge (fires after `duration` ms of no changes)
+- Auto-cleans up timeouts on disposal
+- Replaces custom `debouncedSignal` utilities
+
+---
+
+## `AtomRuntime.atom((get) => Effect)` — Async Derived Atoms
+
+```typescript
+const appsAtom = AtomRuntime.atom((get) => {
+  const search = get(debouncedSearchAtom) // Dependency tracking
+  return listApps(search) // Returns Effect
+})
+// Type: Atom<Result.Result<Application[], Error>>
+```
+
+- `get(atom)` tracks dependencies — re-runs when dependencies change
+- Has access to layer services (BunContext, DaemonManager, etc.)
+- Returns `Result` wrapping success/failure/loading states
+
+---
+
+## `AtomRuntime.fn` — Callable Effect Atoms
+
+```typescript
+const launchAppAtom = AtomRuntime.fn((name: string) => launchApp(name))
+
+// Usage with useAtomSet:
+const launchAppFn = useAtomSet(launchAppAtom, { mode: "promiseExit" })
+const exit = await launchAppFn("firefox")
+if (Exit.isSuccess(exit)) {
+  // ...
+}
+```
+
+---
+
+## `useAtomSet` Modes
+
+| Mode                | Returns               | On Failure             |
+| ------------------- | --------------------- | ---------------------- |
+| `"value"` (default) | `void`                | Fire-and-forget        |
+| `"promise"`         | `Promise<A>`          | Throws                 |
+| `"promiseExit"`     | `Promise<Exit<A, E>>` | Returns `Exit.Failure` |
+
+---
+
+## `Result.getOrElse` — Extract with Fallback
+
+```typescript
+const apps = pipe(
+  appsResult(),
+  Result.getOrElse(() => [] as Application[]),
+)
+```
+
+Returns value if Success, fallback for Initial/Failure. Also returns `previousSuccess` value if available during refetch.

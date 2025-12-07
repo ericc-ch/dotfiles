@@ -39,6 +39,8 @@ window-rule {
 binds {
     Mod+T { spawn "kitty" "--single-instance"; }
     Mod+E { spawn "nautilus"; }
+    Mod+Space { spawn "kitten" "panel" "--single-instance" "--edge" "center-sized" "--lines" "20" "--columns" "40" "--layer" "overlay" "--grab-keyboard" "--focus-policy" "exclusive" "launcher"; }
+    Alt+Space { spawn "kitten" "panel" "--single-instance" "--edge" "center-sized" "--lines" "20" "--columns" "40" "--layer" "overlay" "--grab-keyboard" "--focus-policy" "exclusive" "launcher"; }
 
     XF86AudioRaiseVolume allow-when-locked=true { spawn "pamixer" "-u" "-i" "5"; }
     XF86AudioLowerVolume allow-when-locked=true { spawn "pamixer" "-d" "5"; }

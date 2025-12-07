@@ -14,7 +14,7 @@ const localBinDir =
 await fs.mkdir(localBinDir, { recursive: true })
 
 // Binaries to deploy
-const binaries = ["dashboard", "bar"]
+const binaries = ["dashboard", "bar", "launcher"]
 
 for (const binary of binaries) {
   const src = path.join(distDir, binary)

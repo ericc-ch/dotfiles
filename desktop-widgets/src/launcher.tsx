@@ -1,15 +1,11 @@
+import { Atom, Result } from "@effect-atom/atom"
 import { render, useKeyboard, useTerminalDimensions } from "@opentui/solid"
-import {
-  createMemo,
-  createResource,
-  createSignal,
-  For,
-  type Component,
-} from "solid-js"
-import { launchApp, listApps, type Application } from "./lib/apps"
+import { Exit, pipe } from "effect"
+import { createMemo, For, type Component } from "solid-js"
+import { Applications, launchApp, listApps, type Application } from "./lib/apps"
 import type { ColorPalette } from "./lib/color"
-import { debouncedSignal } from "./lib/debounce"
-import { AppRuntime } from "./lib/runtime"
+import { useAtom, useAtomSet, useAtomValue } from "./lib/effect-solid"
+import { AtomRuntime } from "./lib/runtime"
 import { truncate } from "./lib/truncate"
 import { ThemeProvider, useTheme } from "./providers/theme"
 
@@ -19,6 +15,10 @@ const AppListItem: Component<{
   theme: ColorPalette
   itemHeight: number
 }> = (props) => {
+  const dimensions = useTerminalDimensions()
+  const nameLength = () => Math.floor(0.6 * dimensions().width)
+  const categoriesLength = () => Math.floor(0.4 * dimensions().width)
+
   return (
     <box
       flexDirection="row"
@@ -33,19 +33,33 @@ const AppListItem: Component<{
       <text
         fg={props.isHovered ? props.theme.bg.darker : props.theme.fg.normal}
       >
-        <strong>{truncate(props.app.name, 25)}</strong>
+        <strong>{truncate(props.app.name, nameLength())}</strong>
       </text>
 
       <text
         fg={props.isHovered ? props.theme.bg.normal : props.theme.fg.darker}
       >
-        {props.app.categories.slice(0, 2).join(", ")}
+        {truncate(
+          props.app.categories.slice(0, 1).join(", "),
+          categoriesLength(),
+        )}
       </text>
     </box>
   )
 }
 
 export const Launcher = () => {
+  const searchAtom = Atom.make("")
+  const debouncedSearchAtom = Atom.debounce(searchAtom, 200)
+  const hoveredAppAtom = Atom.make(0)
+
+  const appsAtom = AtomRuntime.atom((get) => {
+    const search = get(debouncedSearchAtom)
+    return listApps(search)
+  })
+
+  const launchAppAtom = AtomRuntime.fn((name: string) => launchApp(name))
+
   const theme = useTheme()
   const dimensions = useTerminalDimensions()
 
@@ -79,66 +93,43 @@ export const Launcher = () => {
     }
   })
 
-  const [search, setSearch] = createSignal("")
-  const debouncedSearch = debouncedSignal(search, 200)
-  const [hoveredApp, setHoveredApp] = createSignal(0)
+  const [search, setSearch] = useAtom(searchAtom)
+  const [hoveredApp, setHoveredApp] = useAtom(hoveredAppAtom)
+  const appsResult = useAtomValue(appsAtom)
+  const launchAppFn = useAtomSet(launchAppAtom, {
+    mode: "promiseExit",
+  })
 
-  const [apps] = createResource(
-    debouncedSearch,
-    (search) => AppRuntime.runPromise(listApps(search)),
-    {
-      initialValue: [],
-    },
-  )
-  const trimmedApps = () => apps().slice(0, layout().maxItems)
+  const maxIndex = () => Math.min(apps().length, layout().maxItems) - 1
 
-  const closeLauncher = () => {
-    setSearch("")
-    setHoveredApp(0)
-  }
+  const apps = () =>
+    pipe(
+      appsResult(),
+      Result.getOrElse(() => [] as typeof Applications.Type),
+    ).slice(0, layout().maxItems)
 
   useKeyboard((event) => {
-    if (event.ctrl && event.name === "c" && search() !== "") {
-      event.preventDefault()
-      setSearch("")
-    }
-
     if (event.name === "escape") {
-      closeLauncher()
+      process.exit(0)
     }
 
     if (event.name === "up") {
-      setHoveredApp((prev) => {
-        const next = prev - 1
-
-        if (next < 0) {
-          return trimmedApps().length - 1
-        }
-        return next
-      })
+      setHoveredApp((prev) => (prev - 1 < 0 ? maxIndex() : prev - 1))
     }
 
     if (event.name === "down") {
-      setHoveredApp((prev) => {
-        const next = prev + 1
-
-        if (next >= trimmedApps().length) {
-          return 0
-        }
-        return next
-      })
+      setHoveredApp((prev) => (prev + 1 > maxIndex() ? 0 : prev + 1))
     }
   })
 
   const handleLaunchApp = async () => {
-    const appToLaunch = trimmedApps().at(hoveredApp())
+    const appToLaunch = apps().at(hoveredApp())
     if (!appToLaunch) return
 
-    try {
-      await AppRuntime.runPromise(launchApp(appToLaunch.name))
-      closeLauncher()
-    } catch (error) {
-      console.error("Failed to launch app:", error, JSON.stringify(error))
+    const exit = await launchAppFn(appToLaunch.name)
+
+    if (Exit.isSuccess(exit)) {
+      process.exit(0)
     }
   }
 
@@ -149,7 +140,7 @@ export const Launcher = () => {
       paddingTop={layout().padding.top}
       paddingBottom={layout().padding.bottom}
       gap={layout().spacing.gap}
-      backgroundColor={theme().bg.darker}
+      backgroundColor={theme().bg.normal}
     >
       <box
         flexDirection="row"
@@ -176,7 +167,7 @@ export const Launcher = () => {
       </box>
 
       <box>
-        <For each={trimmedApps()}>
+        <For each={apps()}>
           {(app, index) => (
             <AppListItem
               app={app}
