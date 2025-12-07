@@ -2,7 +2,6 @@ import { Command } from "@effect/platform"
 import type { PlatformError } from "@effect/platform/Error"
 import {
   Data,
-  Duration,
   Effect,
   Fiber,
   MutableHashMap,
@@ -14,7 +13,7 @@ import {
 
 type DaemonState = "running" | "stopped"
 
-interface Daemon {
+export interface Daemon {
   name: string
   command: [string, ...string[]]
   state: SubscriptionRef.SubscriptionRef<DaemonState>
@@ -71,12 +70,10 @@ export class DaemonManager extends Effect.Service<DaemonManager>()(
         }
 
         const spawnDaemon = Effect.gen(function* () {
-          console.log("spawnDaemon: about to start command")
           const process = yield* pipe(
             Command.make(...daemon.value.command),
             Command.start,
           )
-          console.log(`Process spawned, pid:`, process.pid)
 
           const exitCode = yield* process.exitCode
           const message = yield* pipe(
@@ -90,18 +87,9 @@ export class DaemonManager extends Effect.Service<DaemonManager>()(
             exitCode,
             message,
           })
-        }).pipe(
-          Effect.onInterrupt(() =>
-            Effect.gen(function* () {
-              console.log("spawnDaemon: interrupting daemon process...")
-              console.log("spawnDaemon: fiber interrupted!")
-              yield* Effect.sleep(Duration.seconds(5))
-            }),
-          ),
-          Effect.scoped,
-        )
+        }).pipe(Effect.scoped)
 
-        const fiber = yield* Effect.forkIn(spawnDaemon, scope)
+        const fiber = yield* pipe(spawnDaemon, Effect.forkIn(scope))
         yield* SubscriptionRef.set(daemon.value.state, "running")
 
         MutableHashMap.set(daemons, name, {

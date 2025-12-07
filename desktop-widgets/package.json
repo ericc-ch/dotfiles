@@ -11,6 +11,7 @@
     "typecheck": "tsc"
   },
   "dependencies": {
+    "@effect-atom/atom": "^0.4.8",
     "@effect/platform": "^0.93.6",
     "@effect/platform-bun": "^0.86.0",
     "@opentui/core": "^0.1.56",

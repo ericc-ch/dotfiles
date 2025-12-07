@@ -249,3 +249,87 @@ useKeyboard((event) => {
   }
 })
 ```
+
+---
+
+## Layer MemoMap — Sharing State Between Runtimes
+
+### The Problem
+
+When using both `ManagedRuntime` and `Atom.runtime()` (from `@effect-atom/atom`), each creates its own **MemoMap** — an internal cache for built layers. This means the same `Layer.Default` reference gets built **twice**, creating separate service instances with separate state.
+
+```typescript
+// These use DIFFERENT MemoMaps internally:
+const AppRuntime = ManagedRuntime.make(AppLayer) // MemoMap A
+const AppAtom = Atom.runtime(AppLayer) // MemoMap B (Atom.defaultMemoMap)
+
+// Result: Two separate DaemonManager instances!
+// AppRuntime's DaemonManager has its own MutableHashMap
+// AppAtom's DaemonManager has a DIFFERENT empty MutableHashMap
+```
+
+### What is a MemoMap?
+
+A `MemoMap` is Effect's internal cache that stores built layer instances:
+
+```typescript
+// Simplified concept:
+Map<Layer, BuiltServiceInstance>
+```
+
+When you build a layer, Effect checks the MemoMap:
+
+1. **Found?** → Return cached instance (same state)
+2. **Not found?** → Build new instance, cache it, return it
+
+Memoization uses **reference equality** on Layer objects.
+
+### The Solution: Shared MemoMap
+
+Create ONE `MemoMap` and pass it to both systems:
+
+```typescript
+import { Effect, Layer, ManagedRuntime } from "effect"
+import { Atom } from "./lib/effect-solid"
+
+const AppLayer = Layer.merge(DaemonManager.Default, BunContext.layer)
+
+// Create ONE shared MemoMap
+const sharedMemoMap = Effect.runSync(Layer.makeMemoMap)
+
+// Both use the SAME memoMap
+export const AppRuntime = ManagedRuntime.make(AppLayer, sharedMemoMap)
+export const AppAtom = Atom.context({ memoMap: sharedMemoMap })(AppLayer)
+```
+
+### How It Works
+
+```
+WITHOUT shared MemoMap:
+┌─────────────────────────────────────────────────┐
+│ ManagedRuntime                                  │
+│   └─ MemoMap A                                  │
+│       └─ DaemonManager #1 (state = {})          │
+└─────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────┐
+│ Atom.runtime                                    │
+│   └─ MemoMap B                                  │
+│       └─ DaemonManager #2 (state = {})          │ ← Different instance!
+└─────────────────────────────────────────────────┘
+
+WITH shared MemoMap:
+┌───────────────────────────────────────────────────────┐
+│ sharedMemoMap                                         │
+│   └─ DaemonManager (state = {daemon1, daemon2, ...})  │
+├───────────────────────────────────────────────────────┤
+│ ManagedRuntime ──┐                                    │
+│                  ├── Both get SAME instance           │
+│ Atom.runtime ────┘                                    │
+└───────────────────────────────────────────────────────┘
+```
+
+### When You Need This
+
+- Using `@effect-atom/atom` with `Atom.runtime()` alongside `ManagedRuntime`
+- Services with internal mutable state (like `MutableHashMap`, `Ref`, etc.)
+- Any case where two separate Effect "entry points" need to share the same service instance

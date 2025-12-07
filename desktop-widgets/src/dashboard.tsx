@@ -1,12 +1,13 @@
 import { ConsolePosition } from "@opentui/core"
 import { render, useKeyboard, useRenderer } from "@opentui/solid"
-import { Effect, SubscriptionRef } from "effect"
+import { Effect } from "effect"
 import process from "node:process"
-import { createResource, createSignal, For } from "solid-js"
+import { createSignal, For } from "solid-js"
 import { AppLauncher } from "./components/dashboard/app-launcher"
 import { Clock } from "./components/dashboard/clock"
-import { DaemonManager } from "./lib/daemon-manager"
-import { AppRuntime } from "./lib/runtime"
+import { DaemonManager, type Daemon } from "./lib/daemon-manager"
+import { Atom, Result, useAtomValue } from "./lib/effect-solid"
+import { AppRuntime, AtomRuntime } from "./lib/runtime"
 import { RouterProvider } from "./providers/dashboard/router"
 import { ThemeProvider, useTheme } from "./providers/theme"
 
@@ -20,24 +21,21 @@ const main = Effect.gen(function* () {
 
 await AppRuntime.runPromise(main)
 
+const daemonsAtom = AtomRuntime.atom(
+  Effect.gen(function* () {
+    const dm = yield* DaemonManager
+    return Array.from(yield* dm.list())
+  }),
+)
+
 const App = () => {
   const renderer = useRenderer()
   const theme = useTheme()
 
   const [showAppLauncher, setShowAppLauncher] = createSignal(false)
 
-  const [daemons] = createResource(
-    () =>
-      AppRuntime.runPromise(
-        Effect.gen(function* () {
-          const dm = yield* DaemonManager
-          return yield* dm.list()
-        }),
-      ),
-    {
-      initialValue: [],
-    },
-  )
+  const daemonsResult = useAtomValue(daemonsAtom)
+  const daemons = () => Result.getOrElse(daemonsResult(), () => [] as Daemon[])
 
   useKeyboard((event) => {
     if (event.ctrl && event.name === "c" && !showAppLauncher()) {
@@ -51,23 +49,6 @@ const App = () => {
     if (event.name === "space") {
       if (!showAppLauncher()) event.preventDefault()
       setShowAppLauncher(true)
-    }
-
-    if (event.name === "a") {
-      AppRuntime.runPromise(
-        Effect.gen(function* () {
-          const dm = yield* DaemonManager
-          const daemons = yield* dm.list()
-
-          const statusBar = daemons.at(0)
-          if (!statusBar) return
-
-          const state = yield* SubscriptionRef.get(statusBar.state)
-          console.log(`Status bar is currently: ${state}`)
-
-          yield* dm.start("status-bar")
-        }),
-      ).catch(console.error)
     }
   })
 
@@ -89,16 +70,13 @@ const App = () => {
 
       <For each={daemons()}>
         {(daemon) => {
+          const stateAtom = Atom.subscriptionRef(daemon.state)
+          const state = useAtomValue(stateAtom)
+
           return (
-            <box
-              position="absolute"
-              top={0}
-              left={0}
-              width="100%"
-              height="100%"
-            >
-              <text fg={theme().fg.normal} bg={theme().bg.normal}>
-                [Daemon: {daemon.name}: {}]
+            <box>
+              <text fg={theme().fg.normal}>
+                {daemon.name}: {state()}
               </text>
             </box>
           )
