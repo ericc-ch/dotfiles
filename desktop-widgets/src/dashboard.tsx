@@ -1,54 +1,46 @@
-import { ConsolePosition } from "@opentui/core"
+import { ConsolePosition, type CliRendererConfig } from "@opentui/core"
 import { render, useKeyboard, useRenderer } from "@opentui/solid"
 import { Effect } from "effect"
-import process from "node:process"
-import { createSignal, For } from "solid-js"
-import { AppLauncher } from "./components/dashboard/app-launcher"
+import { For } from "solid-js"
 import { Clock } from "./components/dashboard/clock"
 import { DaemonManager, type Daemon } from "./lib/daemon-manager"
-import { Atom, Result, useAtomValue } from "./lib/effect-solid"
+import { Atom, Result, useAtomSet, useAtomValue } from "./lib/effect-solid"
 import { AppRuntime, AtomRuntime } from "./lib/runtime"
 import { RouterProvider } from "./providers/dashboard/router"
 import { ThemeProvider, useTheme } from "./providers/theme"
 
-const main = Effect.gen(function* () {
-  const dm = yield* DaemonManager
-  yield* dm.set({
-    name: "status-bar",
-    command: ["kitten", "panel", "bar"],
-  })
-})
-
-await AppRuntime.runPromise(main)
-
-const daemonsAtom = AtomRuntime.atom(
-  Effect.gen(function* () {
-    const dm = yield* DaemonManager
-    return Array.from(yield* dm.list())
-  }),
-)
-
 const App = () => {
+  const daemonsAtom = AtomRuntime.atom(
+    Effect.gen(function* () {
+      const dm = yield* DaemonManager
+      return Array.from(yield* dm.list())
+    }),
+  )
+
+  const startBarAtom = AtomRuntime.fn(
+    Effect.fn(function* () {
+      const dm = yield* DaemonManager
+      yield* dm.start("status-bar")
+    }),
+  )
+
+  const startBarTrigger = useAtomSet(startBarAtom, { mode: "promiseExit" })
+
   const renderer = useRenderer()
   const theme = useTheme()
-
-  const [showAppLauncher, setShowAppLauncher] = createSignal(false)
 
   const daemonsResult = useAtomValue(daemonsAtom)
   const daemons = () => Result.getOrElse(daemonsResult(), () => [] as Daemon[])
 
   useKeyboard((event) => {
-    if (event.ctrl && event.name === "c" && !showAppLauncher()) {
-      AppRuntime.dispose().finally(() => process.exit(0))
-    }
-
     if (event.name === "f12") {
       renderer.console.toggle()
     }
 
     if (event.name === "space") {
-      if (!showAppLauncher()) event.preventDefault()
-      setShowAppLauncher(true)
+      startBarTrigger().then((exit) => {
+        console.log("Bar exited with", JSON.stringify(exit))
+      })
     }
   })
 
@@ -61,12 +53,6 @@ const App = () => {
     >
       {/* Clock is the only static element */}
       <Clock />
-
-      {/* This is an overlay + modal, absolute */}
-      <AppLauncher
-        show={showAppLauncher()}
-        onClose={() => setShowAppLauncher(false)}
-      />
 
       <For each={daemons()}>
         {(daemon) => {
@@ -96,7 +82,17 @@ const App = () => {
   )
 }
 
-render(
+void AppRuntime.runPromise(
+  Effect.gen(function* () {
+    const dm = yield* DaemonManager
+    yield* dm.set({
+      name: "status-bar",
+      command: ["kitten", "panel", "bar"],
+    })
+  }),
+)
+
+void render(
   () => (
     <ThemeProvider>
       <RouterProvider initialRoute="home">
@@ -105,11 +101,15 @@ render(
     </ThemeProvider>
   ),
   {
-    exitOnCtrlC: false,
+    exitOnCtrlC: true,
+    useConsole: true,
+    onDestroy: () => {
+      void AppRuntime.dispose()
+    },
     useKittyKeyboard: true,
     consoleOptions: {
       sizePercent: 100,
       position: ConsolePosition.RIGHT,
     },
-  },
+  } satisfies CliRendererConfig,
 )

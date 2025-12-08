@@ -203,15 +203,6 @@ class DaemonManager extends Effect.Service<DaemonManager>()(
 6. `Command.start`'s finalizer runs `killProcessGroup(-pid)`
 7. Child process is properly terminated
 
-### Testing Proof
-
-```
-| Fork Method    | Process Survived dispose()? |
-|----------------|----------------------------|
-| forkDaemon     | ✅ YES — ORPHANED          |
-| forkIn(e, scope) | ❌ NO — Properly killed   |
-```
-
 ### Key Insight
 
 The child process cleanup happens in `Command.start`'s `acquireRelease` finalizer. That finalizer ONLY runs when:
@@ -221,118 +212,70 @@ The child process cleanup happens in `Command.start`'s `acquireRelease` finalize
 
 With `forkDaemon`, the fiber is never interrupted by `dispose()`, so the finalizer never runs.
 
----
+### Why Even SIGTERM Doesn't Help
 
-## `@opentui/core` Signal Handling
-
-`@opentui/core` registers signal handlers via the `Renderer` class (see [renderer.ts](https://github.com/sst/opentui/blob/main/packages/core/src/renderer.ts) — `exitSignals` config and `addExitListeners` method):
-
-```javascript
-;["SIGINT", "SIGTERM", "SIGQUIT", "SIGABRT"].forEach((signal) => {
-  process.on(signal, () => {
-    process.exit() // Immediate exit, no cleanup!
-  })
-})
-```
-
-**Impact:** If a signal arrives, `process.exit()` is called immediately, bypassing any async cleanup like `runtime.dispose()`.
-
-**Solution:** Use `exitOnCtrlC: false` and handle Ctrl+C manually:
+Even if you use `BunRuntime.runMain` (which installs SIGTERM/SIGINT handlers), daemon fibers still won't be cleaned up:
 
 ```typescript
-render(() => <App />, { exitOnCtrlC: false })
-
-useKeyboard((event) => {
-  if (event.ctrl && event.name === "c") {
-    // Properly dispose before exiting
-    AppRuntime.dispose().finally(() => process.exit(0))
-  }
-})
+// runMain's signal handler:
+function onSigint() {
+  fiber.unsafeInterruptAsFork(fiber.id()) // Only interrupts THE main fiber
+}
 ```
+
+The problem:
+
+1. **`runMain`'s signal handler only interrupts the main fiber**
+2. **`forkDaemon` fibers live in global scope** — they're siblings of the main fiber, not children
+3. **Global scope has no `close()` mechanism** — it's a singleton that lives until process termination
+4. **Process exits before finalizers can run** → child processes become orphans
+
+```
+Main Fiber (interrupted on SIGTERM)
+  └── Your app logic (children get interrupted)
+
+Global Scope (NOT cleaned up by anyone)
+  └── Daemon Fiber 1 (orphaned!)
+  └── Daemon Fiber 2 (orphaned!)
+```
+
+**Without `runMain`** (e.g., opentui setup with `AppRuntime.runFork`), it's even worse — there's no signal handler at all, so SIGTERM just kills the process immediately with no cleanup.
+
+**Bottom line:** `forkDaemon` means "I will manually manage this fiber's lifecycle" — don't use it for processes that need cleanup on app shutdown.
 
 ---
 
 ## Layer MemoMap — Sharing State Between Runtimes
 
-### The Problem
-
-When using both `ManagedRuntime` and `Atom.runtime()` (from `@effect-atom/atom`), each creates its own **MemoMap** — an internal cache for built layers. This means the same `Layer.Default` reference gets built **twice**, creating separate service instances with separate state.
+When using both `ManagedRuntime` and `Atom.runtime()`, each creates its own **MemoMap** — an internal cache for built layers. This means the same layer gets built **twice**, creating separate service instances with separate state.
 
 ```typescript
 // These use DIFFERENT MemoMaps internally:
 const AppRuntime = ManagedRuntime.make(AppLayer) // MemoMap A
-const AppAtom = Atom.runtime(AppLayer) // MemoMap B (Atom.defaultMemoMap)
+const AppAtom = Atom.runtime(AppLayer) // MemoMap B
 
-// Result: Two separate DaemonManager instances!
-// AppRuntime's DaemonManager has its own MutableHashMap
-// AppAtom's DaemonManager has a DIFFERENT empty MutableHashMap
+// Result: Two separate DaemonManager instances with separate state!
 ```
 
-### What is a MemoMap?
-
-A `MemoMap` is Effect's internal cache that stores built layer instances:
+### Solution: Share `Atom.runtime.memoMap`
 
 ```typescript
-// Simplified concept:
-Map<Layer, BuiltServiceInstance>
-```
-
-When you build a layer, Effect checks the MemoMap:
-
-1. **Found?** → Return cached instance (same state)
-2. **Not found?** → Build new instance, cache it, return it
-
-Memoization uses **reference equality** on Layer objects.
-
-### The Solution: Shared MemoMap
-
-Create ONE `MemoMap` and pass it to both systems:
-
-```typescript
-import { Effect, Layer, ManagedRuntime } from "effect"
-import { Atom } from "./lib/effect-solid"
-
 const AppLayer = Layer.merge(DaemonManager.Default, BunContext.layer)
 
-// Create ONE shared MemoMap
-const sharedMemoMap = Effect.runSync(Layer.makeMemoMap)
+// Pass Atom.runtime's memoMap to ManagedRuntime
+export const AppRuntime = ManagedRuntime.make(AppLayer, Atom.runtime.memoMap)
+export const AtomRuntime = Atom.runtime(AppLayer)
 
-// Both use the SAME memoMap
-export const AppRuntime = ManagedRuntime.make(AppLayer, sharedMemoMap)
-export const AppAtom = Atom.context({ memoMap: sharedMemoMap })(AppLayer)
+// Now both share the same service instances
 ```
 
-### How It Works
-
-```
-WITHOUT shared MemoMap:
-┌─────────────────────────────────────────────────┐
-│ ManagedRuntime                                  │
-│   └─ MemoMap A                                  │
-│       └─ DaemonManager #1 (state = {})          │
-└─────────────────────────────────────────────────┘
-┌─────────────────────────────────────────────────┐
-│ Atom.runtime                                    │
-│   └─ MemoMap B                                  │
-│       └─ DaemonManager #2 (state = {})          │ ← Different instance!
-└─────────────────────────────────────────────────┘
-
-WITH shared MemoMap:
-┌───────────────────────────────────────────────────────┐
-│ sharedMemoMap                                         │
-│   └─ DaemonManager (state = {daemon1, daemon2, ...})  │
-├───────────────────────────────────────────────────────┤
-│ ManagedRuntime ──┐                                    │
-│                  ├── Both get SAME instance           │
-│ Atom.runtime ────┘                                    │
-└───────────────────────────────────────────────────────┘
-```
+**Alternative:** Create your own shared memoMap with `Effect.runSync(Layer.makeMemoMap)` and pass it to both.
 
 ### When You Need This
 
-- Using `@effect-atom/atom` with `Atom.runtime()` alongside `ManagedRuntime`
-- Services with internal mutable state (like `MutableHashMap`, `Ref`, etc.)
-- Any case where two separate Effect "entry points" need to share the same service instance
+- Using `@effect-atom/atom` alongside `ManagedRuntime`
+- Services with internal mutable state (`MutableHashMap`, `Ref`, etc.)
+- Multiple Effect "entry points" that need to share service instances
 
 ---
 
@@ -496,3 +439,151 @@ const apps = pipe(
 ```
 
 Returns value if Success, fallback for Initial/Failure. Also returns `previousSuccess` value if available during refetch.
+
+---
+
+## `Effect.provide(ManagedRuntime)` — Reuse Built Layers
+
+`Effect.provide()` accepts a `ManagedRuntime` directly, not just layers or contexts. This lets you reuse the already-built runtime without rebuilding layers.
+
+```typescript
+const AppLayer = Layer.merge(DaemonManager.Default, BunContext.layer)
+const AppRuntime = ManagedRuntime.make(AppLayer, Atom.runtime.memoMap)
+
+// Use BunRuntime.runMain for signal handling, provide AppRuntime for services
+BunRuntime.runMain(
+  Effect.gen(function* () {
+    const dm = yield* DaemonManager
+    yield* dm.set({ name: "status-bar", command: ["kitten", "panel", "bar"] })
+
+    render(() => <App />, { exitOnCtrlC: false })
+  }).pipe(Effect.provide(AppRuntime)),
+)
+```
+
+### What Happens Internally
+
+When you `Effect.provide(managedRuntime)`:
+
+1. Effect calls `managedRuntime.runtimeEffect` to get the **cached `Runtime<R>`**
+2. That runtime was built once using the layer + memoMap
+3. The runtime's **Context** (containing built services) is provided to your effect
+4. **No layer rebuilding** — just context injection
+
+```typescript
+// Simplified internal flow:
+function provide(managed, effect) {
+  return flatMap(
+    managed.runtimeEffect, // Gets cached Runtime<R>
+    (rt) => provideContext(effect, rt.context), // Injects built services
+  )
+}
+```
+
+### Why This Matters
+
+- **Same service instances**: If `AppRuntime` and `AtomRuntime` share a `memoMap`, they share service instances
+- **No `toRuntimeWithMemoMap` gymnastics**: Just pass the runtime directly
+- **Works with `BunRuntime.runMain`**: Get signal handling + teardown while using your managed services
+
+---
+
+## opentui + Effect: Clean Exit Pattern
+
+### The Problem
+
+When using opentui with Effect's `ManagedRuntime`, you need to:
+
+1. **Clean up the terminal** — exit alt buffer, restore raw mode, show cursor
+2. **Dispose Effect runtime** — run finalizers, kill daemon processes
+3. **Exit the process** — but only after cleanup completes
+
+Getting this wrong leaves your terminal in a broken state (stuck in alt buffer, no echo, hidden cursor). Run `reset` to fix.
+
+### Raw Mode Context
+
+opentui puts the terminal in **raw mode** (`stdin.setRawMode(true)`), which means:
+
+- **Ctrl+C doesn't generate SIGINT** — it's sent as bytes (`0x03`) to stdin
+- **No echo** — characters you type aren't displayed
+- **Alternate screen buffer** — separate screen from your shell
+
+This is why `BunRuntime.runMain`'s signal handlers won't catch Ctrl+C — it never becomes a signal. opentui must handle it as keyboard input.
+
+### The Wrong Ways
+
+**Wrong #1: Manual Ctrl+C handler with `process.exit()`**
+
+```typescript
+useKeyboard((event) => {
+  if (event.ctrl && event.name === "c") {
+    AppRuntime.dispose().finally(() => process.exit(0)) // ❌ Terminal not cleaned!
+  }
+})
+```
+
+Problem: `process.exit()` runs before opentui can restore terminal state.
+
+**Wrong #2: Using `BunRuntime.runMain` with `render()` inside**
+
+```typescript
+BunRuntime.runMain(
+  Effect.gen(function* () {
+    void render(() => <App />, { exitOnCtrlC: true })
+  }).pipe(Effect.provide(AppRuntime))
+)
+```
+
+Problem: `BunRuntime.runMain` keeps process alive with `setInterval`. Its SIGINT handler never fires because opentui is in raw mode (Ctrl+C becomes keyboard input, not signal). You end up with competing handlers and broken cleanup.
+
+### The Clean Solution
+
+Let opentui handle Ctrl+C entirely, hook into `onDestroy` for Effect cleanup:
+
+```typescript
+// 1. Run Effect setup with runFork (fire and forget, no process keep-alive)
+AppRuntime.runFork(
+  Effect.gen(function* () {
+    const dm = yield* DaemonManager
+    yield* dm.set({ name: "my-daemon", command: ["..."] })
+  })
+)
+
+// 2. render() at top level, let opentui own the process lifecycle
+await render(
+  () => <App />,
+  {
+    exitOnCtrlC: true,  // opentui handles Ctrl+C, calls destroy()
+    onDestroy: () => {
+      void AppRuntime.dispose()  // Clean up Effect runtime
+    },
+    // ...other options
+  } satisfies CliRendererConfig
+)
+```
+
+### Why This Works
+
+1. **Ctrl+C pressed** → opentui's keypress handler catches it (raw mode = keyboard input)
+2. **`destroy()` called** → opentui cleans up terminal:
+   - `stdin.setRawMode(false)` — restore terminal mode
+   - Exit alternate screen buffer
+   - Show cursor
+   - Remove all listeners
+3. **`onDestroy` callback fires** → `AppRuntime.dispose()` runs finalizers (kills daemon processes)
+4. **Process exits naturally** — nothing keeping it alive (no `setInterval`, no pending I/O)
+
+### Key Insights
+
+- **`exitOnCtrlC: true`** doesn't call `process.exit()` — it just calls `renderer.destroy()`
+- **Terminal cleanup happens BEFORE `onDestroy`** — your callback runs after terminal is restored
+- **No explicit `process.exit()` needed** — without `BunRuntime.runMain`'s keep-alive interval, process exits when event loop is empty
+- **`void AppRuntime.dispose()`** — fire and forget is fine; process waits for dispose to complete naturally
+
+### Comparison
+
+| Approach                             | Terminal Cleanup   | Effect Cleanup | Complexity |
+| ------------------------------------ | ------------------ | -------------- | ---------- |
+| Manual `process.exit()`              | ❌ Broken          | ✅ Works       | High       |
+| `BunRuntime.runMain` + render inside | ❌ Race conditions | ⚠️ Complicated | Very High  |
+| `exitOnCtrlC` + `onDestroy`          | ✅ Works           | ✅ Works       | **Low**    |

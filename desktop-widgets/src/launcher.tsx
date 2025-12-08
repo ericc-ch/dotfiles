@@ -96,7 +96,7 @@ export const Launcher = () => {
   const [search, setSearch] = useAtom(searchAtom)
   const [hoveredApp, setHoveredApp] = useAtom(hoveredAppAtom)
   const appsResult = useAtomValue(appsAtom)
-  const launchAppFn = useAtomSet(launchAppAtom, {
+  const launchAppTrigger = useAtomSet(launchAppAtom, {
     mode: "promiseExit",
   })
 
@@ -126,7 +126,7 @@ export const Launcher = () => {
     const appToLaunch = apps().at(hoveredApp())
     if (!appToLaunch) return
 
-    const exit = await launchAppFn(appToLaunch.name)
+    const exit = await launchAppTrigger(appToLaunch.name)
 
     if (Exit.isSuccess(exit)) {
       process.exit(0)

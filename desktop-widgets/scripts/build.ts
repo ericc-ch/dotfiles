@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+
 import solidPlugin from "@opentui/solid/bun-plugin"
 
 import path from "node:path"
@@ -21,8 +22,6 @@ await Promise.all(
       entrypoints: [path.join(rootDir, entry)],
       plugins: [solidPlugin],
       minify: true,
-      // bytecode: true, // requires CJS (no top-level await)
-      // sourcemap: "external",
       compile: {
         autoloadBunfig: false,
         autoloadDotenv: false,
@@ -30,5 +29,5 @@ await Promise.all(
       },
     })
     console.log(`Built ${name}`)
-  })
+  }),
 )
