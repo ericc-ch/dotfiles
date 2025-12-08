@@ -2,6 +2,8 @@
 
 **CRITICAL:** Whenever you are asked or need to do something related to Effect, you **MUST** reference `@.context/effect/` to understand Effect conventions, patterns, and best practices. It is mandatory to follow Effect-TS idioms consistently throughout the codebase. Do not guess—verify against the context.
 
+You can also find common gotchas, specific patterns, and troubleshooting notes for this project in `@docs/notes.md`. Check this file to avoid common pitfalls.
+
 ## Build & Test Commands
 
 - **Run app**: `bun run src/main.tsx` or `bun start`
