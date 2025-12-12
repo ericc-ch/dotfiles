@@ -7,10 +7,18 @@
 
   "agent": {
     "general": {
-      "model": "opencode/big-pickle"
+      "model": "opencode/big-pickle",
     },
     "explore": {
-      "model": "opencode/big-pickle"
-    }
-  }
+      "model": "opencode/big-pickle",
+    },
+  },
+
+  "mcp": {
+    "playwriter": {
+      "command": ["bunx", "playwriter"],
+      "type": "local",
+      "enabled": false,
+    },
+  },
 }
