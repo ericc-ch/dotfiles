@@ -63,6 +63,7 @@ binds {
     Mod+Ctrl+End  { move-column-to-last; }
 
     Mod+F { maximize-column; }
+    Mod+Shift+F { fullscreen-window; }
 
     Print { screenshot; }
     Mod+Print { screenshot-screen; }
