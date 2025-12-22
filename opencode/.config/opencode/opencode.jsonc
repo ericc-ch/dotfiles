@@ -7,22 +7,22 @@
   // "model": "github-copilot/gemini-3-flash-preview",
   // "model": "github-copilot/gpt-5-mini",
 
-  // "model": "gemini-3-pro-preview",
+  // "model": "google/gemini-3-pro-preview",
   "model": "google/gemini-3-flash-preview",
 
   // "small_model": "github-copilot/gpt-5-mini",
-  "small_model": "opencode/grok",
+  "small_model": "opencode/grok-code",
 
   "agent": {
     "general": {
       // "model": "github-copilot/gemini-3-flash-preview",
       // "model": "opencode/big-pickle",
-      "model": "opencode/grok",
+      "model": "opencode/grok-code",
     },
     "explore": {
       // "model": "github-copilot/gemini-3-flash-preview",
       // "model": "opencode/big-pickle",
-      "model": "opencode/grok",
+      "model": "opencode/grok-code",
     },
   },
 
