@@ -6,16 +6,18 @@
   // "model": "github-copilot/gemini-3-pro-preview",
   // "model": "github-copilot/gpt-5.1-codex-max",
   "model": "github-copilot/claude-opus-4.5",
-  "small_model": "github-copilot/gpt-5-mini",
+
+  // "small_model": "github-copilot/gpt-5-mini",
+  "small_model": "opencode/grok",
 
   "agent": {
     "general": {
-      "model": "github-copilot/gemini-3-flash-preview",
-      // "model": "opencode/big-pickle",
+      // "model": "github-copilot/gemini-3-flash-preview",
+      "model": "opencode/big-pickle",
     },
     "explore": {
-      "model": "github-copilot/gemini-3-flash-preview",
-      // "model": "opencode/big-pickle",
+      // "model": "github-copilot/gemini-3-flash-preview",
+      "model": "opencode/big-pickle",
     },
   },
 
