@@ -10,12 +10,12 @@
 
   "agent": {
     "general": {
-      // "model": "github-copilot/gemini-3-flash-preview",
-      "model": "opencode/big-pickle",
+      "model": "github-copilot/gemini-3-flash-preview",
+      // "model": "opencode/big-pickle",
     },
     "explore": {
-      // "model": "github-copilot/gemini-3-flash-preview",
-      "model": "opencode/big-pickle",
+      "model": "github-copilot/gemini-3-flash-preview",
+      // "model": "opencode/big-pickle",
     },
   },
 
