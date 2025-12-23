@@ -8,7 +8,9 @@
   // "model": "github-copilot/gpt-5-mini",
 
   // "model": "google/gemini-3-pro-preview",
-  "model": "google/gemini-3-flash-preview",
+  // "model": "google/gemini-3-flash-preview",
+
+  "model": "opencode/glm-4.7-free",
 
   // "small_model": "github-copilot/gpt-5-mini",
   "small_model": "opencode/grok-code",
