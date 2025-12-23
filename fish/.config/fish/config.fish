@@ -37,3 +37,10 @@ end
 if test -f "$HOME/.cargo/env.fish"
     source "$HOME/.cargo/env.fish"
 end
+
+# Load any local overrides or secrets (ignored by git)
+for file in (status dirname)/*local.fish
+    if test -f "$file"
+        source "$file"
+    end
+end

@@ -1,5 +1,4 @@
-.aider.tags*
-.aider.chat*
-.aider.input*
-aider-keys.fish
+# Local configuration & secrets
+*local.fish
+.env*
 
