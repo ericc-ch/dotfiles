@@ -1,28 +1,27 @@
 {
   "$schema": "https://opencode.ai/config.json",
 
-  // "model": "github-copilot/claude-opus-4.5",
+  "model": "github-copilot/claude-opus-4.5",
+  // "model": "github-copilot/claude-sonnet-4.5",
   // "model": "github-copilot/gpt-5.1-codex-max",
-  // "model": "github-copilot/gemini-3-pro-preview",
-  // "model": "github-copilot/gemini-3-flash-preview",
-  // "model": "github-copilot/gpt-5-mini",
 
   // "model": "google/gemini-3-pro-preview",
   // "model": "google/gemini-3-flash-preview",
 
-  "model": "opencode/glm-4.7-free",
+  // "model": "opencode/glm-4.7-free",
+  // "model": "opencode/big-pickle",
 
   // "small_model": "github-copilot/gpt-5-mini",
   "small_model": "opencode/grok-code",
 
   "agent": {
     "general": {
-      // "model": "github-copilot/gemini-3-flash-preview",
+      // "model": "google/gemini-3-flash-preview",
       // "model": "opencode/big-pickle",
       "model": "opencode/grok-code",
     },
     "explore": {
-      // "model": "github-copilot/gemini-3-flash-preview",
+      // "model": "google/gemini-3-flash-preview",
       // "model": "opencode/big-pickle",
       "model": "opencode/grok-code",
     },
