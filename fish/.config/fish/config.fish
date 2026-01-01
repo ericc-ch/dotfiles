@@ -9,14 +9,17 @@ set -q XDG_CACHE_HOME || set -gx XDG_CACHE_HOME $HOME/.cache
 set -gx MAKEFLAGS -j(nproc)
 # ssh agent
 set -gx SSH_AUTH_SOCK "$XDG_RUNTIME_DIR/ssh-agent.socket"
+# pnpm
+set -gx PNPM_HOME "$HOME/.local/share/pnpm"
+set -gx OPENCODE_DISABLE_DEFAULT_PLUGINS true
+# opencode
+set -gx OPENCODE_DISABLE_DEFAULT_PLUGINS true
 # flatpak
 for dir in /var/lib/flatpak/exports/share $HOME/.local/share/flatpak/exports/share
     if not contains $dir $XDG_DATA_DIRS
         set -gx XDG_DATA_DIRS $XDG_DATA_DIRS $dir
     end
 end
-# pnpm
-set -gx PNPM_HOME "$HOME/.local/share/pnpm"
 
 # Add tool directories to PATH (highest priority first)
 fish_add_path \
