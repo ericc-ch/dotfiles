@@ -44,8 +44,5 @@
     },
   },
 
-  "plugin": [
-    "@echristian/opencode-copilot-auth@latest",
-    "opencode-gemini-auth@latest",
-  ],
+  "plugin": ["@echristian/opencode-copilot-auth@latest"],
 }
