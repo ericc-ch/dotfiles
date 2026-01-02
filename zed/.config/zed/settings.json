@@ -4,24 +4,15 @@
   "ui_font_size": 16,
   "buffer_font_size": 14,
   "buffer_font_family": "JetBrainsMono Nerd Font",
-  "theme": {
-    "mode": "system",
-    "light": "Gruvbox Dark Hard",
-    "dark": "Gruvbox Dark Hard"
-  },
+  "theme": "Gruvbox Dark Hard",
 
   "agent": {
     "default_model": {
       "provider": "copilot_chat",
-      "model": "claude-sonnet-4.5"
-    }
+      "model": "gpt-5-mini",
+    },
   },
   "features": {
-    "edit_prediction_provider": "copilot"
+    "edit_prediction_provider": "copilot",
   },
-
-  "telemetry": {
-    "diagnostics": false,
-    "metrics": false
-  }
 }
