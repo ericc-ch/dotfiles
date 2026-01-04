@@ -4,6 +4,7 @@
   "model": "github-copilot/claude-opus-4.5",
   // "model": "github-copilot/claude-sonnet-4.5",
   // "model": "github-copilot/gpt-5.1-codex-max",
+  // "model": "github-copilot/gpt-5.2",
 
   // "model": "google/gemini-3-pro-preview",
   // "model": "google/gemini-3-flash-preview",
