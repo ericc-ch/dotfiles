@@ -22,7 +22,7 @@ layout {
 
     focus-ring {
         width 2
-        active-color "#ebdbb2"
+        active-color "#a89984"
     }
 
     struts {
