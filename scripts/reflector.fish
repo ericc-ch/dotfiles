@@ -1,7 +1,7 @@
 #!/usr/bin/env fish
 
 sudo reflector \
-    --country ID,SG,JP,CN \
+    --country SG,CN,ID,AU \
     --protocol https \
     --sort rate \
     --save /etc/pacman.d/mirrorlist
