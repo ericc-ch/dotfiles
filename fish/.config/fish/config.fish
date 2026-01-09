@@ -11,7 +11,6 @@ set -gx MAKEFLAGS -j(nproc)
 set -gx SSH_AUTH_SOCK "$XDG_RUNTIME_DIR/ssh-agent.socket"
 # pnpm
 set -gx PNPM_HOME "$HOME/.local/share/pnpm"
-set -gx OPENCODE_DISABLE_DEFAULT_PLUGINS true
 # opencode
 set -gx OPENCODE_DISABLE_DEFAULT_PLUGINS true
 # flatpak
