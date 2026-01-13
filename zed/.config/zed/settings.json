@@ -5,4 +5,25 @@
   "buffer_font_size": 14,
   "buffer_font_family": "JetBrainsMono Nerd Font",
   "theme": "Gruvbox Dark Hard",
+
+  "language_models": {
+    "anthropic": {
+      "api_url": "https://api.minimax.io/anthropic",
+      "available_models": [
+        {
+          "name": "MiniMax-M2.1",
+          "display_name": "MiniMax-M2.1",
+          "max_tokens": 204800,
+          "max_output_tokens": 131072,
+        },
+      ],
+    },
+  },
+
+  "agent": {
+    "default_model": {
+      "model": "MiniMax-M2.1",
+      "provider": "anthropic",
+    },
+  },
 }
