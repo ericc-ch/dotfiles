@@ -35,5 +35,5 @@
     },
   },
 
-  "plugin": ["opencode-gemini-auth@latest"],
+  "plugin": ["opencode-google-auth@latest"],
 }
