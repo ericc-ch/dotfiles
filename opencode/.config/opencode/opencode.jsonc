@@ -13,10 +13,10 @@
 
   "agent": {
     "general": {
-      "model": "opencode/grok-code",
+      "model": "minimax/MiniMax-M2.1",
     },
     "explore": {
-      "model": "opencode/grok-code",
+      "model": "minimax/MiniMax-M2.1",
     },
   },
 
