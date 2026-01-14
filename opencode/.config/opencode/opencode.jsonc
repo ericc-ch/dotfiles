@@ -1,10 +1,10 @@
 {
   "$schema": "https://opencode.ai/config.json",
 
+  "model": "minimax/MiniMax-M2.1",
+
   // "model": "gemini-cli/gemini-3-pro-preview",
   // "model": "gemini-cli/gemini-3-flash-preview",
-
-  "model": "minimax/MiniMax-M2.1",
 
   // "model": "opencode/glm-4.7-free",
   // "model": "opencode/big-pickle",
