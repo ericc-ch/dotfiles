@@ -1,0 +1,4 @@
+alias lg="lazygit"
+alias ls="ls -lah --color=auto"
+alias oc="opencode"
+alias zed="zeditor"
