@@ -43,8 +43,6 @@
   "disabled_providers": ["minimax-cn"],
 
   "keybinds": {
-    "messages_half_page_up": "shift+pageup",
-    "messages_half_page_down": "shift+pagedown",
     "terminal_suspend": "none",
   },
 
