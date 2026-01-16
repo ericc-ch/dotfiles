@@ -20,14 +20,19 @@
       "headers": {
         "CONTEXT7_API_KEY": "{env:CONTEXT7_API_KEY}",
       },
-      "enabled": false,
+      "enabled": true,
+    },
+    "github_grep": {
+      "type": "remote",
+      "url": "https://mcp.grep.app",
+      "enabled": true,
     },
     "browser": {
       "type": "local",
       "command": ["bunx", "playwriter"],
       "enabled": false,
     },
-    "utilities": {
+    "minimax_utils": {
       "type": "local",
       "command": ["uvx", "minimax-coding-plan-mcp", "-y"],
       "environment": {
