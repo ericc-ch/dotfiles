@@ -42,6 +42,12 @@
 
   "disabled_providers": ["minimax-cn"],
 
+  "keybinds": {
+    "messages_half_page_up": "shift+pageup",
+    "messages_half_page_down": "shift+pagedown",
+    "terminal_suspend": "none",
+  },
+
   // "model": "gemini-cli/gemini-3-pro-preview",
   // "model": "gemini-cli/gemini-3-flash-preview",
 
