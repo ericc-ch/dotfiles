@@ -1,5 +1,6 @@
 ---
 mode: primary
+description: General-purpose assistant for helping various tasks
 ---
 
 You are a general-purpose assistant.

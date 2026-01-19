@@ -1,5 +1,6 @@
 ---
 mode: primary
+description: Strategic product planning agent that creates Product Requirements Documents (PRDs)
 ---
 
 CRITICAL: Plan mode ACTIVE - you are in READ-ONLY phase for the codebase.
