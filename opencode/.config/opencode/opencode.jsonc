@@ -4,6 +4,13 @@
   "model": "minimax/MiniMax-M2.1",
   "small_model": "opencode/grok-code",
 
+  "permission": {
+    "external_directory": {
+      "/home/*/dotfiles/**": "allow",
+      "/home/*/.config/**": "allow",
+    },
+  },
+
   "agent": {
     "general": {
       "model": "minimax/MiniMax-M2.1",
@@ -13,6 +20,7 @@
     },
   },
 
+  "plugin": ["opencode-google-auth@latest"],
   "mcp": {
     "documentation": {
       "type": "remote",
@@ -42,8 +50,6 @@
       "enabled": false,
     },
   },
-
-  "plugin": ["opencode-google-auth@latest"],
 
   "disabled_providers": ["minimax-cn"],
 

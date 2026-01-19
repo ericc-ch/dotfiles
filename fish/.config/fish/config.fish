@@ -54,7 +54,7 @@ end
 set --erase _asdf_shims
 
 # Load any local overrides or secrets (ignored by git)
-for file in (status dirname)/*local.fish
+for file in $__fish_config_dir/*local.fish
     if test -f "$file"
         source "$file"
     end
