@@ -1,7 +1,6 @@
 ---
 name: frontend
 description: Create distinctive, production-grade frontend interfaces with high design quality and strict technical standards. Use this skill when the user asks to build web components, pages, or applications. Generates creative, polished code that avoids generic aesthetics while adhering to rigorous accessibility, performance, and best practices.
-license: Complete terms in LICENSE.txt
 ---
 
 ## Design Thinking
