@@ -6,16 +6,17 @@
 
   "permission": {
     "external_directory": {
-      "/home/*/dotfiles/**": "allow",
-      "/home/*/.config/**": "allow",
+      "/home/*/dotfiles/*": "allow",
+      "/home/*/.config/*": "allow",
     },
   },
 
   "agent": {
     "plan": {
       "permission": {
-        "edit": "ask",
-        "bash": "ask",
+        "edit": {
+          "*plan.md": "allow",
+        },
       },
     },
     "general": {

@@ -20,7 +20,7 @@ description: Standard operating procedure for exhaustive, recursive deep-dives. 
 - [ ] **Source URLs**: Mandatory for every finding. Use archives/cache if blocked.
 - [ ] **No stop**: Don't check in or pause until the topic is exhausted.
 
-## Note Format (`research/<topic>.md`)
+## Note Format
 
 Use YAML frontmatter with tags. Every entry must be timestamped:
 
