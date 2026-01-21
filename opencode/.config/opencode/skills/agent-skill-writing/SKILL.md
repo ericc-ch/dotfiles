@@ -41,16 +41,10 @@ skill-name/
 - Skills should be combined into specific topics, for example: `cloudflare`, `cloudflare-r2`, `cloudflare-workers`, `docker`, `gcloud` should be combined into `devops`
 - `SKILL.md` should be **less than 200 lines** and include the references of related markdown files and scripts.
 - Each script or referenced markdown file should be also **less than 200 lines**, remember that you can always split them into multiple files (**progressive disclosure** principle).
-- Descriptions in metadata of `SKILL.md` files should be both concise and still contain enough use cases of the references and scripts, this will help skills can be activated automatically during the implementation process.
+- Descriptions in metadata of `SKILL.md` files should be both concise and still contain enough use cases of the references, this will help skills can be activated automatically during the implementation process.
 - **Referenced markdowns**:
   - Prioritize concision over grammatical perfection when writing these files.
   - Can reference other markdown files or scripts as well.
-- **Referenced scripts**:
-  - Prefer nodejs or python scripts instead of bash script, because bash scripts are not well-supported on Windows.
-  - If you're going to write python scripts, make sure you have `requirements.txt`
-  - Make sure scripts respect `.env` file follow this order: `process.env` > `.opencode/skill/${SKILL}/.env` > `.opencode/skill/.env` > `.opencode/.env`
-  - Create `.env.example` file to show the required environment variables.
-  - Always write tests for these scripts.
 
 **Why?**
 Better **context engineering**: inspired from **progressive disclosure** technique of Agent Skills, when agent skills are activated, the agent will consider to load only relevant files into the context, instead of reading all long `SKILL.md` as before.
@@ -85,9 +79,9 @@ description: What this skill does and when to use it. Use third-person.
 
 **Metadata Quality:** `name` and `description` determine skill activation. Be specific; use third-person ("This skill should be used when...").
 
-### References
+### References (Optional)
 
-Documentation and reference material intended to be loaded as needed into context to inform the agent's process and thinking.
+Documentation and reference material intended to be loaded as needed into context to inform the agent's process and thinking. Always prioritize writing in SKILL.md over references files, only breaking it down into smaller files when necessary.
 
 - **When to include**: For documentation that the agent should reference while working
 - **Examples**: `references/finance.md` for financial schemas, `references/mnda.md` for company NDA template, `references/policies.md` for company policies, `references/api_docs.md` for API specifications
@@ -106,9 +100,9 @@ Skills use a three-level loading system to manage context efficiently:
 
 \*Unlimited because scripts can be executed without reading into context window.
 
-## Skill Creation Process
+## Skill Writing Process
 
-To create a skill, follow the "Skill Creation Process" in order, skipping steps only if there is a clear reason why they are not applicable.
+To create a skill, follow the "Skill Writing Process" in order, skipping steps only if there is a clear reason why they are not applicable.
 
 ### Step 1: Understanding the Skill with Concrete Examples
 
