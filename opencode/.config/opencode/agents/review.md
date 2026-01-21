@@ -1,6 +1,6 @@
 ---
 mode: subagent
-description: Reviews code for quality, bugs, security, and best practices
+description: Reviews code for quality, bugs, security, and best practices. Use when you need feedback on changes or want code examined before committing.
 permission:
   edit: deny
 ---
