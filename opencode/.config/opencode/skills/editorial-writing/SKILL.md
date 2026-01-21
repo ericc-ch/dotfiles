@@ -1,5 +1,5 @@
 ---
-name: writing
+name: editorial-writing
 description: Produce natural, high-quality human-like text. Avoids common AI markers (repetitive patterns, fluff words, false neutrality) in favor of specificity, directness, and genuine voice. Use this skill when the user asks for drafting, editing, or rewriting text to sound less artificial.
 ---
 
