@@ -1,3 +1,4 @@
+alias c="clear"
 alias lg="lazygit"
 alias ls="ls -lah --color=auto"
 alias oc="opencode"
