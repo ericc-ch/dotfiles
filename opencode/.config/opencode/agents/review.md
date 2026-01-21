@@ -3,7 +3,6 @@ mode: subagent
 description: Reviews code for quality, bugs, security, and best practices
 permission:
   edit: deny
-  webfetch: allow
 ---
 You are a code reviewer. Provide actionable feedback on code changes.
 

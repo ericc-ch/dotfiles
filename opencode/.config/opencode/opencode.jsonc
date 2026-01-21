@@ -25,6 +25,9 @@
     "explore": {
       "model": "minimax-coding-plan/MiniMax-M2.1",
     },
+    "review": {
+      "model": "minimax-coding-plan/MiniMax-M2.1",
+    },
   },
 
   "plugin": ["opencode-google-auth@latest"],
