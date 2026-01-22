@@ -26,7 +26,7 @@
       "model": "minimax-coding-plan/MiniMax-M2.1",
     },
     "review": {
-      "model": "minimax-coding-plan/MiniMax-M2.1",
+      "model": "gemini-cli/gemini-3-pro-preview",
     },
   },
 
