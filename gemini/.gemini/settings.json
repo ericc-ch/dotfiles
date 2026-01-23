@@ -9,9 +9,7 @@
     "disableAutoUpdate": true
   },
   "context": {
-    "fileName": [
-      "AGENTS.md"
-    ]
+    "fileName": ["AGENTS.md"]
   },
   "ui": {
     "footer": {
@@ -37,12 +35,7 @@
         "Gray": "#928374",
         "DiffAdded": "#32361a",
         "DiffRemoved": "#3c1f1e",
-        "DiffModified": "#0d3138",
-        "GradientColors": [
-          "#7daea3",
-          "#d3869b",
-          "#ea6962"
-        ]
+        "GradientColors": ["#7daea3", "#d3869b", "#ea6962"]
       }
     },
     "theme": "Gruvbox"
