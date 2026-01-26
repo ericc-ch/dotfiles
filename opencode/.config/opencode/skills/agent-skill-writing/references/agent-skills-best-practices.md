@@ -260,11 +260,7 @@ SKILL.md serves as an overview that points the agent to detailed materials as ne
 
 A basic Skill starts with just a SKILL.md file containing metadata and instructions:
 
-![Simple SKILL.md file showing YAML frontmatter and markdown body](../assets/images/skill-md-anatomy.jpg)
-
 As your Skill grows, you can bundle additional content that Claude loads only when needed:
-
-![Bundling additional reference files like reference.md and forms.md.](../assets/images/skill-bundled-content.jpg)
 
 The complete Skill directory structure might look like this:
 
@@ -941,8 +937,6 @@ Even if the agent could write a script, pre-made scripts offer advantages:
 - Save time (no code generation required)
 - Ensure consistency across uses
 
-![Bundling executable scripts alongside instruction files](../assets/images/code-execution.jpg)
-
 The diagram above shows how executable scripts work alongside instruction files. The instruction file (forms.md) references the script, and the agent can execute it without loading its contents into context.
 
 **Important distinction**: Make clear in your instructions whether the agent should:
@@ -1094,7 +1088,7 @@ Without the server prefix, the agent may fail to locate the tool, especially whe
 
 Don't assume packages are available:
 
-````markdown
+`````markdown
 **Bad example: Assumes installation**:
 "Use the pdf library to process the file."
 
@@ -1108,7 +1102,9 @@ from pypdf import PdfReader
 reader = PdfReader("file.pdf")
 ```"
 ````
-````
+`````
+
+```
 
 ## Technical notes
 
@@ -1164,3 +1160,4 @@ Before sharing a Skill, verify:
 
 - See [agent-skills-spec.md](agent-skills-spec.md) for complete format specification
 - See [agent-skills-blog.md](agent-skills-blog.md) for design philosophy and examples
+```

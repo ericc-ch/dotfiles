@@ -7,15 +7,11 @@ LLMs are powerful, but real work requires procedural knowledge and organizationa
 
 Building a skill = creating an onboarding guide for a new hire. Instead of fragmented custom agents per use case, anyone can specialize agents with composable capabilities by capturing and sharing procedural knowledge.
 
-![Skill directory structure](../assets/images/skill-directory-structure.jpg)
-
 ## Anatomy of a Skill
 
 Simplest form: directory with `SKILL.md` file.
 
 YAML frontmatter required: `name` and `description`. At startup, agent pre-loads metadata of every installed skill into system prompt.
-
-![SKILL.md anatomy](../assets/images/skill-md-anatomy.jpg)
 
 ### Progressive Disclosure Levels
 
@@ -25,18 +21,12 @@ YAML frontmatter required: `name` and `description`. At startup, agent pre-loads
 
 Example: PDF skill has `reference.md` and `forms.md` separate from core `SKILL.md`. Form-filling instructions in `forms.md` only loaded when filling forms.
 
-![Bundled content](../assets/images/skill-bundled-content.jpg)
-
-![Progressive disclosure](../assets/images/progressive-disclosure.jpg)
-
 ### Context Window Flow
 
 1. Start: system prompt + skill metadata + user message
 2. Agent triggers skill by reading `pdf/SKILL.md`
 3. Agent reads bundled files as needed (e.g., `forms.md`)
 4. Agent proceeds with task using loaded instructions
-
-![Context window flow](../assets/images/context-window-flow.jpg)
 
 ### Code Execution
 
@@ -48,8 +38,6 @@ Skills can include pre-written scripts. Benefits:
 - Consistent, repeatable workflows
 
 Example: Python script extracts PDF form fields without loading script or PDF into context.
-
-![Code execution](../assets/images/code-execution.jpg)
 
 ## Developing Skills: Best Practices
 
