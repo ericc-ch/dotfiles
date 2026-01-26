@@ -13,7 +13,6 @@ set -gx SSH_AUTH_SOCK "$XDG_RUNTIME_DIR/ssh-agent.socket"
 set -gx PNPM_HOME "$HOME/.local/share/pnpm"
 # opencode
 set -gx OPENCODE_EXPERIMENTAL true
-set -gx OPENCODE_DISABLE_DEFAULT_PLUGINS true
 # flatpak
 for dir in /var/lib/flatpak/exports/share $HOME/.local/share/flatpak/exports/share
     if not contains $dir $XDG_DATA_DIRS

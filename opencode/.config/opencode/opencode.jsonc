@@ -21,6 +21,7 @@
     },
     "general": {
       "model": "minimax-coding-plan/MiniMax-M2.1",
+      "disable": true,
     },
     "explore": {
       "model": "minimax-coding-plan/MiniMax-M2.1",
