@@ -4,7 +4,7 @@
   // "model": "gemini-cli/gemini-3-pro-preview",
   // "model": "gemini-cli/gemini-3-flash-preview",
   "model": "minimax-coding-plan/MiniMax-M2.1",
-  "small_model": "opencode/grok-code",
+  "small_model": "gemini-cli/gemini-2.5-flash-lite",
 
   "permission": {
     "external_directory": {
