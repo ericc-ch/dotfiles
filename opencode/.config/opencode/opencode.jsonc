@@ -33,7 +33,7 @@
     },
   },
 
-  "plugin": ["opencode-google-auth@latest"],
+  "plugin": ["opencode-google-auth@0.0.5"],
   "mcp": {
     "documentation": {
       "type": "remote",
