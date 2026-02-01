@@ -4,7 +4,8 @@
   // "model": "gemini-cli/gemini-3-pro-preview",
   // "model": "gemini-cli/gemini-3-flash-preview",
   // "model": "minimax-coding-plan/MiniMax-M2.1",
-  "model": "opencode/kimi-k2.5-free",
+  // "model": "opencode/kimi-k2.5-free",
+  "model": "kimi-for-coding/k2p5",
   "small_model": "gemini-cli/gemini-2.5-flash-lite",
 
   "permission": {
