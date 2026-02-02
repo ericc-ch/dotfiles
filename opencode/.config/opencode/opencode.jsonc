@@ -1,5 +1,6 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "lsp": false,
 
   // "model": "gemini-cli/gemini-3-pro-preview",
   // "model": "gemini-cli/gemini-3-flash-preview",
