@@ -1,0 +1,47 @@
+window#waybar {
+  font-family: "JetBrainsMono Nerd Font Mono";
+  background-color: red;
+  color: #d4be98;
+}
+
+window > box {
+  /*background-color: yellow;*/
+  padding: 4px;
+}
+
+/* Watermark day module - large, transparent, positioned as background */
+#clock.day {
+  font-size: 48px;
+  font-weight: 300;
+  opacity: 0.25;
+  color: rgba(212, 190, 152, 0.4);
+  background-color: transparent;
+
+  /* Negative margins to create overlap with modules above and below */
+  margin-top: -20px;
+  margin-bottom: -60px;
+  margin-left: -10px;
+  margin-right: -10px;
+
+  /* Text shadow for subtle depth */
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Target widget containers to ensure transparency */
+.modules-right widget {
+  background-color: transparent;
+}
+
+/* Date module - overlaps with day watermark */
+#clock.date {
+  font-size: 14px;
+  font-weight: 500;
+  background-color: transparent;
+}
+
+/* Time module - foreground element */
+#clock.time {
+  font-size: 18px;
+  font-weight: 600;
+  background-color: transparent;
+}
