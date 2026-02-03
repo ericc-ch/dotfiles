@@ -1,4 +1,3 @@
-spawn-at-startup "/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1"
 // spawn-at-startup "kitty" "+kitten" "panel" "bar"
 spawn-at-startup "kitty" "--single-instance"
 spawn-sh-at-startup "wbg ~/dotfiles/assets/debian.png"
@@ -20,14 +19,19 @@ input {
 layout {
     gaps 8
 
-    focus-ring {
+    border {
         width 2
         active-color "#a89984"
+        inactive-color "#504945"
+    }
+
+    focus-ring {
+        off
     }
 
     struts {
-        left 16
-        right 16
+        left 72
+        right 0
     }
 }
 
