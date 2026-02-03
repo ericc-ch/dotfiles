@@ -14,16 +14,16 @@
           "name": "MiniMax-M2.1",
           "display_name": "MiniMax-M2.1",
           "max_tokens": 204800,
-          "max_output_tokens": 131072,
-        },
-      ],
-    },
+          "max_output_tokens": 131072
+        }
+      ]
+    }
   },
 
   "agent": {
     "default_model": {
       "model": "MiniMax-M2.1",
-      "provider": "anthropic",
-    },
-  },
+      "provider": "anthropic"
+    }
+  }
 }

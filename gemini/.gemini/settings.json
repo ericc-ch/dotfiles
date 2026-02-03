@@ -6,7 +6,8 @@
   },
   "general": {
     "previewFeatures": true,
-    "disableAutoUpdate": true
+    "disableAutoUpdate": true,
+    "enableAutoUpdate": false
   },
   "context": {
     "fileName": ["AGENTS.md"]
@@ -38,6 +39,8 @@
         "GradientColors": ["#7daea3", "#d3869b", "#ea6962"]
       }
     },
-    "theme": "Gruvbox"
+    "theme": "Gruvbox",
+    "hideTips": true,
+    "hideBanner": true
   }
 }

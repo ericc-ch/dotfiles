@@ -10,17 +10,17 @@
   "clock#time": {
     "format": "{:%H:%M}",
     "rotate": 90,
-    "tooltip": false
+    "tooltip": false,
   },
   "clock#date": {
     "format": "{:%m/%d}",
     "rotate": 90,
-    "tooltip": false
+    "tooltip": false,
   },
   "clock#day": {
     "format": "{:%A}",
     "rotate": 90,
-    "tooltip": false
+    "tooltip": false,
   },
   // "height": 30, // Waybar height (to be removed for auto height)
   // "width": 1280, // Waybar width
