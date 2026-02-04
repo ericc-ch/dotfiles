@@ -55,4 +55,25 @@
   "keybinds": {
     "terminal_suspend": "none",
   },
+
+  "provider": {
+    "kimi-for-coding": {
+      "models": {
+        "k2p5": {
+          "variants": {
+            "instant": {
+              "thinking": {
+                "type": "disabled",
+              },
+            },
+            "thinking": {
+              "thinking": {
+                "type": "enabled",
+              },
+            },
+          },
+        },
+      },
+    },
+  },
 }
