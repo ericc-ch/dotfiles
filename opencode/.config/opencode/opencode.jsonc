@@ -69,6 +69,10 @@
             "thinking": {
               "thinking": {
                 "type": "enabled",
+                // This is not used by moonshot anyway
+                // god i wish theres a standard for this
+                // https://xkcd.com/927/
+                "budgetTokens": 0,
               },
             },
           },
