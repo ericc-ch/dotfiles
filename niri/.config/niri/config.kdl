@@ -17,12 +17,18 @@ input {
 }
 
 layout {
+    empty-workspace-above-first
+
     gaps 8
 
     border {
         width 2
-        active-color "#a89984"
-        inactive-color "#504945"
+        active-gradient from="#ebdbb2" to="#7c6f64"
+        inactive-color "#3c3836"
+    }
+
+    insert-hint {
+        color "#7c6f64"
     }
 
     focus-ring {
@@ -41,45 +47,53 @@ window-rule {
 }
 
 binds {
+    // Applications
     Mod+T { spawn "kitty" "--single-instance"; }
     Mod+E { spawn "nautilus"; }
-    Mod+Space { spawn "kitten" "panel" "--single-instance" "--edge" "center-sized" "--lines" "20" "--columns" "40" "--layer" "overlay" "--grab-keyboard" "--focus-policy" "on-demand" "launcher"; }
     Alt+Space { spawn "kitten" "panel" "--single-instance" "--edge" "center-sized" "--lines" "20" "--columns" "40" "--layer" "overlay" "--grab-keyboard" "--focus-policy" "on-demand" "launcher"; }
 
+    // Audio
     XF86AudioRaiseVolume allow-when-locked=true { spawn "pamixer" "-u" "-i" "5"; }
-    XF86AudioLowerVolume allow-when-locked=true { spawn "pamixer" "-d" "5"; }
+    XF86AudioLowerVolume allow-when-locked=true { spawn "pamixer" "-u" "-d" "5"; }
     XF86AudioMute        allow-when-locked=true { spawn "pamixer" "-t"; }
 
-    Mod+D { toggle-overview; }
+    // Overview
+    Mod+Tab { toggle-overview; }
 
+    // Window management
     Mod+F4 repeat=false { close-window; }
     Alt+F4 repeat=false { close-window; }
 
-    Mod+Left  { focus-column-left; }
-    Mod+Right { focus-column-right; }
+    // Focus: WASD navigation
+    Mod+W { focus-window-or-workspace-up; }
+    Mod+A { focus-column-left; }
+    Mod+S { focus-window-or-workspace-down; }
+    Mod+D { focus-column-right; }
 
-    Mod+Ctrl+Left  { move-column-left; }
-    Mod+Ctrl+Right { move-column-right; }
+    // Move: Ctrl + WASD
+    Mod+Shift+W { move-window-up; }
+    Mod+Shift+A { move-column-left; }
+    Mod+Shift+S { move-window-down; }
+    Mod+Shift+D { move-column-right; }
 
-    Mod+Home { focus-column-first; }
-    Mod+End  { focus-column-last; }
-    Mod+Ctrl+Home { move-column-to-first; }
-    Mod+Ctrl+End  { move-column-to-last; }
+    // Column stacks: ZXC
+    Mod+Z { consume-or-expel-window-left; }
+    Mod+X { expel-window-from-column; }
+    Mod+C { consume-or-expel-window-right; }
 
+    // Move window to workspace (Ctrl+Shift)
+    Mod+Ctrl+Shift+W { move-window-to-workspace-up; }
+    Mod+Ctrl+Shift+S { move-window-to-workspace-down; }
+
+    // Column/Window maximization
     Mod+F { maximize-column; }
     Mod+Shift+F { fullscreen-window; }
 
+    // Screenshots
     Print { screenshot; }
     Mod+Print { screenshot-screen; }
 
-    // Applications such as remote-desktop clients and software KVM switches may
-    // request that niri stops processing the keyboard shortcuts defined here
-    // so they may, for example, forward the key presses as-is to a remote machine.
-    // It's a good idea to bind an escape hatch to toggle the inhibitor,
-    // so a buggy application can't hold your session hostage.
-    //
-    // The allow-inhibiting=false property can be applied to other binds as well,
-    // which ensures niri always processes them, even when an inhibitor is active.
+    // Keyboard shortcuts inhibitor escape hatch
     Mod+Escape allow-inhibiting=false { toggle-keyboard-shortcuts-inhibit; }
 }
 
