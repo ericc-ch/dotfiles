@@ -58,3 +58,5 @@ for file in $__fish_config_dir/*local.fish
         source "$file"
     end
 end
+
+zoxide init fish | source
