@@ -31,7 +31,7 @@
       "model": "minimax-coding-plan/MiniMax-M2.1",
     },
     "review": {
-      "model": "gemini-cli/gemini-3-pro-preview",
+      "model": "kimi-for-coding/k2p5",
     },
   },
 
@@ -54,30 +54,5 @@
 
   "keybinds": {
     "terminal_suspend": "none",
-  },
-
-  "provider": {
-    "kimi-for-coding": {
-      "models": {
-        "k2p5": {
-          "variants": {
-            "instant": {
-              "thinking": {
-                "type": "disabled",
-              },
-            },
-            "thinking": {
-              "thinking": {
-                "type": "enabled",
-                // This is not used by moonshot anyway
-                // god i wish theres a standard for this
-                // https://xkcd.com/927/
-                "budgetTokens": 0,
-              },
-            },
-          },
-        },
-      },
-    },
   },
 }
