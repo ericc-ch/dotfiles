@@ -1,8 +1,0 @@
-alias c="clear"
-alias lg="lazygit"
-alias ls="eza -lah"
-alias op="opencode"
-alias zed="zeditor"
-alias gs="git status"
-alias gps="git push"
-alias gpl="git pull"

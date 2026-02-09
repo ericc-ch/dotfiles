@@ -29,3 +29,8 @@ followTags = true
 rebase = true
 [init]
 defaultBranch = main
+
+[alias]
+	s = status
+	ps = push
+	pl = pull
