@@ -13,7 +13,7 @@ set -gx SSH_AUTH_SOCK "$XDG_RUNTIME_DIR/ssh-agent.socket"
 set -gx PNPM_HOME "$HOME/.local/share/pnpm"
 # opencode
 set -gx OPENCODE_EXPERIMENTAL true
-# flatpak
+# flatpak (replaces slow vendor script)
 for dir in /var/lib/flatpak/exports/share $HOME/.local/share/flatpak/exports/share
     if not contains $dir $XDG_DATA_DIRS
         set -gx XDG_DATA_DIRS $XDG_DATA_DIRS $dir
@@ -59,4 +59,4 @@ for file in $__fish_config_dir/*local.fish
     end
 end
 
-zoxide init fish | source
+# zoxide: loaded from conf.d/zoxide.fish (cached for faster startup)
