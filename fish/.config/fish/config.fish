@@ -4,6 +4,7 @@ set -g fish_greeting
 set -q XDG_CONFIG_HOME || set -gx XDG_CONFIG_HOME $HOME/.config
 set -q XDG_DATA_HOME || set -gx XDG_DATA_HOME $HOME/.local/share
 set -q XDG_CACHE_HOME || set -gx XDG_CACHE_HOME $HOME/.cache
+set -q XDG_STATE_HOME || set -gx XDG_STATE_HOME $HOME/.local/state
 
 # makefile
 set -gx MAKEFLAGS -j(nproc)
@@ -13,10 +14,22 @@ set -gx SSH_AUTH_SOCK "$XDG_RUNTIME_DIR/ssh-agent.socket"
 set -gx PNPM_HOME "$HOME/.local/share/pnpm"
 # opencode
 set -gx OPENCODE_EXPERIMENTAL true
-# flatpak (replaces slow vendor script)
+# XDG_DATA_DIRS - ensure base dirs exist (display managers may already set this)
+if not set -q XDG_DATA_DIRS
+    set -gx XDG_DATA_DIRS /usr/local/share /usr/share
+else
+    # Add base dirs if missing (prepend so DM's additions stay at end)
+    for dir in /usr/share /usr/local/share
+        if not contains $dir $XDG_DATA_DIRS
+            set -gx --prepend XDG_DATA_DIRS $dir
+        end
+    end
+end
+
+# flatpak
 for dir in /var/lib/flatpak/exports/share $HOME/.local/share/flatpak/exports/share
     if not contains $dir $XDG_DATA_DIRS
-        set -gx XDG_DATA_DIRS $XDG_DATA_DIRS $dir
+        set -gx --prepend XDG_DATA_DIRS $dir
     end
 end
 
