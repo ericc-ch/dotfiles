@@ -26,10 +26,11 @@ else
     end
 end
 
-# flatpak
+# flatpak - match vendor_conf.d/flatpak.fish behavior
+# System installation first, then user (user takes precedence when appended)
 for dir in /var/lib/flatpak/exports/share $HOME/.local/share/flatpak/exports/share
     if not contains $dir $XDG_DATA_DIRS
-        set -gx --prepend XDG_DATA_DIRS $dir
+        set -gx --append XDG_DATA_DIRS $dir
     end
 end
 
