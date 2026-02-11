@@ -70,11 +70,23 @@ binds {
     Mod+S { focus-window-or-workspace-down; }
     Mod+D { focus-column-right; }
 
+    // Focus: Arrow key navigation
+    Mod+Up { focus-window-or-workspace-up; }
+    Mod+Left { focus-column-left; }
+    Mod+Down { focus-window-or-workspace-down; }
+    Mod+Right { focus-column-right; }
+
     // Move: Ctrl + WASD
     Mod+Shift+W { move-window-up; }
     Mod+Shift+A { move-column-left; }
     Mod+Shift+S { move-window-down; }
     Mod+Shift+D { move-column-right; }
+
+    // Move: Arrow keys
+    Mod+Shift+Up { move-window-up; }
+    Mod+Shift+Left { move-column-left; }
+    Mod+Shift+Down { move-window-down; }
+    Mod+Shift+Right { move-column-right; }
 
     // Column stacks: ZXC
     Mod+Z { consume-or-expel-window-left; }
@@ -84,6 +96,10 @@ binds {
     // Move window to workspace (Ctrl+Shift)
     Mod+Ctrl+Shift+W { move-window-to-workspace-up; }
     Mod+Ctrl+Shift+S { move-window-to-workspace-down; }
+
+    // Move window to workspace (Arrow keys)
+    Mod+Ctrl+Shift+Up { move-window-to-workspace-up; }
+    Mod+Ctrl+Shift+Down { move-window-to-workspace-down; }
 
     // Column/Window maximization
     Mod+F { maximize-column; }

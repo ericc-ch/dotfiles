@@ -33,6 +33,9 @@
     "review": {
       "model": "kimi-for-coding/k2p5",
     },
+    "compaction": {
+      "model": "gemini-cli/gemini-3-flash-preview",
+    },
   },
 
   "plugin": ["opencode-google-auth@0.0.5"],
