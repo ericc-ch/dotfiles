@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "documentation": {
+      "url": "https://mcp.context7.com/mcp"
+    },
+    "github_grep": {
+      "url": "https://mcp.grep.app"
+    }
+  }
+}
