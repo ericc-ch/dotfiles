@@ -24,11 +24,11 @@
       },
     },
     "general": {
-      "model": "minimax-coding-plan/MiniMax-M2.1",
+      "model": "gemini-cli/gemini-3-flash-preview",
       "disable": true,
     },
     "explore": {
-      "model": "minimax-coding-plan/MiniMax-M2.1",
+      "model": "gemini-cli/gemini-3-flash-preview",
     },
     "review": {
       "model": "kimi-for-coding/k2p5",
