@@ -6,7 +6,7 @@
   // "model": "minimax-coding-plan/MiniMax-M2.1",
   // "model": "opencode/kimi-k2.5-free",
   "model": "kimi-for-coding/k2p5",
-  "small_model": "gemini-cli/gemini-2.5-flash-lite",
+  "small_model": "google/gemini-2.5-flash-lite",
 
   "permission": {
     "external_directory": {
@@ -24,21 +24,20 @@
       },
     },
     "general": {
-      "model": "gemini-cli/gemini-3-flash-preview",
+      "model": "opencode/minimax-m2.5-free",
       "disable": true,
     },
     "explore": {
-      "model": "gemini-cli/gemini-3-flash-preview",
+      "model": "opencode/minimax-m2.5-free",
     },
     "review": {
       "model": "kimi-for-coding/k2p5",
     },
     "compaction": {
-      "model": "gemini-cli/gemini-3-flash-preview",
+      "model": "opencode/minimax-m2.5-free",
     },
   },
 
-  "plugin": ["opencode-google-auth@0.0.5"],
   "mcp": {
     "documentation": {
       "type": "remote",
@@ -52,6 +51,22 @@
       "type": "remote",
       "url": "https://mcp.grep.app",
       "enabled": true,
+    },
+  },
+
+  "provider": {
+    "modal": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Modal",
+      "options": {
+        "baseURL": "https://api.us-west-2.modal.direct/v1",
+        "apiKey": "{env:MODAL_API_KEY}",
+      },
+      "models": {
+        "zai-org/GLM-5-FP8": {
+          "name": "GLM-5",
+        },
+      },
     },
   },
 
