@@ -1,10 +1,6 @@
 {
   "$schema": "https://opencode.ai/config.json",
 
-  // "model": "gemini-cli/gemini-3-pro-preview",
-  // "model": "gemini-cli/gemini-3-flash-preview",
-  // "model": "minimax-coding-plan/MiniMax-M2.1",
-  // "model": "opencode/kimi-k2.5-free",
   "model": "kimi-for-coding/k2p5",
   "small_model": "google/gemini-2.5-flash-lite",
 
@@ -51,22 +47,6 @@
       "type": "remote",
       "url": "https://mcp.grep.app",
       "enabled": true,
-    },
-  },
-
-  "provider": {
-    "modal": {
-      "npm": "@ai-sdk/openai-compatible",
-      "name": "Modal",
-      "options": {
-        "baseURL": "https://api.us-west-2.modal.direct/v1",
-        "apiKey": "{env:MODAL_API_KEY}",
-      },
-      "models": {
-        "zai-org/GLM-5-FP8": {
-          "name": "GLM-5",
-        },
-      },
     },
   },
 
