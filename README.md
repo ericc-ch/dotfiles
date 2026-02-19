@@ -1,5 +1,7 @@
 # Dotfiles
 
+> **HEY THIS REPO IS NO LONGER UPDATED — EVERYTHING MOVED TO [ericc-ch/nixos-config](https://github.com/ericc-ch/nixos-config)**
+
 Personal dotfiles managed with GNU Stow.
 
 ## Installation
